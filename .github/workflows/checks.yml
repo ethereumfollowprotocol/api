@@ -1,0 +1,35 @@
+name: Checks
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    # since `deploy.yml` runs in main and does the same checks
+    branches-ignore: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
+jobs:
+  checks:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') }}
+    timeout-minutes: 3
+    runs-on: ['ubuntu-latest']
+    steps:
+      - name: 🔑 Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: 'Install Dependencies'
+        uses: ./.github/actions/setup
+
+      - name: 'Lint / Build / Test'
+        uses: ./.github/actions/checks
+        with:
+          skip-build: false

@@ -1,0 +1,43 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "git.autofetch": true,
+  "git.confirmSync": false,
+  "git.enableCommitSigning": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": true,
+    "source.fixAll.biome": true,
+    "source.organizeImports.biome": true
+  },
+  "editor.defaultFormatter": "biomejs.biome",
+  "[json]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "files.associations": {
+    "biome.json": "jsonc",
+    ".dev.vars": "dotenv",
+    "wrangler.json": "jsonc",
+    ".dev.vars.example": "dotenv"
+  },
+  "search.exclude": {
+    "_": true,
+    "**/dist/**": true,
+    "public/*.js": true,
+    "**/node_modules": true
+  },
+  "files.exclude": {
+    "**/.wrangler": true
+  },
+  // for github actions
+  "yaml.completion": true,
+  "yaml.format.enable": true,
+  "yaml.schemaStore.enable": true,
+  "yaml.schemaStore.url": "https://www.schemastore.org/api/json/catalog.json",
+  // disable various telemetry services
+  "redhat.telemetry.enabled": false,
+  "gitlens.telemetry.enabled": false,
+  "docsYaml.telemetry.enableTelemetry": false,
+  "database-client.telemetry.usesOnlineServices": false
+}

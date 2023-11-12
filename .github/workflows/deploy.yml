@@ -1,0 +1,65 @@
+name: Deploy
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  ACTIONS_RUNNER_DEBUG: true
+
+jobs:
+  checks:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') }}
+    timeout-minutes: 3
+    runs-on: ['ubuntu-latest']
+    steps:
+      - name: 🔑 Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: 'Install Dependencies'
+        uses: ./.github/actions/setup
+
+      - name: 'Lint / Build / Test'
+        uses: ./.github/actions/checks
+        with:
+          skip-build: false
+
+  deploy-workers:
+    if: ${{ !contains(github.event.head_commit.message, '[skip-deploy]') }}
+    needs: [checks]
+    timeout-minutes: 3
+    runs-on: ['ubuntu-latest']
+    steps:
+      - name: 🔑 Checkout
+        uses: actions/checkout@v4.1.1
+
+      - name: 'Install Dependencies'
+        uses: ./.github/actions/setup
+
+      - name: 'Install Wrangler CLI'
+        run: bun add --global wrangler@latest
+
+      - name: Deploy Cloudflare Workers
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          wrangler deploy ./src/index.ts \
+            --name=indexer \
+            --minify \
+            --latest=true \
+            --keep-vars=true \
+            --experimental-json-config \
+            --config=wrangler.json \
+            --compatibility-date=2023-06-20 \
+            ----compatibility-flag=node_compat
