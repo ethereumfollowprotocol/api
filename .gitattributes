@@ -1,2 +1,5 @@
 * text=auto eol=lf
-wrangler.json linguist-language-JSON-with-Comments
+wrangler.json linguist-language=JSON-with-Comments
+biome.json linguist-language=JSON-with-Comments
+.dev.vars linguist-language=dotenv
+.dev.vars.example linguist-language=dotenv
