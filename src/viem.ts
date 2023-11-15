@@ -15,9 +15,9 @@ export async function ensAddress({
   env: Env
 }): Promise<Address> {
   if (!ensNameOrAddress) {
-    raise(`invalid id. Must be an address or ENS name. Provided id: ${ensNameOrAddress}`)
+    raise(`invalid id. Must be a valid address or ENS name. Provided id: ${ensNameOrAddress}`)
   }
-  if (ensNameOrAddress.includes('.eth')) {
+  if (ensNameOrAddress.indexOf('.eth') > -1) {
     const client = mainnetClient(env)
     const address = await client.getEnsAddress({ name: normalize(ensNameOrAddress) })
     if (!address) raise(`invalid ENS name: ${ensNameOrAddress}`)
@@ -25,7 +25,7 @@ export async function ensAddress({
   }
   if (isAddress(ensNameOrAddress)) return getAddress(ensNameOrAddress)
 
-  raise(`Invalid id. Must be an address or ENS name: ${ensNameOrAddress}`)
+  raise(`Invalid id. Must be a valid address or ENS name: ${ensNameOrAddress}`)
 }
 
 export function mainnetClient(environment: Env) {

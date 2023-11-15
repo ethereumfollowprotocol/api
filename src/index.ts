@@ -14,6 +14,8 @@ app.get('/', context => context.redirect('/v1'))
 
 app.get('/health', context => context.text('ok'))
 
+app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
+
 app.route('/', api)
 
 const PORT = runtime === 'workerd' ? 8_787 : Bun.env.PORT

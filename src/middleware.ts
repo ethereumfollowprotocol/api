@@ -8,6 +8,7 @@ import { secureHeaders } from 'hono/secure-headers'
 import { HTTPException } from 'hono/http-exception'
 
 import { apiLogger } from '#/logger.ts'
+import { DOCS_URL } from '#/constant.ts'
 import type { Environment } from '#/types'
 import { parseBaseURL } from '#/utilities.ts'
 
@@ -58,7 +59,7 @@ export function middlewares(app: Hono<{ Bindings: Environment }>) {
     apiLogger.error(`[notFound: ${context.req.url}]: not found`)
     const routesUrl = `${parseBaseURL(context.req.url)}/v1/routes`
     return context.json(
-      { error: `${context.req.url} not found. Visit ${routesUrl} to see available routes` },
+      { error: `${context.req.url} is not a valid path. Visit ${DOCS_URL} for documentation` },
       404
     )
   })
