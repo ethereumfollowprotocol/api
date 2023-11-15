@@ -8,10 +8,15 @@ interface EnvironmentVariables {
   readonly SUPABASE_URL: string
   readonly SUPABASE_SECRET_KEY: string
   readonly SUPABASE_PUBLIC_KEY: string
+  readonly DATABASE_URL: string
+  readonly DATABASE_POOLING_URL: string
 }
 
 // Cloudflare Workers
-interface Env extends EnvironmentVariables {}
+interface Env extends EnvironmentVariables {
+  postgres: Hyperdrive
+  'postgres-pooling': Hyperdrive
+}
 
 // Node.js
 declare namespace NodeJS {
