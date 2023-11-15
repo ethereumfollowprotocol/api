@@ -17,7 +17,9 @@ export function middlewares(app: Hono<{ Bindings: Environment }>) {
     await next()
     context.header('X-Powered-By', 'Ethereum Follow Protocol')
   })
+
   app.use('*', logger())
+
   /**
    * @link https://hono.dev/middleware/builtin/cache
    * - super heavy caching during demo period since data is dummy atm

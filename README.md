@@ -1,5 +1,5 @@
 ___
-`README.md` is WIP ⚠️
+### `README.md` is WIP
 ___
 
 # Ethereum Follow Protocol Public API

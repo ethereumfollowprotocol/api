@@ -50,7 +50,7 @@
       },
       "nursery": {
         "all": true,
-        "noUnusedImports": "warn"
+        "noUnusedImports": "off"
       },
       "complexity": {
         "useLiteralKeys": "off"

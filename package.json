@@ -1,5 +1,6 @@
 {
   "name": "efp-public-api",
+  "version": "0.0.0",
   "description": "Ethereum Follow Protocol Public API",
   "repository": "github:ethereumfollowprotocol/api",
   "type": "module",
