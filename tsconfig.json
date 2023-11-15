@@ -32,5 +32,6 @@
     "checkJs": true,
   },
   "include": ["src/**/*", "scripts/**/*"],
-  "files": ["environment.d.ts", "reset.d.ts"]
+  "files": ["environment.d.ts", "reset.d.ts"],
+  "exclude": ["_"]
 }
