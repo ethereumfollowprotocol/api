@@ -1,4 +1,4 @@
-ENV="development"
+NODE_ENV="development"
 PORT="8787"
 
 # https://llamanodes.com
@@ -14,5 +14,7 @@ INFURA_ID=""
 SUPABASE_URL=""
 # The unique Supabase Key which is supplied when you create a new project in your project dashboard.
 SUPABASE_SECRET_KEY=""
+# Supabase > Settings > API > Project ID
+SUPABASE_PROJECT_ID=""
 
 ENABLE_DATABASE_LOGGING="false"
