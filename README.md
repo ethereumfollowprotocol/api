@@ -1,5 +1,5 @@
 > [!NOTE]
-> **Ethereum Follow Protocol** is in active development.
+> The project is under active development.
 
 <br />
 
