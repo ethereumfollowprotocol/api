@@ -1,6 +1,8 @@
 > [!NOTE]
 > **Ethereum Follow Protocol** is in active development.
 
+<br />
+
 <p align="center">
   <a href="https://ethfollow.xyz" target="_blank" rel="noopener noreferrer">
     <img width="275" src="https://docs.ethfollow.xyz/logo.png" alt="EFP logo" />
