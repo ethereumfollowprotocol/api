@@ -1,13 +1,14 @@
 import { Hono } from 'hono'
+import { sql } from 'kysely'
 import { validator } from 'hono/validator'
 
 import { ensAddress } from '#/viem.ts'
 import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
-import { supabaseClient } from '#/database.ts'
-import { type Environment, type SortField, sortFields } from '#/types'
+import { database, type Functions } from '#/database.ts'
+import { sortFields, type Bindings, type SortField } from '#/types'
 
-export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
+export const api = new Hono<{ Bindings: Bindings }>().basePath('/v1')
 
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
@@ -26,23 +27,26 @@ api.get(
       const { id } = context.req.valid('param')
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
-      const database = supabaseClient(context.env)
+      const db = await database(context.env)
       const [
-        { count: followingCount, error: followingError, status: followingStatus },
-        { count: followersCount, error: followersError, status: followersStatus }
+        {
+          // @ts-expect-error
+          rows: [{ count: followersCount }]
+        },
+        {
+          // @ts-expect-error
+          rows: [{ count: followingCount }]
+        }
       ] = await Promise.all([
-        database.rpc('get_following', { actor_address: address }, { count: 'exact' }),
-        database.rpc('get_followers', { target_address: address }, { count: 'exact' })
+        sql<{ count: number }> /* sql */`SELECT COUNT(*) FROM get_followers('${sql.raw(
+          address
+        )}')`.execute(db),
+        sql<
+          Functions['get_following']['Returns']
+        > /* sql */`SELECT COUNT(*) FROM get_following('${sql.raw(address)}')`.execute(db)
       ])
 
-      if (followersError) {
-        return context.json({ error: followersError }, followersStatus)
-      }
-      if (followingError) {
-        return context.json({ error: followingError }, followingStatus)
-      }
-
-      return context.json({ data: { followersCount, followingCount } }, 200)
+      return context.json({ data: { followingCount, followersCount } }, 200)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })
@@ -78,14 +82,18 @@ api.get(
 
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
-      const database = supabaseClient(context.env)
-      const { data, error, status } = await database
-        .rpc('get_followers', { target_address: address })
-        .order('action_timestamp', { ascending: sort === 'ascending' || sort === 'asc' })
-        .select('actor_address,action_timestamp')
+      const db = await database(context.env)
+      const { rows } = await sql<Functions['get_followers']['Returns']> /* sql */`
+        SELECT 
+          actor_address,
+          action_timestamp
+        FROM
+          get_followers('${sql.raw(address)}')
+        ORDER BY
+          action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
+      `.execute(db)
 
-      if (error) return context.json({ error }, status)
-      return context.json({ data }, status)
+      return context.json({ data: rows }, 200)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })
@@ -120,14 +128,18 @@ api.get(
 
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
-      const database = supabaseClient(context.env)
-      const { data, error, status } = await database
-        .rpc('get_following', { actor_address: address })
-        .select('target_address,action_timestamp')
-        .order('action_timestamp', { ascending: sort === 'ascending' || sort === 'asc' })
+      const db = await database(context.env)
+      const { rows } = await sql<Functions['get_following']['Returns']> /* sql */`
+        SELECT 
+          target_address,
+          action_timestamp
+        FROM
+          get_following('${sql.raw(address)}')
+        ORDER BY
+          action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
+      `.execute(db)
 
-      if (error) return context.json({ error }, status)
-      return context.json({ data }, status)
+      return context.json({ data: rows }, 200)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })
@@ -162,29 +174,39 @@ api.get(
 
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
-      const database = supabaseClient(context.env)
-      const [
-        { data: following, count: followingCount, error: followingError, status: followingStatus },
-        { data: followers, count: followersCount, error: followersError, status: followersStatus }
-      ] = await Promise.all([
-        database
-          .rpc('get_following', { actor_address: address }, { count: 'exact' })
-          .select('target_address,action_timestamp')
-          .order('action_timestamp', { ascending: sort === 'ascending' || sort === 'asc' }),
-        database
-          .rpc('get_followers', { target_address: address }, { count: 'exact' })
-          .select('actor_address,action_timestamp')
-          .order('action_timestamp', { ascending: sort === 'ascending' || sort === 'asc' })
+      const db = await database(context.env)
+      const [{ rows: followingRows }, { rows: followersRows }] = await Promise.all([
+        sql<Functions['get_following']['Returns']> /* sql */`
+          SELECT 
+            target_address,
+            action_timestamp
+          FROM
+            get_following('${sql.raw(address)}')
+          ORDER BY
+            action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
+      `.execute(db),
+        sql<Functions['get_followers']['Returns']> /* sql */`
+          SELECT 
+            actor_address,
+            action_timestamp
+          FROM
+            get_followers('${sql.raw(address)}')
+          ORDER BY
+            action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
+      `.execute(db)
       ])
 
-      if (followersError) {
-        return context.json({ error: followersError }, followersStatus)
-      }
-      if (followingError) {
-        return context.json({ error: followingError }, followingStatus)
-      }
-
-      return context.json({ data: { followersCount, followers, followingCount, following } }, 200)
+      return context.json(
+        {
+          data: {
+            followingCount: followingRows.length,
+            followersCount: followersRows.length,
+            followers: followersRows,
+            following: followingRows
+          }
+        },
+        200
+      )
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })

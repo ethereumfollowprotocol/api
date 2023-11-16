@@ -11,10 +11,10 @@ import { secureHeaders } from 'hono/secure-headers'
 import { api } from '#/routes.ts'
 import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
-import type { Environment } from '#/types'
-import { parseBaseURL, runtime } from '#/utilities.ts'
+import { runtime } from '#/utilities.ts'
+import type { Bindings } from '#/types'
 
-const app = new Hono<{ Bindings: Environment }>()
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('*', async (context, next) => {
   await next()
@@ -59,7 +59,6 @@ app.use(
 
 app.notFound(context => {
   apiLogger.error(`[notFound: ${context.req.url}]: not found`)
-  const routesUrl = `${parseBaseURL(context.req.url)}/v1/routes`
   return context.json(
     { error: `${context.req.url} is not a valid path. Visit ${DOCS_URL} for documentation` },
     404
@@ -73,7 +72,11 @@ app.onError((error, context) => {
   return context.json({ message: error.message }, 500)
 })
 
-app.get('/', context => context.redirect('/v1'))
+app.get('/', context => {
+  // console.log(JSON.stringify(context.env, undefined, 2))
+  console.log(context.env.postgres)
+  return context.redirect('/v1')
+})
 
 app.get('/health', context => context.text('ok'))
 

@@ -4,5 +4,15 @@
   "main": "./src/index.ts",
   "compatibility_date": "2023-06-20",
   "node_compat": true,
-  "placement": { "mode": "smart" }
+  "placement": { "mode": "smart" },
+  "hyperdrive": [
+    {
+      "binding": "postgres",
+      "id": "2f8af7766f57476c818d0097b6030e03"
+    },
+    {
+      "binding": "postgres-pooling",
+      "id": "9d821d038aae42c889f4c8eae701e4fe"
+    }
+  ]
 }
