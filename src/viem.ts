@@ -32,9 +32,11 @@ export function mainnetClient(environment: Env) {
   return createPublicClient({
     chain: mainnet,
     transport: fallback([
+      http(`https://eth.llamarpc.com/rpc/${environment.LLAMAFOLIO_ID}`),
+      http(`https://rpc.ankr.com/eth/${environment.ANKR_ID}`),
       http(`https://eth-mainnet.alchemyapi.io/v2/${environment.ALCHEMY_ID}`),
-      http(`https://mainnet.infura.io/v3/${environment.INFURA_ID}`),
-      http(`https://eth.llamarpc.com/rpc/${environment.LLAMAFOLIO_ID}`)
-    ])
+      http(`https://mainnet.infura.io/v3/${environment.INFURA_ID}`)
+    ]),
+    batch: { multicall: true }
   })
 }

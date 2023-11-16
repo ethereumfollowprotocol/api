@@ -1,14 +1,18 @@
-NODE_ENV="development"
+ENV="development"
 PORT="8787"
 
-ALCHEMY_ID=""
+# https://llamanodes.com
 LLAMAFOLIO_ID=""
+# https://www.ankr.com
+ANKR_ID=""
+# https://www.alchemy.com (optional)
+ALCHEMY_ID=""
+# https://www.infura.io (optional)
 INFURA_ID=""
 
-DATABASE_URL=""
-DATABASE_POOLING_URL=""
-ENABLE_DATABASE_LOGGING="false"
-
+# The unique Supabase URL which is supplied when you create a new project in your project dashboard
 SUPABASE_URL=""
-SUPABASE_PUBLIC_KEY=""
+# The unique Supabase Key which is supplied when you create a new project in your project dashboard.
 SUPABASE_SECRET_KEY=""
+
+ENABLE_DATABASE_LOGGING="false"
