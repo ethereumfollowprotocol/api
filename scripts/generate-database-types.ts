@@ -21,9 +21,8 @@ main().catch(error => {
 
 async function main() {
   const response = await fetch(INDEXER_DATABASE_TYPES_URL, { method: 'GET' })
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${INDEXER_DATABASE_TYPES_URL} - ${response.status}`)
-  }
+
+  if (!response.ok) throw new Error(`Failed to fetch ${INDEXER_DATABASE_TYPES_URL}`)
   const text = await response.text()
 
   const writeResult = await bun.write(LOCAL_DATABASE_TYPES_PATH, text)

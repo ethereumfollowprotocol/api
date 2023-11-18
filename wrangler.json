@@ -1,5 +1,5 @@
 {
-  "$schema": "https://gist.githubusercontent.com/o-az/d298a1776165407ba63ee763d32f7a89/raw/8d10286344e4ce2f9bc8582a87409f58ff8b365c/wrangler.json",
+  "$schema": "https://gist.githubusercontent.com/o-az/d298a1776165407ba63ee763d32f7a89/raw/1fd2b77788932f6463a7c88f15296ddb35dece52/wrangler.json",
   "name": "indexer",
   "main": "./src/index.ts",
   "compatibility_date": "2023-06-20",
@@ -8,11 +8,13 @@
   "hyperdrive": [
     {
       "binding": "postgres",
-      "id": "2f8af7766f57476c818d0097b6030e03"
+      "id": "2f8af7766f57476c818d0097b6030e03",
+      "localConnectionString": "$DATABASE_URL"
     },
     {
       "binding": "postgres-pooling",
-      "id": "9d821d038aae42c889f4c8eae701e4fe"
+      "id": "9d821d038aae42c889f4c8eae701e4fe",
+      "localConnectionString": "$DATABASE_POOLING_URL"
     }
   ]
 }

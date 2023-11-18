@@ -8,7 +8,7 @@
     "dev": "bunx wrangler dev --experimental-json-config --config=wrangler.json --latest=true",
     "dev:remote": "bun dev --remote",
     "build": "bunx wrangler deploy --dry-run --experimental-json-config --config=wrangler.json --outdir=dist --minify=true --latest=true",
-    "generate-supabase-types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public --experimental >| src/types/generated/database.ts",
+    "generate-database-types": "bun ./scripts/generate-database-types.ts",
     "lint": "biome check --apply .",
     "format": "biome format . --write",
     "typecheck": "tsc --project tsconfig.json --noEmit",
