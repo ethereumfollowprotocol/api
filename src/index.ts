@@ -70,8 +70,6 @@ app.onError((error, context) => {
 })
 
 app.get('/', context => {
-  // console.log(JSON.stringify(context.env, undefined, 2))
-  console.log(context.env.postgres)
   return context.redirect('/v1')
 })
 

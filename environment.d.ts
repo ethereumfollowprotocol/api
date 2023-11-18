@@ -11,7 +11,10 @@ interface EnvironmentVariables {
 }
 
 // Cloudflare Workers
-interface Env extends EnvironmentVariables {}
+interface Env extends EnvironmentVariables {
+  postgres: Hyperdrive
+  'postgres-pooling': Hyperdrive
+}
 
 // Node.js
 declare namespace NodeJS {
