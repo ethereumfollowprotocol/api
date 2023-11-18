@@ -58,16 +58,13 @@ app.use(
 )
 
 app.notFound(context => {
-  apiLogger.error(`[notFound: ${context.req.url}]: not found`)
-  return context.json(
-    { error: `${context.req.url} is not a valid path. Visit ${DOCS_URL} for documentation` },
-    404
-  )
+  const errorMessage = `${context.req.url} is not a valid path. Visit ${DOCS_URL} for documentation`
+  apiLogger.error(errorMessage)
+  return context.json({ error: errorMessage }, 404)
 })
 
 app.onError((error, context) => {
   apiLogger.error(`[onError: ${context.req.url}]: ${error}`, context.error)
-
   if (error instanceof HTTPException) return error.getResponse()
   return context.json({ message: error.message }, 500)
 })

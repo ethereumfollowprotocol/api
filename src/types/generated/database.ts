@@ -91,6 +91,10 @@ export interface Database {
           created_at: string
         }[]
       }
+      health: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       action: 'follow' | 'unfollow' | 'block' | 'unblock' | 'mute' | 'unmute'

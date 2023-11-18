@@ -12,6 +12,14 @@ export const api = new Hono<{ Bindings: Bindings }>().basePath('/v1')
 
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
+api.get('/postgres-health', async context => {
+  const database = supabaseClient(context.env)
+  const { error, data, status } = await database.rpc('health', {}).select('*')
+  if (status === 200 && data) return context.text(`${data}`, 200)
+  apiLogger.error(`error while checking postgres health: ${JSON.stringify(error, undefined, 2)}`)
+  return context.text('error while checking postgres health', 500)
+})
+
 /**
  * Return followers and following counts for a user based on `id` provided (address or ENS name)
  */
