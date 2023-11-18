@@ -1,7 +1,12 @@
-import { createClient } from '@supabase/supabase-js'
+import { raise } from '#/utilities.ts'
+import * as schema from '#/types/generated/database.ts'
 
-import type { Database } from '#/types/generated/database.ts'
+export async function database(env: Env) {
+  const { Pool } = await import('pg')
+  const { drizzle } = await import('drizzle-orm/node-postgres')
+  const { connectionString } = env['postgres-pooling']
+  if (!connectionString) raise("`env.['postgres-pooling'].connectionString` is missing")
 
-export function supabaseClient(environment: Env) {
-  return createClient<Database>(environment.SUPABASE_URL, environment.SUPABASE_SECRET_KEY)
+  const pool = new Pool({ connectionString })
+  return drizzle(pool, { schema })
 }

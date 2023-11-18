@@ -8,6 +8,11 @@ interface EnvironmentVariables {
   readonly SUPABASE_URL: string
   readonly SUPABASE_SECRET_KEY: string
   readonly ENABLE_DATABASE_LOGGING: 'true' | 'false'
+  readonly DATABASE_URL: string
+  readonly DATABASE_POOLING_URL: string
+
+  postgres: Hyperdrive
+  'postgres-pooling': Hyperdrive
 }
 
 // Cloudflare Workers

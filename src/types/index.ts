@@ -1,6 +1,6 @@
 export * from './generated'
 
-export type Environment = Pretty<Env>
+export type Bindings = Pretty<Env>
 
 export const sortFields = ['ascending', 'descending', 'asc', 'desc'] as const
 

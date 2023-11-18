@@ -11,10 +11,10 @@ import { secureHeaders } from 'hono/secure-headers'
 import { api } from '#/routes.ts'
 import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
-import type { Environment } from '#/types'
-import { parseBaseURL, runtime } from '#/utilities.ts'
+import { runtime } from '#/utilities.ts'
+import type { Bindings } from '#/types'
 
-const app = new Hono<{ Bindings: Environment }>()
+const app = new Hono<{ Bindings: Bindings }>()
 
 app.use('*', async (context, next) => {
   await next()
@@ -64,12 +64,14 @@ app.notFound(context => {
 })
 
 app.onError((error, context) => {
-  apiLogger.error(`[onError: ${context.req.url}]: ${error}`, context.error)
+  apiLogger.error(`\n[onError: ${context.req.url}]:\n${error}\n`, context.error)
   if (error instanceof HTTPException) return error.getResponse()
   return context.json({ message: error.message }, 500)
 })
 
-app.get('/', context => context.redirect('/v1'))
+app.get('/', context => {
+  return context.redirect('/v1')
+})
 
 app.get('/health', context => context.text('ok'))
 
