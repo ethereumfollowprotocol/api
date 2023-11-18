@@ -64,7 +64,7 @@ app.notFound(context => {
 })
 
 app.onError((error, context) => {
-  apiLogger.error(`[onError: ${context.req.url}]: ${error}`, context.error)
+  apiLogger.error(`\n[onError: ${context.req.url}]:\n${error}\n`, context.error)
   if (error instanceof HTTPException) return error.getResponse()
   return context.json({ message: error.message }, 500)
 })

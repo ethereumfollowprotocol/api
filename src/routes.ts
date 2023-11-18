@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
-import { sql } from 'kysely'
+import { sql } from 'drizzle-orm'
 import { validator } from 'hono/validator'
 
 import { ensAddress } from '#/viem.ts'
 import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
-import { database, type Functions } from '#/database.ts'
+import { database } from '#/database.ts'
 import { sortFields, type Bindings, type SortField } from '#/types'
 
 export const api = new Hono<{ Bindings: Bindings }>().basePath('/v1')
@@ -13,10 +13,11 @@ export const api = new Hono<{ Bindings: Bindings }>().basePath('/v1')
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
 api.get('/postgres-health', async context => {
-  const database = supabaseClient(context.env)
-  const { error, data, status } = await database.rpc('health', {}).select('*')
-  if (status === 200 && data) return context.text(`${data}`, 200)
-  apiLogger.error(`error while checking postgres health: ${JSON.stringify(error, undefined, 2)}`)
+  const db = await database(context.env)
+  const {
+    rows: [result]
+  } = await db.execute(sql`SELECT * FROM health()`)
+  if (result) return context.text(`${Object.values(result)}`, 200)
   return context.text('error while checking postgres health', 500)
 })
 
@@ -46,15 +47,18 @@ api.get(
           rows: [{ count: followingCount }]
         }
       ] = await Promise.all([
-        sql<{ count: number }> /* sql */`SELECT COUNT(*) FROM get_followers('${sql.raw(
-          address
-        )}')`.execute(db),
-        sql<
-          Functions['get_following']['Returns']
-        > /* sql */`SELECT COUNT(*) FROM get_following('${sql.raw(address)}')`.execute(db)
+        db.execute(sql /*sql*/`
+          SELECT COUNT(*) FROM get_followers('${sql.raw(address)}');
+        `),
+        db.execute(sql /*sql*/`
+          SELECT COUNT(*) FROM get_following('${sql.raw(address)}');
+        `)
       ])
 
-      return context.json({ data: { followingCount, followersCount } }, 200)
+      return context.json(
+        { data: { followers: { count: followersCount }, following: { count: followingCount } } },
+        200
+      )
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })
@@ -91,17 +95,17 @@ api.get(
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
       const db = await database(context.env)
-      const { rows } = await sql<Functions['get_followers']['Returns']> /* sql */`
-        SELECT 
+      const { rows, rowCount: count } = await db.execute(sql /*sql*/`
+        SELECT
           actor_address,
           action_timestamp
         FROM
           get_followers('${sql.raw(address)}')
         ORDER BY
           action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
-      `.execute(db)
+      `)
 
-      return context.json({ data: rows }, 200)
+      return context.json({ data: { count, rows } }, 200)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })
@@ -137,17 +141,17 @@ api.get(
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
       const db = await database(context.env)
-      const { rows } = await sql<Functions['get_following']['Returns']> /* sql */`
-        SELECT 
+      const { rows, rowCount: count } = await db.execute(sql /*sql*/`
+        SELECT
           target_address,
           action_timestamp
         FROM
           get_following('${sql.raw(address)}')
         ORDER BY
           action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
-      `.execute(db)
+      `)
 
-      return context.json({ data: rows }, 200)
+      return context.json({ data: { count, rows } }, 200)
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : `Encoutered an error: ${error}`
       apiLogger.error({ errorMessage })
@@ -183,34 +187,35 @@ api.get(
       const address = await ensAddress({ ensNameOrAddress: id.toLowerCase(), env: context.env })
 
       const db = await database(context.env)
-      const [{ rows: followingRows }, { rows: followersRows }] = await Promise.all([
-        sql<Functions['get_following']['Returns']> /* sql */`
-          SELECT 
+      const [
+        { rows: followingRows, rowCount: followingCount },
+        { rows: followersRows, rowCount: followersCount }
+      ] = await Promise.all([
+        db.execute(sql /*sql*/`
+          SELECT
             target_address,
             action_timestamp
           FROM
             get_following('${sql.raw(address)}')
           ORDER BY
             action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
-      `.execute(db),
-        sql<Functions['get_followers']['Returns']> /* sql */`
-          SELECT 
+        `),
+        db.execute(sql /*sql*/`
+          SELECT
             actor_address,
             action_timestamp
           FROM
             get_followers('${sql.raw(address)}')
           ORDER BY
             action_timestamp ${sql.raw(sort === 'descending' || sort === 'desc' ? 'DESC' : 'ASC')};
-      `.execute(db)
+        `)
       ])
 
       return context.json(
         {
           data: {
-            followingCount: followingRows.length,
-            followersCount: followersRows.length,
-            followers: followersRows,
-            following: followingRows
+            followers: { count: followersCount, rows: followersRows },
+            following: { count: followingCount, rows: followingRows }
           }
         },
         200
