@@ -7,27 +7,28 @@
   "scripts": {
     "dev": "bunx wrangler dev --experimental-json-config --config=wrangler.json --latest=true",
     "build": "bunx wrangler deploy --dry-run --experimental-json-config --config=wrangler.json --outdir=dist --minify=true --latest=true --compatibility-flag=node_compat --compatibility-date=2023-06-30",
-    "generate-supabase-types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_ID --schema public --experimental >| src/types/generated/database.ts",
+    "generate-supabase-types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_REF --schema public --experimental >| src/types/generated/database.ts",
     "lint": "biome check --apply .",
     "format": "biome format . --write",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "clean": "rm -rf dist .wrangler node_modules"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.38.4",
+    "@supabase/supabase-js": "^2.38.5",
     "consola": "^3.2.3",
     "hono": "^3.10.1",
     "pretty-cache-header": "^1.0.0",
     "viem": "^2.0.0-beta.4"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20231025.0",
-    "@types/node": "^20.9.2",
     "@biomejs/biome": "^1.3.3",
-    "bun": "^1.0.13",
-    "bun-types": "^1.0.13",
+    "@cloudflare/workers-types": "^4.20231025.0",
     "@total-typescript/ts-reset": "^0.5.1",
-    "typescript": "^5.2.2",
+    "@types/node": "^20.9.2",
+    "bun": "^1.0.14",
+    "bun-types": "^1.0.14",
+    "dbmate": "^2.8.0",
+    "typescript": "^5.3.2",
     "wrangler": "^3.16.0"
   },
   "sideEffects": false,

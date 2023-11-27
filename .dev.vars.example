@@ -10,11 +10,15 @@ ALCHEMY_ID=""
 # https://www.infura.io (optional)
 INFURA_ID=""
 
+# Supabase studio > Settings > General > Project Settings > Reference ID
+SUPABASE_PROJECT_REF=""
 # The unique Supabase URL which is supplied when you create a new project in your project dashboard
 SUPABASE_URL=""
 # The unique Supabase Key which is supplied when you create a new project in your project dashboard.
 SUPABASE_SECRET_KEY=""
 # Supabase > Settings > API > Project ID
 SUPABASE_PROJECT_ID=""
+# https://<PROJECT_REF>.supabase.co/graphql/v1
+SUPABASE_GRAPHQL_URL=""
 
 ENABLE_DATABASE_LOGGING="false"

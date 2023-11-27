@@ -201,6 +201,16 @@ api.get(
   }
 )
 
+/**
+ * Fetch from ENS worker
+ */
+api.get('/ens/:type/:id', async context => {
+  const { type, id } = context.req.param()
+  const ensWorkerResponse = await fetch(`https://ens.ethfollow.xyz/${type}/${id}`)
+  const ensProfileData = await ensWorkerResponse.json()
+  return context.json(ensProfileData, 200)
+})
+
 api.get('/health', context => context.text('ok'))
 
 api.get('/docs', context => {
