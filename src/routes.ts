@@ -207,6 +207,9 @@ api.get(
 api.get('/ens/:type/:id', async context => {
   const { type, id } = context.req.param()
   const ensWorkerResponse = await fetch(`https://ens.ethfollow.xyz/${type}/${id}`)
+  if (!ensWorkerResponse.ok) {
+    return context.json({ error: await ensWorkerResponse.text() }, 500)
+  }
   const ensProfileData = await ensWorkerResponse.json()
   return context.json(ensProfileData, 200)
 })
