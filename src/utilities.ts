@@ -38,7 +38,7 @@ export const runtime =
   globalThis['navigator']?.['userAgent'] === 'Cloudflare-Workers'
     ? 'workerd'
     : globalThis['process']?.['release']?.['name'] === 'node'
-    ? 'node'
-    : !!globalThis['Bun'] || !!globalThis['process']?.['versions']?.['bun']
-    ? 'bun'
-    : 'unknown'
+      ? 'node'
+      : !!globalThis['Bun'] || !!globalThis['process']?.['versions']?.['bun']
+        ? 'bun'
+        : 'unknown'

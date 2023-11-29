@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.3.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/1.4.0/schema.json",
   "vcs": {
     "root": ".",
     "enabled": true,
@@ -51,6 +51,7 @@
       "performance": { "noAccumulatingSpread": "off" },
       "nursery": {
         "all": true,
+        "noDefaultExport": "off",
         "noUnusedImports": "off"
       },
       "complexity": {
