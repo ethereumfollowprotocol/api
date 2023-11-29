@@ -221,6 +221,5 @@ api.get('/docs', context => {
 })
 
 api.get('/routes', context => {
-  if (context.env.ENV === 'production') return context.notFound()
   return context.json(api.routes.filter(route => route.method !== 'ALL'))
 })
