@@ -48,6 +48,7 @@
         "useSelfClosingElements": "off",
         "noUnusedTemplateLiteral": "off"
       },
+      "performance": { "noAccumulatingSpread": "off" },
       "nursery": {
         "all": true,
         "noUnusedImports": "off"
