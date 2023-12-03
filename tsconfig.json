@@ -29,7 +29,7 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
-    "checkJs": true,
+    "checkJs": true
   },
   "include": ["src/**/*", "scripts/**/*"],
   "files": ["environment.d.ts", "reset.d.ts"],

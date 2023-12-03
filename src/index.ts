@@ -12,7 +12,6 @@ import { api } from '#/routes.ts'
 import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
 import type { Environment } from '#/types'
-import { parseBaseURL, runtime } from '#/utilities.ts'
 
 const app = new Hono<{ Bindings: Environment }>()
 
@@ -77,7 +76,7 @@ app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 3
 
 app.route('/', api)
 
-const PORT = runtime === 'workerd' ? 8_787 : Bun.env.PORT
+const PORT = 8_787
 
 apiLogger.box(`🚀 API running on http://localhost:${PORT}`)
 
