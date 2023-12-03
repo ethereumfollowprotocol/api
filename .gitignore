@@ -38,3 +38,7 @@ yarn-error.log*
 data.sqld
 .data
 _
+
+# wrangler
+dist
+.dev.vars
