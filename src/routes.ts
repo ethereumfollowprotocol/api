@@ -1,11 +1,11 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 
-import { ensAddress } from '#/viem.ts'
-import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
 import { supabaseClient } from '#/database.ts'
-import { type Environment, type SortField, sortFields } from '#/types'
+import { apiLogger } from '#/logger.ts'
+import { sortFields, type Environment, type SortField } from '#/types'
+import { ensAddress } from '#/viem.ts'
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
 
