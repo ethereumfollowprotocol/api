@@ -1,11 +1,14 @@
-import { Hono } from 'hono'
+import { Hono } from 'hono';
 
-import { DOCS_URL } from '#/constant.ts'
-import { database } from '#/database.ts'
-import { apiLogger } from '#/logger.ts'
-import type { Environment } from '#/types'
+import { DOCS_URL } from '#/constant.ts';
+import { database } from '#/database.ts';
+import { apiLogger } from '#/logger.ts';
+import type { Environment } from '#/types';
+import { ENSMetadataService } from './service/ens-metadata/service';
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
+
+const ensMetadataService = new ENSMetadataService()
 
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
@@ -25,16 +28,17 @@ api.get('/database-health', async context => {
 })
 
 /**
- * Fetch from ENS worker
+ * Fetch from ENS metadata service
  */
-api.get('/ens/:type/:id', async context => {
-  const { type, id } = context.req.param()
-  const ensWorkerResponse = await fetch(`https://ens.ethfollow.xyz/${type}/${id}`)
-  if (!ensWorkerResponse.ok) {
-    return context.json({ error: await ensWorkerResponse.text() }, 500)
+api.get('/ens/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    return context.json(await ensMetadataService.getENSProfile(id), 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching ENS profile: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching ENS profile', 500)
   }
-  const ensProfileData = await ensWorkerResponse.json()
-  return context.json(ensProfileData, 200)
 })
 
 api.get('/health', context => context.text('ok'))
