@@ -9,5 +9,5 @@ export type ENSProfile = {
     chains: Record<string, Address>
     fresh: number
     resolver: Address
-    errors: any
+    errors: Record<string, string>
   }
