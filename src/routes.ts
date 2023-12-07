@@ -1,14 +1,21 @@
-import { Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 
 import { DOCS_URL } from '#/constant.ts'
 import { database } from '#/database.ts'
 import { apiLogger } from '#/logger.ts'
-import type { Environment } from '#/types'
+import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
+import type { Environment } from '#/types'
+import type { Address } from 'viem'
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
 
-const ensMetadataService = new ENSMetadataService()
+const ensMetadataService = () => new ENSMetadataService()
+const efpIndexerService = (
+  context: Context<{
+    Bindings: Environment
+  }>
+) => new EFPIndexerService(context.env)
 
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
@@ -34,7 +41,26 @@ api.get('/ens/:id', async context => {
   const { id } = context.req.param()
 
   try {
-    return context.json(await ensMetadataService.getENSProfile(id), 200)
+    return context.json(await ensMetadataService().getENSProfile(id), 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching ENS profile: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching ENS profile', 500)
+  }
+})
+
+/**
+ * Fetch from ENS metadata service
+ */
+api.get('/efp/primaryList/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = id.startsWith('0x')
+      ? (id as Address)
+      : (await ensMetadataService().getENSProfile(id)).address
+    const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
+    apiLogger.info(`primaryList: ${JSON.stringify(primaryList, undefined, 2)}`)
+    return context.json(primaryList, 200)
   } catch (error) {
     apiLogger.error(`error while fetching ENS profile: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching ENS profile', 500)
