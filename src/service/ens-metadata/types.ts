@@ -1,3 +1,4 @@
+import type { Address } from "viem";
 
 export type ENSProfile = {
     name: string
