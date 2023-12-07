@@ -6,8 +6,7 @@
 import bun from 'bun'
 import packageJson from '../package.json' with { type: 'json' }
 
-const { name, version, description, type, scripts, dependencies, devDependencies, ...rest } =
-  packageJson
+const { name, version, description, type, scripts, dependencies, devDependencies, ...rest } = packageJson
 
 main().catch(error => {
   console.error(error)
@@ -28,12 +27,8 @@ async function bumpDependencies() {
   const unstableDevDependenciesNames = getUnstableDependencies(devDependencies)
 
   // filter out packages whose version is beta
-  const dependenciesNames = Object.keys(dependencies).filter(
-    name => !Object.hasOwn(unstableDependenciesNames, name)
-  )
-  const latestDependenciesVersions = await Promise.all(
-    dependenciesNames.map(name => fetchPackageLatestVersion(name))
-  )
+  const dependenciesNames = Object.keys(dependencies).filter(name => !Object.hasOwn(unstableDependenciesNames, name))
+  const latestDependenciesVersions = await Promise.all(dependenciesNames.map(name => fetchPackageLatestVersion(name)))
 
   const updatedDependencies = Object.fromEntries(
     dependenciesNames.map((name, index) => [name, `^${latestDependenciesVersions[index]}`])

@@ -1,8 +1,7 @@
 import { normalize } from 'viem/ens'
 import { mainnet } from 'viem/chains'
-import { createPublicClient, http, fallback, getAddress, isAddress, type Address } from 'viem'
-
 import { raise } from '#/utilities.ts'
+import { createPublicClient, http, fallback, getAddress, isAddress, type Address } from 'viem'
 
 /**
  * Takes an ENS name or address and returns the address

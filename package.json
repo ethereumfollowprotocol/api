@@ -7,37 +7,35 @@
     "dev": "bunx wrangler dev --experimental-json-config --config=wrangler.json --latest=true",
     "dev:remote": "bun dev --remote",
     "build": "bunx wrangler deploy --dry-run --experimental-json-config --config=wrangler.json --outdir=dist --minify=true --latest=true --compatibility-flag=node_compat --compatibility-date=2023-06-30",
-    "generate-supabase-types": "supabase gen types typescript --project-id $SUPABASE_PROJECT_REF --schema public --experimental >| src/types/generated/database.ts",
+    "database:generate-types": "kysely-codegen --dialect='postgres' --type-only-imports --log-level='error' --out-file='./src/types/generated/index.ts' && bun format",
     "lint": "biome check --apply .",
     "format": "biome format . --write",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "clean": "rm -rf dist .wrangler node_modules"
+    "clean": "rm -rf dist .wrangler node_modules",
+    "update-dependencies": "bun ./scripts/update-dependencies.ts"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0",
     "consola": "^3.2.3",
-    "hono": "^3.10.4",
+    "hono": "^3.11.0",
     "kysely": "^0.26.3",
     "kysely-postgres-js": "^2.0.0",
-    "pg": "^8.11.3",
+    "postgres": "^3.4.3",
     "pretty-cache-header": "^1.0.0",
-    "viem": "^2.0.0-beta.6"
+    "viem": "^2.0.0-beta.11"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.4.1",
     "@cloudflare/workers-types": "^4.20231121.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/node": "^20.10.2",
-    "@types/pg": "^8.10.9",
     "bun": "^1.0.15",
     "bun-types": "^1.0.15",
-    "dbmate": "^2.8.0",
-    "supabase": "^1.115.4",
     "kysely-codegen": "^0.11.0",
+    "pg": "^8.11.3",
     "typescript": "^5.3.2",
     "wrangler": "^3.18.0"
   },
-  "repository": "github:ethereumfollowprotocol/api",
   "sideEffects": false,
+  "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/indexer/README.md"
 }

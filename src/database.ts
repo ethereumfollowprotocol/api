@@ -1,20 +1,14 @@
-import type { Database } from '#/types/generated/database.ts'
-import { createClient } from '@supabase/supabase-js'
-import { Kysely, PostgresDialect } from 'kysely'
-import { Pool } from 'pg'
-import type { DB } from 'src/generated/index.ts'
+import postgres from 'postgres'
+import { Kysely, type InsertObject } from 'kysely'
+import type { DB } from '#/types/generated/index.ts'
+import { PostgresJSDialect } from 'kysely-postgres-js'
 
-export function supabaseClient(environment: Env) {
-  return createClient<Database>(environment.SUPABASE_URL, environment.SUPABASE_SECRET_KEY)
-}
+export type Row<T extends keyof DB> = InsertObject<DB, T>
 
-// TODO: in progress need to consolidate db interface into service
-export function kyselyDb(environment: Env) {
+export function database(env: Env) {
   return new Kysely<DB>({
-    dialect: new PostgresDialect({
-      pool: new Pool({
-        connectionString: environment.DATABASE_URL
-      })
+    dialect: new PostgresJSDialect({
+      postgres: postgres(env.DATABASE_URL)
     })
   })
 }

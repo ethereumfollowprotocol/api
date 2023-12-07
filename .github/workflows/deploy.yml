@@ -53,12 +53,12 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          wrangler deploy ./src/index.ts \
-            --name=indexer \
-            --minify \
-            --latest=true \
-            --keep-vars=true \
-            --experimental-json-config \
-            --config=wrangler.json \
-            --compatibility-date=2023-06-20 \
-            ----compatibility-flag=node_compat
+          # wrangler deploy ./src/index.ts \
+          #   --name=indexer \
+          #   --minify \
+          #   --latest=true \
+          #   --keep-vars=true \
+          #   --experimental-json-config \
+          #   --config=wrangler.json \
+          #   --compatibility-date=2023-06-20 \
+          #   ----compatibility-flag=node_compat
