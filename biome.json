@@ -6,16 +6,7 @@
     "clientKind": "git"
   },
   "files": {
-    "include": [
-      "./**/*.ts",
-      "./**/*.js",
-      "./**/*.cjs",
-      "./**/*.mjs",
-      "./**/*.tsx",
-      "./**/*.d.ts",
-      "./**/*.json",
-      "./**/*.jsonc"
-    ],
+    "include": ["./**/*.ts", "./**/*.js", "./**/*.cjs", "./**/*.mjs", "./**/*.d.ts", "./**/*.json", "./**/*.jsonc"],
     "ignoreUnknown": true,
     "ignore": ["node_modules", "dist", "_"]
   },
@@ -28,16 +19,7 @@
     "indentWidth": 2,
     "indentStyle": "space",
     "formatWithErrors": true,
-    "include": [
-      "./**/*.ts",
-      "./**/*.js",
-      "./**/*.cjs",
-      "./**/*.mjs",
-      "./**/*.tsx",
-      "./**/*.d.ts",
-      "./**/*.json",
-      "./**/*.jsonc"
-    ]
+    "include": ["./**/*.ts", "./**/*.js", "./**/*.cjs", "./**/*.mjs", "./**/*.d.ts", "./**/*.json", "./**/*.jsonc"]
   },
   "linter": {
     "enabled": true,
@@ -52,17 +34,14 @@
       "nursery": {
         "all": true,
         "noDefaultExport": "off",
-        "noUnusedImports": "off"
+        "noUnusedImports": "off",
+        "noEmptyBlockStatements": "off"
       },
       "complexity": {
         "useLiteralKeys": "off"
       },
-      "correctness": {
-        "noUndeclaredVariables": "off"
-      },
+      "correctness": {},
       "suspicious": {
-        "noRedeclare": "off",
-        "noExplicitAny": "off",
         "noEmptyInterface": "off"
       }
     }

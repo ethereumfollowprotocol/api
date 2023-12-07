@@ -7,5 +7,3 @@ export const apiLogger = createConsola({
     colors: true
   }
 })
-
-apiLogger.wrapAll()

@@ -14,7 +14,7 @@ interface EnvironmentVariables {
 // Cloudflare Workers
 interface Env extends EnvironmentVariables {
   readonly ENV: 'development' | 'production' | 'test'
-  readonly ens: any
+  readonly ens: Record<string, unknown>
 }
 
 // Node.js
