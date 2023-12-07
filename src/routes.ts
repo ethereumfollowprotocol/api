@@ -55,12 +55,9 @@ api.get('/efp/primaryList/:id', async context => {
   const { id } = context.req.param()
 
   try {
-    const address: Address = id.startsWith('0x')
-      ? (id as Address)
-      : (await ensMetadataService().getENSProfile(id)).address
+    const address: Address = await ensMetadataService().getAddress(id)
     const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-    apiLogger.info(`primaryList: ${JSON.stringify(primaryList, undefined, 2)}`)
-    return context.json(primaryList, 200)
+    return context.json(`${primaryList}`, 200)
   } catch (error) {
     apiLogger.error(`error while fetching ENS profile: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching ENS profile', 500)
