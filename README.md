@@ -30,18 +30,10 @@
 - [Bun runtime](https://bun.sh/)
 - [Cloudflare Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/)
 - [Ethereum Follow Protocol Indexer](https://github.com/ethereumfollowprotocol/indexer)
-  - [Supabase Postgres Database](https://supabase.com/dashboard/new?plan=free)
-
-
-The API relies on a postgres database whose data is populated by the indexer.
-The database is hosted on [Supabase](https://supabase.com/dashboard/new?plan=free).
-Supabase offers a free database with unlimited API requests and up to 5GB of bandwidth so it's a great option for development.
-Howver, in the near future you will be able to use any postgres database.
-
 
 ### Setup
 
-Assuming you have an indexer running and postgres database setup on Supabase, follow these steps to get started with development:
+Assuming you have an indexer running and postgres database setup, follow these steps to get started with development:
 
 0. Ensure development tools are up to date
 
