@@ -8,7 +8,6 @@ interface EnvironmentVariables {
   readonly SUPABASE_URL: string
   readonly SUPABASE_SECRET_KEY: string
   readonly SUPABASE_PROJECT_REF: string
-  readonly SUPABASE_GRAPHQL_URL: string
   readonly ENABLE_DATABASE_LOGGING: 'true' | 'false'
 }
 
