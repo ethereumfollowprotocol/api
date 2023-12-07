@@ -1,11 +1,11 @@
-import { Hono } from 'hono';
-import { validator } from 'hono/validator';
+import { Hono } from 'hono'
+import { validator } from 'hono/validator'
 
-import { DOCS_URL } from '#/constant.ts';
-import { kyselyDb, supabaseClient } from '#/database.ts';
-import { apiLogger } from '#/logger.ts';
-import { sortFields, type Environment, type SortField } from '#/types';
-import { ensAddress } from '#/viem.ts';
+import { DOCS_URL } from '#/constant.ts'
+import { kyselyDb, supabaseClient } from '#/database.ts'
+import { apiLogger } from '#/logger.ts'
+import { sortFields, type Environment, type SortField } from '#/types'
+import { ensAddress } from '#/viem.ts'
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
 
@@ -25,10 +25,7 @@ api.get('/kysely-health', async context => {
 
   // do a simple query to check if the database is up
   try {
-  await database
-    .selectFrom('contracts')
-    .select('name').limit(1)
-    .execute()
+    await database.selectFrom('contracts').select('name').limit(1).execute()
   } catch (error) {
     apiLogger.error(`error while checking postgres health: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while checking postgres health', 500)
