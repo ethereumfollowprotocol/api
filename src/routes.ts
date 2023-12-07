@@ -1,10 +1,10 @@
-import { Hono } from 'hono';
+import { Hono } from 'hono'
 
-import { DOCS_URL } from '#/constant.ts';
-import { database } from '#/database.ts';
-import { apiLogger } from '#/logger.ts';
-import type { Environment } from '#/types';
-import { ENSMetadataService } from './service/ens-metadata/service';
+import { DOCS_URL } from '#/constant.ts'
+import { database } from '#/database.ts'
+import { apiLogger } from '#/logger.ts'
+import type { Environment } from '#/types'
+import { ENSMetadataService } from './service/ens-metadata/service'
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
 
