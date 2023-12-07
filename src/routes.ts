@@ -1,11 +1,11 @@
-import { Hono } from 'hono'
-import { validator } from 'hono/validator'
+import { Hono } from 'hono';
+import { validator } from 'hono/validator';
 
-import { DOCS_URL } from '#/constant.ts'
-import { supabaseClient } from '#/database.ts'
-import { apiLogger } from '#/logger.ts'
-import { sortFields, type Environment, type SortField } from '#/types'
-import { ensAddress } from '#/viem.ts'
+import { DOCS_URL } from '#/constant.ts';
+import { kyselyDb, supabaseClient } from '#/database.ts';
+import { apiLogger } from '#/logger.ts';
+import { sortFields, type Environment, type SortField } from '#/types';
+import { ensAddress } from '#/viem.ts';
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
 
@@ -15,8 +15,26 @@ api.get('/postgres-health', async context => {
   const database = supabaseClient(context.env)
   const { error, data, status } = await database.rpc('health', {}).select('*')
   if (status === 200 && data) return context.text(`${data}`, 200)
-  apiLogger.error(`error while checking postgres health: ${JSON.stringify(error, undefined, 2)}`)
-  return context.text('error while checking postgres health', 500)
+  apiLogger.error(`error while checking supabase health: ${JSON.stringify(error, undefined, 2)}`)
+  return context.text('error while checking supabase health', 500)
+})
+
+// TODO: in progress need to consolidate db interface into service
+api.get('/kysely-health', async context => {
+  const database = kyselyDb(context.env)
+
+  // do a simple query to check if the database is up
+  try {
+  await database
+    .selectFrom('contracts')
+    .select('name').limit(1)
+    .execute()
+  } catch (error) {
+    apiLogger.error(`error while checking postgres health: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while checking postgres health', 500)
+  }
+  // database is up
+  return context.text('ok', 200)
 })
 
 /**

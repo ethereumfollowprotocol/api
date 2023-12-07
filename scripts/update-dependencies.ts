@@ -27,7 +27,7 @@ async function bumpDependencies() {
   const unstableDependenciesNames = getUnstableDependencies(dependencies)
   const unstableDevDependenciesNames = getUnstableDependencies(devDependencies)
 
-  // filter out packages whose version is beta or alpha
+  // filter out packages whose version is beta
   const dependenciesNames = Object.keys(dependencies).filter(
     name => !Object.hasOwn(unstableDependenciesNames, name)
   )
@@ -86,6 +86,6 @@ async function fetchPackageLatestVersion(name: string) {
 
 function getUnstableDependencies(dependencies: Record<string, string>) {
   return Object.entries(dependencies)
-    .filter(([, version]) => /alpha|beta/.test(version))
+    .filter(([, version]) => /beta/.test(version))
     .reduce((acc, [name, version]) => ({ ...acc, [name]: version }), {}) as Record<string, string>
 }
