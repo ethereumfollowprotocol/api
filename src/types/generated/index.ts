@@ -31,7 +31,6 @@ export interface AccountMetadata {
 export interface Contracts {
   address: string
   chain_id: Int8
-  id: Generated<string>
   name: string
   owner: string
 }
@@ -51,7 +50,7 @@ export interface ListMetadata {
   chain_id: Int8
   contract_address: string
   key: string
-  token_id: Int8
+  nonce: Int8
   value: string
 }
 
@@ -73,7 +72,6 @@ export interface ListOps {
   code: number
   contract_address: string
   data: string
-  id: Generated<string>
   nonce: Int8
   op: string
   version: number
@@ -83,7 +81,6 @@ export interface ListRecords {
   chain_id: Int8
   contract_address: string
   data: string
-  id: Generated<string>
   nonce: Int8
   record: string
   type: number

@@ -6,6 +6,11 @@ import type { Address } from 'viem'
 
 export interface IEFPIndexerService {
   getPrimaryList(address: Address): Promise<string | undefined>
+  getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
+  getFollowingCount(tokenId: bigint): Promise<number>
+  getFollowing(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
+  getFollowerCount(address: `0x${string}`): Promise<number>
+  getFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -31,7 +36,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       .select('list_storage_location')
       .where('token_id', '=', tokenId.toString())
       .executeTakeFirst()
-    return result?.list_storage_location || undefined
+    return (result?.list_storage_location as `0x${string}`) || undefined
   }
 
   async getFollowingCount(tokenId: bigint): Promise<number> {
@@ -80,7 +85,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getFollowerCount(address: `0x${string}`): Promise<number> {
     const possibleDuplicates = await this.getFollowers(address)
-    const uniqueUsers = new Set(possibleDuplicates.map(({ listUser }) => listUser))
+    const uniqueUsers = new Set(possibleDuplicates.map(({ list_user }) => list_user))
     return uniqueUsers.size
   }
 
