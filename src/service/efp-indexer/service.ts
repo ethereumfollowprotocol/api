@@ -79,26 +79,11 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowerCount(address: `0x${string}`): Promise<number> {
-    const result = await this.db
-      .selectFrom('list_records')
-      .select(({ fn, val, ref }) => [
-        // The `fn` module contains the most common
-        // functions.
-        fn
-          .count<number>('nonce')
-          .as('count')
-      ])
-      .where('version', '=', 1)
-      .where('type', '=', 1)
-      .where('data', '=', address)
-      .groupBy('version')
-      .groupBy('type')
-      .groupBy('data')
-      .executeTakeFirst()
-    return result?.count ?? 0
+    const possibleDuplicates = await this.getFollowers(address)
+    const uniqueUsers = new Set(possibleDuplicates.map(({ listUser }) => listUser))
+    return uniqueUsers.size
   }
 
-  // biome-ignore lint/nursery/useAwait: TODO
   async getFollowers(address: `0x${string}`): Promise<{ tokenId: number; listUser: string }[]> {
     // TODO: implement below query
     // SELECT DISTINCT subquery.list_user
@@ -121,8 +106,6 @@ export class EFPIndexerService implements IEFPIndexerService {
     //       lr.version = 1
     //       AND lr.type = 1
     //       AND lr.data = '0x0000000000000000000000000000000000000004'
-    //   LIMIT 100
-    //   OFFSET 0
     // ) AS subquery;
     // Define the subquery
     const subquery = this.db

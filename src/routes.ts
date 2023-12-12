@@ -166,7 +166,6 @@ api.get('/efp/followers/:id', async context => {
   try {
     const address: Address = await ensMetadataService().getAddress(id)
     const followers: any[] = await efpIndexerService(context).getFollowers(address)
-    console.log(followers)
     return context.json(followers, 200)
   } catch (error) {
     apiLogger.error(`error while fetching followers: $JSON.stringify(error, undefined, 2)`)
