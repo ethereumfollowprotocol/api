@@ -61,6 +61,32 @@ api.get('/efp/primaryList/:id', async context => {
   }
 })
 
+api.get('/efp/followerCount/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const followerCount: number = await efpIndexerService(context).getFollowerCount(address)
+    return context.json(followerCount, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching follower count: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching follower count', 500)
+  }
+})
+
+api.get('/efp/followers/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const followers: any[] = await efpIndexerService(context).getFollowers(address)
+    return context.json(followers, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching followers: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching followers', 500)
+  }
+})
+
 api.get('/efp/followingCount/:id', async context => {
   const { id } = context.req.param()
 
@@ -124,7 +150,7 @@ api.get('/efp/following/:id', async context => {
       if (!primaryList) {
         // user doesn't have a primary list, so return 0?
         // TODO: we could check if the own a list, and if so, return the count of that list
-        return context.json(0, 200)
+        return context.json([], 200)
       }
       // convert to bigint
       const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
@@ -147,29 +173,41 @@ api.get('/efp/following/:id', async context => {
   }
 })
 
-api.get('/efp/followerCount/:id', async context => {
+api.get('/efp/stats/:id', async context => {
   const { id } = context.req.param()
 
   try {
     const address: Address = await ensMetadataService().getAddress(id)
     const followerCount: number = await efpIndexerService(context).getFollowerCount(address)
-    return context.json(followerCount, 200)
-  } catch (error) {
-    apiLogger.error(`error while fetching follower count: $JSON.stringify(error, undefined, 2)`)
-    return context.text('error while fetching follower count', 500)
-  }
-})
+    const stats = {
+      followerCount,
+      followingCount: 0
+    }
 
-api.get('/efp/followers/:id', async context => {
-  const { id } = context.req.param()
+    let tokenId: bigint | undefined
+    if (id.startsWith('0x') || id.endsWith('.eth')) {
+      const address: Address = await ensMetadataService().getAddress(id)
+      const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
+      if (!primaryList) {
+        // user doesn't have a primary list, so return 0?
+        // TODO: we could check if the own a list, and if so, return the count of that list
+        return context.json(stats, 200)
+      }
+      // convert to bigint
+      const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
+      // 32-byte
+      tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
+    }
 
-  try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const followers: any[] = await efpIndexerService(context).getFollowers(address)
-    return context.json(followers, 200)
+    if (tokenId === undefined) {
+      return context.text('error while fetching following count', 500)
+    }
+    const followingCount: number = await efpIndexerService(context).getFollowingCount(tokenId as bigint)
+    stats.followingCount = followingCount
+    return context.json(stats, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching followers: $JSON.stringify(error, undefined, 2)`)
-    return context.text('error while fetching followers', 500)
+    apiLogger.error(`error while fetching stats: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching stats', 500)
   }
 })
 
