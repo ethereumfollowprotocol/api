@@ -117,6 +117,7 @@ api.get('/efp/followingCount/:id', async context => {
       // id is a token id
       tokenId = BigInt(id)
     }
+    console.log(`tokenId: ${tokenId}`)
 
     if (tokenId === undefined) {
       return context.text('error while fetching following count', 500)
@@ -168,7 +169,7 @@ api.get('/efp/following/:id', async context => {
     const following: any[] = await efpIndexerService(context).getFollowing(tokenId as bigint)
     return context.json(following, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching following: ${JSON.stringify(error, undefined, 2)}`)
+    apiLogger.error(`error while fetching following: $JSON.stringify(error, undefined, 2)`)
     return context.text('error while fetching following', 500)
   }
 })

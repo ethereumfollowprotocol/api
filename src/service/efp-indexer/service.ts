@@ -1,6 +1,6 @@
 import { database } from '#/database'
 import type { DB } from '#/types'
-import { decodeListLocationTypeV1 } from '#/types/list-location-type'
+import { decodeListStorageLocation } from '#/types/list-location-type'
 import type { Kysely } from 'kysely'
 import type { Address } from 'viem'
 
@@ -25,22 +25,22 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result?.value
   }
 
-  async getListLocation(tokenId: bigint): Promise<string | undefined> {
+  async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
     const result = await this.db
-      .selectFrom('list_metadata')
-      .select('value')
+      .selectFrom('list_nfts')
+      .select('list_storage_location')
       .where('token_id', '=', tokenId.toString())
-      .where('key', '=', 'efp.list.location')
       .executeTakeFirst()
-    return result?.value
+    return result?.list_storage_location || undefined
   }
 
   async getFollowingCount(tokenId: bigint): Promise<number> {
-    const listLocation = (await this.getListLocation(tokenId)) as `0x${string}`
-    if (listLocation === undefined || listLocation.length !== 2 + (1 + 1 + 20 + 32) * 2) {
+    const listStorageLocation: `0x${string}` | undefined = await this.getListStorageLocation(tokenId)
+    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
       return 0
     }
-    const { version, locationType, chainId, contractAddress, nonce } = decodeListLocationTypeV1(listLocation)
+    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
+    console.log({ version, locationType, chainId, contractAddress, nonce })
 
     const countResult = await this.db
       .selectFrom('list_records')
@@ -56,15 +56,15 @@ export class EFPIndexerService implements IEFPIndexerService {
       .groupBy('contract_address')
       .groupBy('nonce')
       .executeTakeFirst()
-    return countResult?.count ?? 0
+    return Number(countResult?.count ?? 0)
   }
 
   async getFollowing(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
-    const listLocation = (await this.getListLocation(tokenId)) as `0x${string}`
-    if (listLocation === undefined || listLocation.length !== 2 + (1 + 1 + 20 + 32) * 2) {
+    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as `0x${string}`
+    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
       return []
     }
-    const { version, locationType, chainId, contractAddress, nonce } = decodeListLocationTypeV1(listLocation)
+    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
     const result = await this.db
       .selectFrom('list_records')
       .select(['version', 'type', 'data'])
@@ -84,7 +84,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return uniqueUsers.size
   }
 
-  async getFollowers(address: `0x${string}`): Promise<{ tokenId: number; listUser: string }[]> {
+  async getFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
     // TODO: implement below query
     // SELECT DISTINCT subquery.list_user
     // FROM (
@@ -120,14 +120,15 @@ export class EFPIndexerService implements IEFPIndexerService {
       .where('version', '=', 1)
       .where('type', '=', 1)
       .where('data', '=', address)
+      .orderBy('nft.token_id', 'asc')
 
     const result = await subquery.execute()
     if (result === undefined) {
       return []
     }
     return result.map(({ token_id, list_user }) => ({
-      tokenId: Number(token_id),
-      listUser: list_user || ''
+      token_id: Number(token_id),
+      list_user: list_user || ''
     }))
   }
 }

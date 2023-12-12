@@ -28,32 +28,32 @@ export type EVMListLocationType = {
   nonce: `0x${string}`
 }
 
-export function decode(listLocation: `0x${string}`): ListLocationType {
-  if (listLocation.length !== 2 + (1 + 1 + 20 + 32) * 2) {
+export function decode(listStorageLocation: `0x${string}`): ListLocationType {
+  if (listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
     throw new Error('invalid list location')
   }
   // read bytes 2-21 as address
-  const asBytes: Buffer = Buffer.from(listLocation.slice(2), 'hex')
+  const asBytes: Buffer = Buffer.from(listStorageLocation.slice(2), 'hex')
   const version: number = Number(asBytes[0])
   const locationType: number = Number(asBytes[1])
   const data: Buffer = asBytes.subarray(2)
   return { version, locationType, data }
 }
 
-export function decodeListLocationTypeV1(listLocation: `0x${string}`): EVMListLocationType {
-  const { version, locationType, data } = decode(listLocation)
+export function decodeListStorageLocation(listStorageLocation: `0x${string}`): EVMListLocationType {
+  const { version, locationType, data } = decode(listStorageLocation)
   if (version !== 1) {
     throw new Error('invalid list location version')
   }
   if (locationType !== 1) {
     throw new Error('invalid list location type')
   }
-  if (data.length !== 20 + 32) {
+  if (data.length !== 32 + 20 + 32) {
     throw new Error('invalid list location data')
   }
-  const chainId: number = 1
-  const contractAddress: `0x${string}` = `0x${data.subarray(0, 20).toString('hex')}`
-  const nonce: `0x${string}` = `0x${data.subarray(20).toString('hex')}`
+  const chainId: number = Number(data.subarray(0, 32).reduce((acc, cur) => acc * 256 + cur, 0))
+  const contractAddress: `0x${string}` = `0x${data.subarray(32, 32 + 20).toString('hex')}`
+  const nonce: `0x${string}` = `0x${data.subarray(32 + 20, 32 + 20 + 32).toString('hex')}`
 
   return { version, locationType, chainId, contractAddress, nonce }
 }
