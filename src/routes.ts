@@ -48,9 +48,6 @@ api.get('/ens/:id', async context => {
   }
 })
 
-/**
- * Fetch from ENS metadata service
- */
 api.get('/efp/primaryList/:id', async context => {
   const { id } = context.req.param()
 
@@ -64,9 +61,6 @@ api.get('/efp/primaryList/:id', async context => {
   }
 })
 
-/**
- * Fetch from ENS metadata service
- */
 api.get('/efp/followingCount/:id', async context => {
   const { id } = context.req.param()
 
@@ -110,9 +104,6 @@ api.get('/efp/followingCount/:id', async context => {
   }
 })
 
-/**
- * Fetch from ENS metadata service
- */
 api.get('/efp/following/:id', async context => {
   const { id } = context.req.param()
 
@@ -153,6 +144,32 @@ api.get('/efp/following/:id', async context => {
   } catch (error) {
     apiLogger.error(`error while fetching following: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching following', 500)
+  }
+})
+
+api.get('/efp/followerCount/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const followerCount: number = await efpIndexerService(context).getFollowerCount(address)
+    return context.json(followerCount, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching follower count: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching follower count', 500)
+  }
+})
+
+api.get('/efp/followers/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const followers: any[] = await efpIndexerService(context).getFollowers(address)
+    return context.json(followers, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching follower count: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching follower count', 500)
   }
 })
 

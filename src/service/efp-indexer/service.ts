@@ -85,4 +85,28 @@ export class EFPIndexerService implements IEFPIndexerService {
       data: data as `0x${string}`
     }))
   }
+
+  async getFollowerCount(address: `0x${string}`): Promise<number> {
+    const result = await this.db
+      .selectFrom('list_records')
+      .select(({ fn, val, ref }) => [
+        // The `fn` module contains the most common
+        // functions.
+        fn
+          .count<number>('nonce')
+          .as('count')
+      ])
+      .where('version', '=', 1)
+      .where('type', '=', 1)
+      .where('data', '=', address)
+      .groupBy('version')
+      .groupBy('type')
+      .groupBy('data')
+      .executeTakeFirst()
+    return result?.count ?? 0
+  }
+
+  async getFollowers(address: `0x${string}`): Promise<{ version: number; nonce: bigint }[]> {
+    return []
+  }
 }
