@@ -2,7 +2,7 @@ import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListLocationTypeV1 } from '#/types/list-location-type'
 import type { Kysely } from 'kysely'
-import { type Address } from 'viem'
+import type { Address } from 'viem'
 
 export interface IEFPIndexerService {
   getPrimaryList(address: Address): Promise<string | undefined>
@@ -33,14 +33,6 @@ export class EFPIndexerService implements IEFPIndexerService {
       .where('key', '=', 'efp.list.location')
       .executeTakeFirst()
     return result?.value
-  }
-
-  decodeNonce(listLocation: string): { contract_address: `0x${string}`; nonce: bigint } | undefined {
-    // read bytes 2-21 as address
-    const asBytes = Buffer.from(listLocation.slice(2), 'hex')
-    const nonceBytes: Buffer = asBytes.subarray(2 + 20, 2 + 20 + 32)
-    const nonce: bigint = nonceBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
-    return nonce
   }
 
   async getFollowingCount(tokenId: bigint): Promise<number> {
@@ -106,7 +98,53 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result?.count ?? 0
   }
 
-  async getFollowers(address: `0x${string}`): Promise<{ version: number; nonce: bigint }[]> {
-    return []
+  // biome-ignore lint/nursery/useAwait: TODO
+  async getFollowers(address: `0x${string}`): Promise<{ tokenId: number; listUser: string }[]> {
+    // TODO: implement below query
+    // SELECT DISTINCT subquery.list_user
+    // FROM (
+    //   SELECT
+    //       lr.chain_id,
+    //       lr.contract_address,
+    //       lr.nonce,
+    //       nft.chain_id,
+    //       nft.contract_address,
+    //       nft.token_id,
+    //       nft.list_user
+    //   FROM
+    //       list_records lr
+    //   LEFT JOIN
+    //       list_nfts nft ON nft.list_storage_location_chain_id = lr.chain_id
+    //                    AND nft.list_storage_location_contract_address = lr.contract_address
+    //                    AND nft.list_storage_location_nonce = lr.nonce
+    //   WHERE
+    //       lr.version = 1
+    //       AND lr.type = 1
+    //       AND lr.data = '0x0000000000000000000000000000000000000004'
+    //   LIMIT 100
+    //   OFFSET 0
+    // ) AS subquery;
+    // Define the subquery
+    const subquery = this.db
+      .selectFrom('list_records as lr')
+      .innerJoin('list_nfts as nft', join =>
+        join
+          .onRef('nft.list_storage_location_chain_id', '=', 'lr.chain_id')
+          .onRef('nft.list_storage_location_contract_address', '=', 'lr.contract_address')
+          .onRef('nft.list_storage_location_nonce', '=', 'lr.nonce')
+      )
+      .select(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'nft.token_id', 'nft.list_user'])
+      .where('version', '=', 1)
+      .where('type', '=', 1)
+      .where('data', '=', address)
+
+    const result = await subquery.execute()
+    if (result === undefined) {
+      return []
+    }
+    return result.map(({ token_id, list_user }) => ({
+      tokenId: Number(token_id),
+      listUser: list_user || ''
+    }))
   }
 }

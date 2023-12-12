@@ -56,8 +56,14 @@ export interface ListMetadata {
 }
 
 export interface ListNfts {
-  address: string
   chain_id: Int8
+  contract_address: string
+  list_manager: string | null
+  list_storage_location: string | null
+  list_storage_location_chain_id: Int8 | null
+  list_storage_location_contract_address: string | null
+  list_storage_location_nonce: Int8 | null
+  list_user: string | null
   owner: string
   token_id: Int8
 }
