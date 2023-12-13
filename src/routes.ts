@@ -43,10 +43,29 @@ async function inputToTokenId(
   return tokenId
 }
 
+/**
+ * Home Endpoint
+ * Purpose: Provides information about the API's documentation location.
+ * Request Parameters: None.
+ * Response: Plain text message with the URL of the documentation.
+ */
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
+/**
+ * Documentation Redirect
+ * Purpose: Redirects to the external API documentation page.
+ * Request Parameters: None.
+ * Response: HTTP 301 redirect to the external documentation URL.
+ */
 api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
+/**
+ * Database Health Check
+ * Purpose: Checks the health of the database by performing a simple query.
+ * Request Parameters: None.
+ * Response: Text response indicating the health status of the database.
+ * Error Handling: Returns an error message and a 500 status code if the database check fails.
+ */
 api.get('/database-health', async context => {
   const db = database(context.env)
 
@@ -61,10 +80,20 @@ api.get('/database-health', async context => {
   return context.text('ok', 200)
 })
 
+/**
+ * API Health Check
+ * Purpose: Provides a simple health check for the API.
+ * Request Parameters: None.
+ * Response: Plain text response "ok".
+ */
 api.get('/health', context => context.text('ok'))
 
 /**
- * Fetch from ENS metadata service
+ * Fetch ENS Metadata
+ * Purpose: Retrieves ENS (Ethereum Name Service) profile information based on the given identifier.
+ * Request Parameters: `id` - The identifier for the ENS profile.
+ * Response: JSON object containing ENS profile information.
+ * Error Handling: Returns an error message and a 500 status code in case of failure.
  */
 api.get('/ens/:id', async context => {
   const { id } = context.req.param()
@@ -77,6 +106,13 @@ api.get('/ens/:id', async context => {
   }
 })
 
+/**
+ * Fetch Primary List from EFP
+ * Purpose: Retrieves the primary list associated with a given ID from the EFP indexer service.
+ * Request Parameters: `id` - The identifier to query the primary list.
+ * Response: JSON object containing the primary list information.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/primaryList/:id', async context => {
   const { id } = context.req.param()
 
@@ -90,6 +126,13 @@ api.get('/efp/primaryList/:id', async context => {
   }
 })
 
+/**
+ * Get Followers Count
+ * Purpose: Retrieves the count of followers for a given address.
+ * Request Parameters: `id` - The identifier (address) to query the followers count.
+ * Response: JSON object containing the number of followers.
+ * Error Handling: Returns an error message and a 500 status code in case of failure.
+ */
 api.get('/efp/followersCount/:id', async context => {
   const { id } = context.req.param()
 
@@ -103,6 +146,13 @@ api.get('/efp/followersCount/:id', async context => {
   }
 })
 
+/**
+ * Fetch Followers
+ * Purpose: Retrieves a list of followers for a given address.
+ * Request Parameters: `id` - The identifier (address) to query the list of followers.
+ * Response: JSON array containing follower details.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/followers/:id', async context => {
   const { id } = context.req.param()
 
@@ -116,6 +166,13 @@ api.get('/efp/followers/:id', async context => {
   }
 })
 
+/**
+ * Fetch Following
+ * Purpose: Retrieves a list of list records that a given ID is following.
+ * Request Parameters: `id` - The identifier to query the following list.
+ * Response: JSON array containing the list of followed list records.
+ * Error Handling: Returns an error message and a 500 status code in case of failure.
+ */
 api.get('/efp/following/:id', async context => {
   const { id } = context.req.param()
 
@@ -137,6 +194,15 @@ api.get('/efp/following/:id', async context => {
   }
 })
 
+/**
+ * Fetch Following by Tag
+ * Purpose: Retrieves a list of list records that a given ID is following, filtered by a specified tag.
+ * Request Parameters:
+ *  - `id` - The identifier to query the following list.
+ *  - `tag` - The tag to filter the list.
+ * Response: JSON array containing the filtered list of followed list records.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/following/:id/:tag', async context => {
   const { id, tag } = context.req.param()
 
@@ -153,6 +219,13 @@ api.get('/efp/following/:id/:tag', async context => {
   }
 })
 
+/**
+ * Get Following Count
+ * Purpose: Retrieves the count of list records a given ID is following.
+ * Request Parameters: `id` - The identifier to query the following count.
+ * Response: A number representing the count of followed list records.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/followingCount/:id', async context => {
   const { id } = context.req.param()
 
@@ -170,6 +243,13 @@ api.get('/efp/followingCount/:id', async context => {
   }
 })
 
+/**
+ * Fetch Following with Tags
+ * Purpose: Retrieves a list of list records that a given ID is following, along with the tags associated with each followed list record.
+ * Request Parameters: `id` - The identifier to query the following list with tags.
+ * Response: JSON array containing the list of followed list records and their associated tags.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('efp/followingWithTags/:id', async context => {
   const { id } = context.req.param()
 
@@ -191,6 +271,13 @@ api.get('efp/followingWithTags/:id', async context => {
   }
 })
 
+/**
+ * Fetch Stats
+ * Purpose: Retrieves statistical data such as the number of followers and following count for a given ID.
+ * Request Parameters: `id` - The identifier to query statistical data.
+ * Response: JSON object containing statistical data like followers and following count.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/stats/:id', async context => {
   const { id } = context.req.param()
 
@@ -216,6 +303,13 @@ api.get('/efp/stats/:id', async context => {
   }
 })
 
+/**
+ * Who Blocks
+ * Purpose: Retrieves a list of accounts that have blocked the given ID.
+ * Request Parameters: `id` - The identifier to query the list of accounts that have blocked it.
+ * Response: JSON array containing the details of accounts that have blocked the given ID.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/whoblocks/:id', async context => {
   const { id } = context.req.param()
 
@@ -229,6 +323,13 @@ api.get('/efp/whoblocks/:id', async context => {
   }
 })
 
+/**
+ * Who Mutes
+ * Purpose: Retrieves a list of accounts that have muted the given ID.
+ * Request Parameters: `id` - The identifier to query the list of accounts that have muted it.
+ * Response: JSON array containing the details of accounts that have muted the given ID.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
 api.get('/efp/whomutes/:id', async context => {
   const { id } = context.req.param()
 
