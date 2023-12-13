@@ -17,11 +17,36 @@ const efpIndexerService = (
   }>
 ) => new EFPIndexerService(context.env)
 
+async function inputToTokenId(
+  context: Context<{
+    Bindings: Environment
+  }>,
+  id: string
+): Promise<bigint | undefined> {
+  let tokenId: bigint | undefined
+  if (id.startsWith('0x') || id.endsWith('.eth')) {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
+    if (!primaryList) {
+      // user doesn't have a primary list
+      return undefined
+    }
+    // convert to bigint
+    const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
+    // 32-byte
+    tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
+  } else {
+    // id is a token id
+    tokenId = BigInt(id)
+  }
+
+  return tokenId
+}
+
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
 api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
-// TODO: in progress need to consolidate db interface into service
 api.get('/database-health', async context => {
   const db = database(context.env)
 
@@ -73,7 +98,7 @@ api.get('/efp/followersCount/:id', async context => {
     const followersCount: number = await efpIndexerService(context).getFollowerCount(address)
     return context.json(followersCount, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching follower count: $JSON.stringify(error, undefined, 2)`)
+    apiLogger.error(`error while fetching follower count: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching follower count', 500)
   }
 })
@@ -86,52 +111,8 @@ api.get('/efp/followers/:id', async context => {
     const followers: any[] = await efpIndexerService(context).getFollowers(address)
     return context.json(followers, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching followers: $JSON.stringify(error, undefined, 2)`)
+    apiLogger.error(`error while fetching followers: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching followers', 500)
-  }
-})
-
-api.get('/efp/followingCount/:id', async context => {
-  const { id } = context.req.param()
-
-  try {
-    // three cases:
-    // 1. id is an address
-    // 2. id is an ENS name
-    // 3. id is a token id
-
-    // we want to determine the token id to query the indexer
-    // if token id is provided, use that
-    // else if address/ens, then use user's primary list
-
-    let tokenId: bigint | undefined
-    if (id.startsWith('0x') || id.endsWith('.eth')) {
-      const address: Address = await ensMetadataService().getAddress(id)
-      const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-      if (!primaryList) {
-        // user doesn't have a primary list, so return 0?
-        // TODO: we could check if the own a list, and if so, return the count of that list
-        return context.json(0, 200)
-      }
-      // convert to bigint
-      const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
-      // 32-byte
-      tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
-    } else {
-      // id is a token id
-      tokenId = BigInt(id)
-    }
-    console.log(`tokenId: ${tokenId}`)
-
-    if (tokenId === undefined) {
-      return context.text('error while fetching following count', 500)
-    }
-
-    const followingCount: number = await efpIndexerService(context).getFollowingCount(tokenId as bigint)
-    return context.json(followingCount, 200)
-  } catch (error) {
-    apiLogger.error(`error while fetching following count: $JSON.stringify(error, undefined, 2)`)
-    return context.text('error while fetching following count', 500)
   }
 })
 
@@ -139,42 +120,53 @@ api.get('/efp/following/:id', async context => {
   const { id } = context.req.param()
 
   try {
-    // three cases:
-    // 1. id is an address
-    // 2. id is an ENS name
-    // 3. id is a token id
-
-    // we want to determine the token id to query the indexer
-    // if token id is provided, use that
-    // else if address/ens, then use user's primary list
-
-    let tokenId: bigint | undefined
-    if (id.startsWith('0x') || id.endsWith('.eth')) {
-      const address: Address = await ensMetadataService().getAddress(id)
-      const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-      if (!primaryList) {
-        // user doesn't have a primary list, so return 0?
-        // TODO: we could check if the own a list, and if so, return the count of that list
-        return context.json([], 200)
-      }
-      // convert to bigint
-      const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
-      // 32-byte
-      tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
-    } else {
-      // id is a token id
-      tokenId = BigInt(id)
+    const tokenId: bigint | undefined = await inputToTokenId(context, id)
+    if (tokenId === undefined) {
+      return context.json([], 200)
     }
 
+    const listRecords: {
+      version: number
+      recordType: number
+      data: `0x${string}`
+    }[] = await efpIndexerService(context).getListRecords(tokenId as bigint)
+    return context.json(listRecords, 200)
+  } catch (error) {
+    apiLogger.error(`2 error while fetching following: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('3 error while fetching following', 500)
+  }
+})
+
+api.get('/efp/following/:id/:tag', async context => {
+  const { id, tag } = context.req.param()
+
+  try {
+    const tokenId: bigint | undefined = await inputToTokenId(context, id)
     if (tokenId === undefined) {
       return context.text('error while fetching following count', 500)
     }
-
-    const following: any[] = await efpIndexerService(context).getFollowing(tokenId as bigint)
-    return context.json(following, 200)
+    const taggedListRecords: any[] = await efpIndexerService(context).getListRecordsFilterByTags(tokenId as bigint, tag)
+    return context.json(taggedListRecords, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching following: $JSON.stringify(error, undefined, 2)`)
-    return context.text('error while fetching following', 500)
+    apiLogger.error(`error while fetching blocked by: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching blocked by', 500)
+  }
+})
+
+api.get('/efp/followingCount/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const tokenId: bigint | undefined = await inputToTokenId(context, id)
+    if (tokenId === undefined) {
+      return context.json(0, 200)
+    }
+
+    const listRecordCount: number = await efpIndexerService(context).getListRecordCount(tokenId as bigint)
+    return context.json(listRecordCount, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching following count: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching following count', 500)
   }
 })
 
@@ -182,42 +174,20 @@ api.get('efp/followingWithTags/:id', async context => {
   const { id } = context.req.param()
 
   try {
-    // three cases:
-    // 1. id is an address
-    // 2. id is an ENS name
-    // 3. id is a token id
-
-    // we want to determine the token id to query the indexer
-    // if token id is provided, use that
-    // else if address/ens, then use user's primary list
-
-    let tokenId: bigint | undefined
-    if (id.startsWith('0x') || id.endsWith('.eth')) {
-      const address: Address = await ensMetadataService().getAddress(id)
-      const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-      if (!primaryList) {
-        // user doesn't have a primary list, so return 0?
-        // TODO: we could check if the own a list, and if so, return the count of that list
-        return context.json([], 200)
-      }
-      // convert to bigint
-      const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
-      // 32-byte
-      tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
-    } else {
-      // id is a token id
-      tokenId = BigInt(id)
-    }
-
+    const tokenId: bigint | undefined = await inputToTokenId(context, id)
     if (tokenId === undefined) {
-      return context.text('error while fetching following count', 500)
+      return context.json([], 200)
     }
-
-    const following: any[] = await efpIndexerService(context).getFollowingWithTags(tokenId as bigint)
-    return context.json(following, 200)
+    const listRecords: {
+      version: number
+      recordType: number
+      data: `0x${string}`
+      tags: string[]
+    }[] = await efpIndexerService(context).getListRecordsWithTags(tokenId as bigint)
+    return context.json(listRecords, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching following: $JSON.stringify(error, undefined, 2)`)
-    return context.text('error while fetching following', 500)
+    apiLogger.error(`error while fetching following with tags: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching following with tags', 500)
   }
 })
 
@@ -232,29 +202,16 @@ api.get('/efp/stats/:id', async context => {
       followingCount: 0
     }
 
-    let tokenId: bigint | undefined
-    if (id.startsWith('0x') || id.endsWith('.eth')) {
-      const address: Address = await ensMetadataService().getAddress(id)
-      const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-      if (!primaryList) {
-        // user doesn't have a primary list, so return 0?
-        // TODO: we could check if the own a list, and if so, return the count of that list
-        return context.json(stats, 200)
-      }
-      // convert to bigint
-      const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
-      // 32-byte
-      tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
+    const tokenId: bigint | undefined = await inputToTokenId(context, id)
+    if (tokenId === undefined) {
+      return context.json(stats, 200)
     }
 
-    if (tokenId === undefined) {
-      return context.text('error while fetching following count', 500)
-    }
-    const followingCount: number = await efpIndexerService(context).getFollowingCount(tokenId as bigint)
-    stats.followingCount = followingCount
+    const listRecordCount: number = await efpIndexerService(context).getListRecordCount(tokenId as bigint)
+    stats.followingCount = listRecordCount
     return context.json(stats, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching stats: $JSON.stringify(error, undefined, 2)`)
+    apiLogger.error(`error while fetching stats: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching stats', 500)
   }
 })
@@ -264,10 +221,10 @@ api.get('/efp/whoblocks/:id', async context => {
 
   try {
     const address: Address = await ensMetadataService().getAddress(id)
-    const blockedBy: any[] = await efpIndexerService(context).getBlockTaggedFollowers(address)
+    const blockedBy: any[] = await efpIndexerService(context).getWhoBlocks(address)
     return context.json(blockedBy, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching blocked by: $JSON.stringify(error, undefined, 2)`)
+    apiLogger.error(`error while fetching blocked by: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching blocked by', 500)
   }
 })
@@ -277,10 +234,10 @@ api.get('/efp/whomutes/:id', async context => {
 
   try {
     const address: Address = await ensMetadataService().getAddress(id)
-    const mutedBy: any[] = await efpIndexerService(context).getMuteTaggedFollowers(address)
+    const mutedBy: any[] = await efpIndexerService(context).getWhoMutes(address)
     return context.json(mutedBy, 200)
   } catch (error) {
-    apiLogger.error(`error while fetching muted by: $JSON.stringify(error, undefined, 2)`)
+    apiLogger.error(`error while fetching muted by: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching muted by', 500)
   }
 })

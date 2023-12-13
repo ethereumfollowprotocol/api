@@ -7,8 +7,8 @@ import type { Address } from 'viem'
 export interface IEFPIndexerService {
   getPrimaryList(address: Address): Promise<string | undefined>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
-  getFollowingCount(tokenId: bigint): Promise<number>
-  getFollowing(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
+  getListRecordCount(tokenId: bigint): Promise<number>
+  getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
   getFollowerCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]>
 }
@@ -82,7 +82,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return (result?.list_storage_location as Address) || undefined
   }
 
-  async getFollowingCount(tokenId: bigint): Promise<number> {
+  async getListRecordCount(tokenId: bigint): Promise<number> {
     const listStorageLocation: Address | undefined = await this.getListStorageLocation(tokenId)
     if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
       return 0
@@ -109,7 +109,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return Number(countResult?.count ?? 0)
   }
 
-  async getFollowing(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
+  async getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
     const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
     if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
       return []
@@ -129,7 +129,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getFollowingWithTags(
+  async getListRecordsWithTags(
     tokenId: bigint
   ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]> {
     const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
@@ -173,6 +173,31 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
+  async getListRecordsFilterByTags(
+    tokenId: bigint,
+    tag: string
+  ): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
+    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
+    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
+      return []
+    }
+    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
+    const result = await this.db
+      .selectFrom('list_record_tags')
+      .select(['record'])
+      .where('chain_id', '=', chainId.toString())
+      .where('contract_address', '=', contractAddress)
+      .where('nonce', '=', nonce.toString())
+      .where('tag', '=', tag)
+      .execute()
+    console.log({ result })
+    return result.map(({ record }) => ({
+      version,
+      recordType: 1,
+      data: record as Address
+    }))
+  }
+
   async getFollowerCount(address: Address): Promise<number> {
     const possibleDuplicates = await this.getFollowers(address)
     const uniqueUsers = new Set(possibleDuplicates.map(({ list_user }) => list_user))
@@ -212,7 +237,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getBlockTaggedFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
+  async getWhoBlocks(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
     const result = await this.db
       .selectFrom('list_records_tags_extended_view')
       .select(['token_id', 'list_user'])
@@ -239,7 +264,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getMuteTaggedFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
+  async getWhoMutes(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
     const result = await this.db
       .selectFrom('list_records_tags_extended_view')
       .select(['token_id', 'list_user'])
@@ -264,5 +289,13 @@ export class EFPIndexerService implements IEFPIndexerService {
       token_id: Number(row.token_id),
       list_user: row.list_user
     }))
+  }
+
+  async getBlocks(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
+    return await this.getListRecordsFilterByTags(tokenId, 'block')
+  }
+
+  async getMutes(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
+    return await this.getListRecordsFilterByTags(tokenId, 'mute')
   }
 }
