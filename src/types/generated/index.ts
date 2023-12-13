@@ -99,12 +99,24 @@ export interface ListRecords {
   version: number
 }
 
+export interface ListRecordsTagsExtendedView {
+  array_tags: string[] | null
+  chain_id: Int8 | null
+  contract_address: string | null
+  data: string | null
+  has_block_tag: boolean | null
+  has_mute_tag: boolean | null
+  nonce: Int8 | null
+  record: string | null
+  type: number | null
+  version: number | null
+}
+
 export interface ListRecordsTagsView {
   array_tags: string[] | null
   chain_id: Int8 | null
   contract_address: string | null
   data: string | null
-  json_tags: Json | null
   nonce: Int8 | null
   record: string | null
   type: number | null
@@ -133,6 +145,7 @@ export interface DB {
   list_ops: ListOps
   list_record_tags: ListRecordTags
   list_records: ListRecords
+  list_records_tags_extended_view: ListRecordsTagsExtendedView
   list_records_tags_view: ListRecordsTagsView
   schema_migrations: SchemaMigrations
 }
