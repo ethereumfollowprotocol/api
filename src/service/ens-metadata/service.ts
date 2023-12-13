@@ -13,10 +13,10 @@ export class ENSMetadataService implements IENSMetadataService {
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
     if (ensNameOrAddress.startsWith('0x') && ensNameOrAddress.length === 42) {
-      return ensNameOrAddress as Address
+      return ensNameOrAddress.toLowerCase() as Address
     }
 
-    return (await this.getENSProfile(ensNameOrAddress)).address
+    return (await this.getENSProfile(ensNameOrAddress)).address.toLowerCase() as Address
   }
 
   async getENSProfile(ensNameOrAddress: Address | string): Promise<ENSProfile> {

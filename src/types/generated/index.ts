@@ -87,6 +87,24 @@ export interface ListRecords {
   version: number
 }
 
+export interface ListRecordsView {
+  block: boolean | null
+  chain_id: Int8 | null
+  contract_address: string | null
+  mute: boolean | null
+  nonce: Int8 | null
+  record: string | null
+  tags: string[] | null
+}
+
+export interface ListRecordTags {
+  chain_id: Int8
+  contract_address: string
+  nonce: Int8
+  record: string
+  tag: string
+}
+
 export interface SchemaMigrations {
   version: string
 }
@@ -98,6 +116,8 @@ export interface DB {
   list_metadata: ListMetadata
   list_nfts: ListNfts
   list_ops: ListOps
+  list_record_tags: ListRecordTags
   list_records: ListRecords
+  list_records_view: ListRecordsView
   schema_migrations: SchemaMigrations
 }
