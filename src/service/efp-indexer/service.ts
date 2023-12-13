@@ -115,7 +115,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     // Define the subquery
     const subquery = this.db
       .selectFrom('list_records as lr')
-      .innerJoin('list_nfts as nft', join =>
+      .innerJoin('list_nfts_view as nft', join =>
         join
           .onRef('nft.list_storage_location_chain_id', '=', 'lr.chain_id')
           .onRef('nft.list_storage_location_contract_address', '=', 'lr.contract_address')

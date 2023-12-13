@@ -61,13 +61,13 @@ api.get('/efp/primaryList/:id', async context => {
   }
 })
 
-api.get('/efp/followerCount/:id', async context => {
+api.get('/efp/followersCount/:id', async context => {
   const { id } = context.req.param()
 
   try {
     const address: Address = await ensMetadataService().getAddress(id)
-    const followerCount: number = await efpIndexerService(context).getFollowerCount(address)
-    return context.json(followerCount, 200)
+    const followersCount: number = await efpIndexerService(context).getFollowerCount(address)
+    return context.json(followersCount, 200)
   } catch (error) {
     apiLogger.error(`error while fetching follower count: $JSON.stringify(error, undefined, 2)`)
     return context.text('error while fetching follower count', 500)
@@ -179,9 +179,9 @@ api.get('/efp/stats/:id', async context => {
 
   try {
     const address: Address = await ensMetadataService().getAddress(id)
-    const followerCount: number = await efpIndexerService(context).getFollowerCount(address)
+    const followersCount: number = await efpIndexerService(context).getFollowerCount(address)
     const stats = {
-      followerCount,
+      followersCount,
       followingCount: 0
     }
 
