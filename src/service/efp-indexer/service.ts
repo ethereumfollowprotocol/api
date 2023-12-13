@@ -73,17 +73,17 @@ export class EFPIndexerService implements IEFPIndexerService {
     return `0x${hex}`
   }
 
-  async getListStorageLocation(tokenId: bigint): Promise<`0x$string` | undefined> {
+  async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
     const result = await this.db
       .selectFrom('list_nfts')
       .select('list_storage_location')
       .where('token_id', '=', tokenId.toString())
       .executeTakeFirst()
-    return (result?.list_storage_location as `0x$string`) || undefined
+    return (result?.list_storage_location as Address) || undefined
   }
 
   async getFollowingCount(tokenId: bigint): Promise<number> {
-    const listStorageLocation: `0x$string` | undefined = await this.getListStorageLocation(tokenId)
+    const listStorageLocation: Address | undefined = await this.getListStorageLocation(tokenId)
     if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
       return 0
     }
@@ -108,7 +108,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowing(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
-    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as `0x$string`
+    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
     if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
       return []
     }
@@ -122,17 +122,61 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result.map(({ version, type, data }) => ({
       version,
       recordType: type,
-      data: data as `0x$string`
+      data: data as Address
     }))
   }
 
-  async getFollowerCount(address: `0x$string`): Promise<number> {
+  async getFollowingWithTags(
+    tokenId: bigint
+  ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]> {
+    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
+    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
+      return []
+    }
+    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
+    const result = await this.db
+      .selectFrom('list_record_tags as tags')
+      .fullJoin('list_records as lr', join =>
+        join
+          .onRef('tags.chain_id', '=', 'lr.chain_id')
+          .onRef('tags.contract_address', '=', 'lr.contract_address')
+          .onRef('tags.nonce', '=', 'lr.nonce')
+          .onRef('tags.record', '=', 'lr.record')
+      )
+      .select(({ fn, ref }) => [
+        'lr.version',
+        'lr.type',
+        'lr.data',
+
+        // Using fn.agg to aggregate tags into an array
+        fn
+          .agg<string[]>('array_agg', ['tags.tag'])
+          .as('array_tags')
+      ])
+      .where('tags.contract_address', '=', contractAddress)
+      .where('tags.nonce', '=', nonce.toString())
+      .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record', 'lr.version', 'lr.type', 'lr.data'])
+      .execute()
+    console.log({ result })
+    // filter nulls
+    const filtered: { version: number; type: number; data: `0x${string}`; array_tags: string[] }[] = result.filter(
+      ({ version, type, data, array_tags }) => version !== null && type !== null && data !== null && array_tags !== null
+    ) as { version: number; type: number; data: `0x${string}`; array_tags: string[] }[]
+    return filtered.map(({ version, type, data, array_tags }) => ({
+      version,
+      recordType: type,
+      data: data as Address,
+      tags: array_tags as string[]
+    }))
+  }
+
+  async getFollowerCount(address: Address): Promise<number> {
     const possibleDuplicates = await this.getFollowers(address)
     const uniqueUsers = new Set(possibleDuplicates.map(({ list_user }) => list_user))
     return uniqueUsers.size
   }
 
-  async getFollowers(address: `0x$string`): Promise<{ token_id: number; list_user: string }[]> {
+  async getFollowers(address: Address): Promise<{ token_id: number; list_user: string }[]> {
     const subquery = this.db
       .selectFrom('list_records as lr')
       // inner join because we only want to count records associated with a list nft

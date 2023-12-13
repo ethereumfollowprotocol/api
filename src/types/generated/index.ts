@@ -99,6 +99,18 @@ export interface ListRecords {
   version: number
 }
 
+export interface ListRecordsTagsView {
+  array_tags: string[] | null
+  chain_id: Int8 | null
+  contract_address: string | null
+  data: string | null
+  json_tags: Json | null
+  nonce: Int8 | null
+  record: string | null
+  type: number | null
+  version: number | null
+}
+
 export interface ListRecordTags {
   chain_id: Int8
   contract_address: string
@@ -121,5 +133,6 @@ export interface DB {
   list_ops: ListOps
   list_record_tags: ListRecordTags
   list_records: ListRecords
+  list_records_tags_view: ListRecordsTagsView
   schema_migrations: SchemaMigrations
 }
