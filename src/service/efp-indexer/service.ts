@@ -157,7 +157,7 @@ export class EFPIndexerService implements IEFPIndexerService {
           .as('tags')
       ])
       // TODO: WHERE chain id
-      .where('tags.contract_address', '=', contractAddress)
+      .where('tags.contract_address', '=', contractAddress.toLowerCase())
       .where('tags.nonce', '=', nonce.toString())
       .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record', 'lr.version', 'lr.type', 'lr.data'])
       .execute()

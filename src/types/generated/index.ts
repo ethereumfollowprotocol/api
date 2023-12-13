@@ -31,8 +31,10 @@ export interface AccountMetadata {
 export interface Contracts {
   address: string
   chain_id: Int8
+  created_at: Generated<Timestamp | null>
   name: string
   owner: string
+  updated_at: Generated<Timestamp | null>
 }
 
 export interface Events {
