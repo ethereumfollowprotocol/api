@@ -19,6 +19,8 @@ const efpIndexerService = (
 
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
+api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
+
 // TODO: in progress need to consolidate db interface into service
 api.get('/database-health', async context => {
   const db = database(context.env)
@@ -33,6 +35,8 @@ api.get('/database-health', async context => {
   // database is up
   return context.text('ok', 200)
 })
+
+api.get('/health', context => context.text('ok'))
 
 /**
  * Fetch from ENS metadata service
@@ -255,6 +259,28 @@ api.get('/efp/stats/:id', async context => {
   }
 })
 
-api.get('/health', context => context.text('ok'))
+api.get('/efp/whoblocks/:id', async context => {
+  const { id } = context.req.param()
 
-api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const blockedBy: any[] = await efpIndexerService(context).getBlockTaggedFollowers(address)
+    return context.json(blockedBy, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching blocked by: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching blocked by', 500)
+  }
+})
+
+api.get('/efp/whomutes/:id', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const mutedBy: any[] = await efpIndexerService(context).getMuteTaggedFollowers(address)
+    return context.json(mutedBy, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching muted by: $JSON.stringify(error, undefined, 2)`)
+    return context.text('error while fetching muted by', 500)
+  }
+})

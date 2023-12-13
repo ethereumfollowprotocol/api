@@ -100,25 +100,27 @@ export interface ListRecords {
 }
 
 export interface ListRecordsTagsExtendedView {
-  array_tags: string[] | null
-  chain_id: Int8 | null
-  contract_address: string | null
   data: string | null
   has_block_tag: boolean | null
   has_mute_tag: boolean | null
-  nonce: Int8 | null
+  list_storage_location_chain_id: Int8 | null
+  list_storage_location_contract_address: string | null
+  list_storage_location_nonce: Int8 | null
+  list_user: string | null
   record: string | null
+  tags: string[] | null
+  token_id: Int8 | null
   type: number | null
   version: number | null
 }
 
 export interface ListRecordsTagsView {
-  array_tags: string[] | null
   chain_id: Int8 | null
   contract_address: string | null
   data: string | null
   nonce: Int8 | null
   record: string | null
+  tags: string[] | null
   type: number | null
   version: number | null
 }

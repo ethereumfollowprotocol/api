@@ -99,8 +99,10 @@ export class EFPIndexerService implements IEFPIndexerService {
           .count<number>('record')
           .as('count')
       ])
+      // TODO: WHERE chain id
       .where('contract_address', '=', contractAddress)
       .where('nonce', '=', nonce.toString())
+      // TODO: GROUP BY chain id
       .groupBy('contract_address')
       .groupBy('nonce')
       .executeTakeFirst()
@@ -116,6 +118,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     const result = await this.db
       .selectFrom('list_records')
       .select(['version', 'type', 'data'])
+      // TODO: WHERE chain id
       .where('contract_address', '=', contractAddress)
       .where('nonce', '=', nonce.toString())
       .execute()
@@ -151,22 +154,22 @@ export class EFPIndexerService implements IEFPIndexerService {
         // Using fn.agg to aggregate tags into an array
         fn
           .agg<string[]>('array_agg', ['tags.tag'])
-          .as('array_tags')
+          .as('tags')
       ])
+      // TODO: WHERE chain id
       .where('tags.contract_address', '=', contractAddress)
       .where('tags.nonce', '=', nonce.toString())
       .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record', 'lr.version', 'lr.type', 'lr.data'])
       .execute()
-    console.log({ result })
     // filter nulls
-    const filtered: { version: number; type: number; data: `0x${string}`; array_tags: string[] }[] = result.filter(
-      ({ version, type, data, array_tags }) => version !== null && type !== null && data !== null && array_tags !== null
-    ) as { version: number; type: number; data: `0x${string}`; array_tags: string[] }[]
-    return filtered.map(({ version, type, data, array_tags }) => ({
+    const filtered: { version: number; type: number; data: `0x${string}`; tags: string[] }[] = result.filter(
+      ({ version, type, data, tags }) => version !== null && type !== null && data !== null && tags !== null
+    ) as { version: number; type: number; data: `0x${string}`; tags: string[] }[]
+    return filtered.map(({ version, type, data, tags }) => ({
       version,
       recordType: type,
       data: data as Address,
-      tags: array_tags as string[]
+      tags: tags as string[]
     }))
   }
 
@@ -206,6 +209,60 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result.map(({ token_id, list_user }) => ({
       token_id: Number(token_id),
       list_user: list_user || ''
+    }))
+  }
+
+  async getBlockTaggedFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
+    const result = await this.db
+      .selectFrom('list_records_tags_extended_view')
+      .select(['token_id', 'list_user'])
+      .where('has_block_tag', '=', true)
+      .where('version', '=', 1)
+      .where('type', '=', 1)
+      .where('data', '=', address)
+      .execute()
+
+    const filtered: { token_id: number; list_user: string }[] = []
+    for (const row of result) {
+      if (row.token_id === null || row.list_user === null) {
+        continue
+      }
+      filtered.push({
+        token_id: Number(row.token_id),
+        list_user: row.list_user
+      })
+    }
+
+    return filtered.map(row => ({
+      token_id: Number(row.token_id),
+      list_user: row.list_user
+    }))
+  }
+
+  async getMuteTaggedFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
+    const result = await this.db
+      .selectFrom('list_records_tags_extended_view')
+      .select(['token_id', 'list_user'])
+      .where('has_mute_tag', '=', true)
+      .where('version', '=', 1)
+      .where('type', '=', 1)
+      .where('data', '=', address)
+      .execute()
+
+    const filtered: { token_id: number; list_user: string }[] = []
+    for (const row of result) {
+      if (row.token_id === null || row.list_user === null) {
+        continue
+      }
+      filtered.push({
+        token_id: Number(row.token_id),
+        list_user: row.list_user
+      })
+    }
+
+    return filtered.map(row => ({
+      token_id: Number(row.token_id),
+      list_user: row.list_user
     }))
   }
 }
