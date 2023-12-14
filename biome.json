@@ -42,7 +42,8 @@
       },
       "correctness": {},
       "suspicious": {
-        "noEmptyInterface": "off"
+        "noEmptyInterface": "off",
+        "noExplicitAny": "off"
       }
     }
   },

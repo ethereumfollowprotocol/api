@@ -24,7 +24,6 @@
   "search.exclude": {
     "_": true,
     "**/dist/**": true,
-    "public/*.js": true,
     "**/node_modules": true
   },
   "files.exclude": {

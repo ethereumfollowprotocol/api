@@ -3,6 +3,7 @@
     "biomejs.biome",
     "mikestead.dotenv",
     "EditorConfig.EditorConfig",
+    "adpyke.vscode-sql-formatter",
     "cweijan.vscode-database-client2"
   ],
   "unwantedRecommendations": [
