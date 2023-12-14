@@ -1,16 +1,16 @@
 import { Hono } from 'hono'
 
-import { cors } from 'hono/cors'
 import { cache } from 'hono/cache'
+import { cors } from 'hono/cors'
+import { HTTPException } from 'hono/http-exception'
 import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
-import { cacheHeader } from 'pretty-cache-header'
-import { HTTPException } from 'hono/http-exception'
 import { secureHeaders } from 'hono/secure-headers'
+import { cacheHeader } from 'pretty-cache-header'
 
-import { api } from '#/routes.ts'
-import { apiLogger } from '#/logger.ts'
 import { DOCS_URL } from '#/constant.ts'
+import { apiLogger } from '#/logger.ts'
+import { api } from '#/routes.ts'
 import type { Environment } from '#/types'
 
 const app = new Hono<{ Bindings: Environment }>()

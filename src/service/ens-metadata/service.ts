@@ -1,5 +1,5 @@
-import { raise } from '#/utilities.ts'
 import type { Address } from 'viem'
+import { raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
 
 export interface IENSMetadataService {

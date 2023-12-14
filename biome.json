@@ -11,7 +11,7 @@
     "ignore": ["node_modules", "dist", "_"]
   },
   "organizeImports": {
-    "enabled": false
+    "enabled": true
   },
   "formatter": {
     "enabled": true,
