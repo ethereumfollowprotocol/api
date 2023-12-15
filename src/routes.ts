@@ -66,7 +66,7 @@ api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 3
  * Response: Text response indicating the health status of the database.
  * Error Handling: Returns an error message and a 500 status code if the database check fails.
  */
-api.get('/database-health', async context => {
+api.get('/database/health', async context => {
   const db = database(context.env)
 
   // do a simple query to check if the database is up
@@ -95,7 +95,7 @@ api.get('/health', context => context.text('ok'))
  * Response: JSON object containing ENS profile information.
  * Error Handling: Returns an error message and a 500 status code in case of failure.
  */
-api.get('/ens/:id', async context => {
+api.get('/users/:id/ens', async context => {
   const { id } = context.req.param()
 
   try {
@@ -113,36 +113,20 @@ api.get('/ens/:id', async context => {
  * Response: JSON object containing the primary list information.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('/efp/primaryList/:id', async context => {
+api.get('/users/:id/primary-list', async context => {
   const { id } = context.req.param()
 
   try {
     const address: Address = await ensMetadataService().getAddress(id)
-    const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-    return context.json(`${primaryList}`, 200)
+    const primaryListHex: string | undefined = await efpIndexerService(context).getPrimaryList(address)
+    if (primaryListHex === undefined) {
+      return context.json(undefined, 200)
+    }
+    const primaryList: number = parseInt(primaryListHex.replace('0x', '') as string, 16)
+    return context.json(primaryList, 200)
   } catch (error) {
     apiLogger.error(`error while fetching primary list: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching primary list', 500)
-  }
-})
-
-/**
- * Get Followers Count
- * Purpose: Retrieves the count of followers for a given address.
- * Request Parameters: `id` - The identifier (address) to query the followers count.
- * Response: JSON object containing the number of followers.
- * Error Handling: Returns an error message and a 500 status code in case of failure.
- */
-api.get('/efp/followersCount/:id', async context => {
-  const { id } = context.req.param()
-
-  try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const followersCount: number = await efpIndexerService(context).getFollowerCount(address)
-    return context.json(followersCount, 200)
-  } catch (error) {
-    apiLogger.error(`error while fetching follower count: ${JSON.stringify(error, undefined, 2)}`)
-    return context.text('error while fetching follower count', 500)
   }
 })
 
@@ -153,7 +137,7 @@ api.get('/efp/followersCount/:id', async context => {
  * Response: JSON array containing follower details.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('/efp/followers/:id', async context => {
+api.get('/users/:id/followers', async context => {
   const { id } = context.req.param()
 
   try {
@@ -173,7 +157,7 @@ api.get('/efp/followers/:id', async context => {
  * Response: JSON array containing the list of followed list records.
  * Error Handling: Returns an error message and a 500 status code in case of failure.
  */
-api.get('/efp/following/:id', async context => {
+api.get('/users/:id/following', async context => {
   const { id } = context.req.param()
 
   try {
@@ -203,7 +187,7 @@ api.get('/efp/following/:id', async context => {
  * Response: JSON array containing the filtered list of followed list records.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('/efp/following/:id/:tag', async context => {
+api.get('/users/:id/following/tagged/:tag', async context => {
   const { id, tag } = context.req.param()
 
   try {
@@ -220,37 +204,13 @@ api.get('/efp/following/:id/:tag', async context => {
 })
 
 /**
- * Get Following Count
- * Purpose: Retrieves the count of list records a given ID is following.
- * Request Parameters: `id` - The identifier to query the following count.
- * Response: A number representing the count of followed list records.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/efp/followingCount/:id', async context => {
-  const { id } = context.req.param()
-
-  try {
-    const tokenId: bigint | undefined = await inputToTokenId(context, id)
-    if (tokenId === undefined) {
-      return context.json(0, 200)
-    }
-
-    const listRecordCount: number = await efpIndexerService(context).getListRecordCount(tokenId as bigint)
-    return context.json(listRecordCount, 200)
-  } catch (error) {
-    apiLogger.error(`error while fetching following count: ${JSON.stringify(error, undefined, 2)}`)
-    return context.text('error while fetching following count', 500)
-  }
-})
-
-/**
  * Fetch Following with Tags
  * Purpose: Retrieves a list of list records that a given ID is following, along with the tags associated with each followed list record.
  * Request Parameters: `id` - The identifier to query the following list with tags.
  * Response: JSON array containing the list of followed list records and their associated tags.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('efp/followingWithTags/:id', async context => {
+api.get('/users/:id/following/tags', async context => {
   const { id } = context.req.param()
 
   try {
@@ -278,7 +238,7 @@ api.get('efp/followingWithTags/:id', async context => {
  * Response: JSON object containing statistical data like followers and following count.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('/efp/stats/:id', async context => {
+api.get('/users/:id/stats', async context => {
   const { id } = context.req.param()
 
   try {
@@ -310,7 +270,7 @@ api.get('/efp/stats/:id', async context => {
  * Response: JSON array containing the details of accounts that have blocked the given ID.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('/efp/whoblocks/:id', async context => {
+api.get('/users/:id/whoblocks', async context => {
   const { id } = context.req.param()
 
   try {
@@ -330,7 +290,7 @@ api.get('/efp/whoblocks/:id', async context => {
  * Response: JSON array containing the details of accounts that have muted the given ID.
  * Error Handling: Returns an error message and a 500 status code if fetching fails.
  */
-api.get('/efp/whomutes/:id', async context => {
+api.get('/users/:id/whomutes', async context => {
   const { id } = context.req.param()
 
   try {

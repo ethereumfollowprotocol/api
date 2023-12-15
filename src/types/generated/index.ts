@@ -113,7 +113,17 @@ export interface ListRecords {
   version: number
 }
 
-export interface ListRecordsTagsExtendedView {
+export interface ListRecordTags {
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  nonce: Int8
+  record: string
+  tag: string
+  updated_at: Generated<Timestamp | null>
+}
+
+export interface ListRecordTagsExtendedView {
   data: string | null
   has_block_tag: boolean | null
   has_mute_tag: boolean | null
@@ -128,7 +138,7 @@ export interface ListRecordsTagsExtendedView {
   version: number | null
 }
 
-export interface ListRecordsTagsView {
+export interface ListRecordTagsView {
   chain_id: Int8 | null
   contract_address: string | null
   data: string | null
@@ -137,16 +147,6 @@ export interface ListRecordsTagsView {
   tags: string[] | null
   type: number | null
   version: number | null
-}
-
-export interface ListRecordTags {
-  chain_id: Int8
-  contract_address: string
-  created_at: Generated<Timestamp | null>
-  nonce: Int8
-  record: string
-  tag: string
-  updated_at: Generated<Timestamp | null>
 }
 
 export interface SchemaMigrations {
@@ -162,8 +162,8 @@ export interface DB {
   list_nfts_view: ListNftsView
   list_ops: ListOps
   list_record_tags: ListRecordTags
+  list_record_tags_extended_view: ListRecordTagsExtendedView
+  list_record_tags_view: ListRecordTagsView
   list_records: ListRecords
-  list_records_tags_extended_view: ListRecordsTagsExtendedView
-  list_records_tags_view: ListRecordsTagsView
   schema_migrations: SchemaMigrations
 }

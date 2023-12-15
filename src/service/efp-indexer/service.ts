@@ -1,8 +1,8 @@
-import type { Kysely } from 'kysely'
-import type { Address } from 'viem'
 import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
+import type { Kysely } from 'kysely'
+import type { Address } from 'viem'
 
 export interface IEFPIndexerService {
   getPrimaryList(address: Address): Promise<string | undefined>
@@ -27,7 +27,6 @@ export class EFPIndexerService implements IEFPIndexerService {
       .where('address', '=', address)
       .where('key', '=', 'efp.list.primary')
       .executeTakeFirst()
-    console.log({ address, result1 })
 
     const accountMetadataPrimaryList = result1?.value as string | undefined
 
@@ -154,22 +153,22 @@ export class EFPIndexerService implements IEFPIndexerService {
         // Using fn.agg to aggregate tags into an array
         fn
           .agg<string[]>('array_agg', ['tags.tag'])
-          .as('tags')
+          .as('agg_tags')
       ])
-      // TODO: WHERE chain id
-      .where('tags.contract_address', '=', contractAddress.toLowerCase())
-      .where('tags.nonce', '=', nonce.toString())
-      .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record', 'lr.version', 'lr.type', 'lr.data'])
+      .where('lr.chain_id', '=', chainId.toString())
+      .where('lr.contract_address', '=', contractAddress.toLowerCase())
+      .where('lr.nonce', '=', nonce.toString())
+      .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record'])
       .execute()
     // filter nulls
-    const filtered: { version: number; type: number; data: `0x${string}`; tags: string[] }[] = result.filter(
-      ({ version, type, data, tags }) => version !== null && type !== null && data !== null && tags !== null
-    ) as { version: number; type: number; data: `0x${string}`; tags: string[] }[]
-    return filtered.map(({ version, type, data, tags }) => ({
+    const filtered: { version: number; type: number; data: `0x${string}`; agg_tags: string[] }[] = result.filter(
+      ({ version, type, data, agg_tags }) => version !== null && type !== null && data !== null && agg_tags !== null
+    ) as { version: number; type: number; data: `0x${string}`; agg_tags: string[] }[]
+    return filtered.map(({ version, type, data, agg_tags }) => ({
       version,
       recordType: type,
       data: data as Address,
-      tags: tags as string[]
+      tags: agg_tags as string[]
     }))
   }
 
@@ -190,12 +189,21 @@ export class EFPIndexerService implements IEFPIndexerService {
       .where('nonce', '=', nonce.toString())
       .where('tag', '=', tag)
       .execute()
-    console.log({ result })
-    return result.map(({ record }) => ({
-      version,
-      recordType: 1,
-      data: record as Address
-    }))
+    // record will be a string 0x1234567890abcdef...
+    // the first byte is version
+    // the second byte is recordType
+    // the rest is data
+    // need to decode and convert to correct format
+    return result.map(({ record }) => {
+      const version: number = Number(`0x${record.slice(2, 4)}`)
+      const recordType = Number(`0x${record.slice(4, 6)}`)
+      const data: Address = `0x${record.slice(6)}` as Address
+      return {
+        version,
+        recordType,
+        data
+      }
+    })
   }
 
   async getFollowerCount(address: Address): Promise<number> {
@@ -239,7 +247,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getWhoBlocks(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
     const result = await this.db
-      .selectFrom('list_records_tags_extended_view')
+      .selectFrom('list_record_tags_extended_view')
       .select(['token_id', 'list_user'])
       .where('has_block_tag', '=', true)
       .where('version', '=', 1)
@@ -266,7 +274,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getWhoMutes(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
     const result = await this.db
-      .selectFrom('list_records_tags_extended_view')
+      .selectFrom('list_record_tags_extended_view')
       .select(['token_id', 'list_user'])
       .where('has_mute_tag', '=', true)
       .where('version', '=', 1)
