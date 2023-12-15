@@ -8,7 +8,7 @@ import { ENSMetadataService } from '#/service/ens-metadata/service'
 import type { Environment } from '#/types'
 import type { Address } from 'viem'
 
-export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
+export const api = new Hono<{ Bindings: Environment }>().basePath('/api/v1')
 
 const ensMetadataService = () => new ENSMetadataService()
 const efpIndexerService = (
