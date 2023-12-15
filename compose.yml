@@ -1,0 +1,21 @@
+version: '3.8'
+
+name: efp-api
+
+networks:
+  default:
+    driver: bridge
+
+services:
+  anvil:
+    container_name: efp-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bun dev
+    tty: true
+    stdin_open: true
+    ports:
+      - 8787:8787
+    networks:
+      - default

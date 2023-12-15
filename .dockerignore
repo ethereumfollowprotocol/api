@@ -1,0 +1,16 @@
+# ignore everything
+*
+# except for
+!.dev.vars
+!.npmrc
+!bun.lockb
+!environment.d.ts
+!package.json
+!reset.d.ts
+!scripts/
+!src/
+!tsconfig.json
+!wrangler.json
+
+# needed for forge
+!.git
