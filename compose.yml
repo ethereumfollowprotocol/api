@@ -7,7 +7,7 @@ networks:
     driver: bridge
 
 services:
-  anvil:
+  api:
     container_name: efp-api
     build:
       context: .
