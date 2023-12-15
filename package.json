@@ -37,5 +37,5 @@
   },
   "sideEffects": false,
   "repository": "github:ethereumfollowprotocol/api",
-  "homepage": "github:ethereumfollowprotocol/indexer/README.md"
+  "homepage": "github:ethereumfollowprotocol/api/README.md"
 }
