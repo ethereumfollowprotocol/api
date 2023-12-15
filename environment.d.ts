@@ -5,8 +5,6 @@ interface EnvironmentVariables {
   readonly ALCHEMY_ID: string
   readonly INFURA_ID: string
   readonly DATABASE_URL: string
-  readonly SUPABASE_URL: string
-  readonly SUPABASE_SECRET_KEY: string
   readonly SUPABASE_PROJECT_REF: string
   readonly ENABLE_DATABASE_LOGGING: 'true' | 'false'
 }

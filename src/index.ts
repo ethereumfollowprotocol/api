@@ -74,6 +74,13 @@ app.get('/health', context => context.text('ok'))
 
 app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
+/** Logs all registered routes to the console. */
+app.get('/routes', async () => {
+  const { showRoutes } = await import('hono/dev')
+  showRoutes(app, { verbose: false })
+  return new Response(null, { status: 418 })
+})
+
 app.route('/', api)
 
 const PORT = 8_787

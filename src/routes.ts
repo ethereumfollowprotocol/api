@@ -1,12 +1,12 @@
-import { Hono, type Context } from 'hono'
+import { type Context, Hono } from 'hono'
 
+import type { Address } from 'viem'
 import { DOCS_URL } from '#/constant.ts'
 import { database } from '#/database.ts'
 import { apiLogger } from '#/logger.ts'
 import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
 import type { Environment } from '#/types'
-import type { Address } from 'viem'
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/api/v1')
 

@@ -6,9 +6,9 @@
   "git.enableCommitSigning": true,
   "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "quickfix.biome": true,
-    "source.fixAll.biome": true,
-    "source.organizeImports.biome": true
+    "quickfix.biome": "always",
+    "source.fixAll.biome": "always",
+    "source.organizeImports.biome": "always"
   },
   "editor.defaultFormatter": "biomejs.biome",
   "[json]": { "editor.defaultFormatter": "biomejs.biome" },

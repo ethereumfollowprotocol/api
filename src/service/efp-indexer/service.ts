@@ -1,8 +1,8 @@
+import type { Kysely } from 'kysely'
+import type { Address } from 'viem'
 import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
-import type { Kysely } from 'kysely'
-import type { Address } from 'viem'
 
 export interface IEFPIndexerService {
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
