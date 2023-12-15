@@ -17,55 +17,44 @@ const efpIndexerService = (
   }>
 ) => new EFPIndexerService(context.env)
 
-async function inputToTokenId(
+async function primaryList(
   context: Context<{
     Bindings: Environment
   }>,
-  id: string
+  ensOrAddress: string
 ): Promise<bigint | undefined> {
-  let tokenId: bigint | undefined
-  if (id.startsWith('0x') || id.endsWith('.eth')) {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-    if (!primaryList) {
-      // user doesn't have a primary list
-      return undefined
-    }
-    // convert to bigint
-    const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
-    // 32-byte
-    tokenId = asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
-  } else {
-    // id is a token id
-    tokenId = BigInt(id)
+  if (!ensOrAddress.startsWith('0x') && !ensOrAddress.endsWith('.eth')) {
+    return undefined
   }
 
-  return tokenId
+  const address: Address = await ensMetadataService().getAddress(ensOrAddress)
+  const primaryList: string | undefined = await efpIndexerService(context).getPrimaryList(address)
+  if (!primaryList) {
+    // address doesn't have a primary list set
+    return undefined
+  }
+
+  // primaryList should be a 32-byte hex string
+  if (!primaryList.startsWith('0x') || primaryList.length !== 66) {
+    apiLogger.error(`invalid primary list: ${primaryList} for address: ${address}`)
+    return undefined
+  }
+
+  // convert to bigint
+  const asBytes: Buffer = Buffer.from(primaryList.slice(2), 'hex')
+  // convert to bigint
+  try {
+    return asBytes.reduce((acc, cur) => acc * 256n + BigInt(cur), 0n)
+  } catch (error) {
+    apiLogger.error(`error while converting primary list: ${primaryList} for address: ${address}`)
+    return undefined
+  }
 }
 
-/**
- * Home Endpoint
- * Purpose: Provides information about the API's documentation location.
- * Request Parameters: None.
- * Response: Plain text message with the URL of the documentation.
- */
 api.get('/', context => context.text(`Visit ${DOCS_URL} for documentation`))
 
-/**
- * Documentation Redirect
- * Purpose: Redirects to the external API documentation page.
- * Request Parameters: None.
- * Response: HTTP 301 redirect to the external documentation URL.
- */
 api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
-/**
- * Database Health Check
- * Purpose: Checks the health of the database by performing a simple query.
- * Request Parameters: None.
- * Response: Text response indicating the health status of the database.
- * Error Handling: Returns an error message and a 500 status code if the database check fails.
- */
 api.get('/database/health', async context => {
   const db = database(context.env)
 
@@ -80,45 +69,28 @@ api.get('/database/health', async context => {
   return context.text('ok', 200)
 })
 
-/**
- * API Health Check
- * Purpose: Provides a simple health check for the API.
- * Request Parameters: None.
- * Response: Plain text response "ok".
- */
 api.get('/health', context => context.text('ok'))
 
-/**
- * Fetch ENS Metadata
- * Purpose: Retrieves ENS (Ethereum Name Service) profile information based on the given identifier.
- * Request Parameters: `id` - The identifier for the ENS profile.
- * Response: JSON object containing ENS profile information.
- * Error Handling: Returns an error message and a 500 status code in case of failure.
- */
-api.get('/users/:id/ens', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/ens', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    return context.json(await ensMetadataService().getENSProfile(id), 200)
+    return context.json(await ensMetadataService().getENSProfile(ensOrAddress), 200)
   } catch (error) {
     apiLogger.error(`error while fetching ENS profile: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching ENS profile', 500)
   }
 })
 
-/**
- * Fetch Followers
- * Purpose: Retrieves a list of followers for a given address.
- * Request Parameters: `id` - The identifier (address) to query the list of followers.
- * Response: JSON array containing follower details.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/followers', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/followers', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const followers = await efpIndexerService(context).getFollowers(address)
+    const address: Address = await ensMetadataService().getAddress(ensOrAddress)
+    const followers: {
+      token_id: number
+      list_user: string
+    }[] = await efpIndexerService(context).getFollowers(address)
     return context.json(followers, 200)
   } catch (error) {
     apiLogger.error(`error while fetching followers: ${JSON.stringify(error, undefined, 2)}`)
@@ -126,19 +98,12 @@ api.get('/users/:id/followers', async context => {
   }
 })
 
-/**
- * Fetch Following
- * Purpose: Retrieves a list of list records that a given ID is following.
- * Request Parameters: `id` - The identifier to query the following list.
- * Response: JSON array containing the list of followed list records.
- * Error Handling: Returns an error message and a 500 status code in case of failure.
- */
-api.get('/users/:id/following', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/following', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const tokenId: bigint | undefined = await inputToTokenId(context, id)
-    if (tokenId === undefined) {
+    const primaryListTokenId: bigint | undefined = await primaryList(context, ensOrAddress)
+    if (primaryListTokenId === undefined) {
       return context.json([], 200)
     }
 
@@ -146,32 +111,26 @@ api.get('/users/:id/following', async context => {
       version: number
       recordType: number
       data: `0x${string}`
-    }[] = await efpIndexerService(context).getListRecords(tokenId as bigint)
+    }[] = await efpIndexerService(context).getListRecords(primaryListTokenId)
     return context.json(listRecords, 200)
   } catch (error) {
-    apiLogger.error(`2 error while fetching following: ${JSON.stringify(error, undefined, 2)}`)
-    return context.text('3 error while fetching following', 500)
+    apiLogger.error(`error while fetching following: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching following', 500)
   }
 })
 
-/**
- * Fetch Following by Tag
- * Purpose: Retrieves a list of list records that a given ID is following, filtered by a specified tag.
- * Request Parameters:
- *  - `id` - The identifier to query the following list.
- *  - `tag` - The tag to filter the list.
- * Response: JSON array containing the filtered list of followed list records.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/following/tagged/:tag', async context => {
-  const { id, tag } = context.req.param()
+api.get('/users/:ensOrAddress/following/tagged/:tag', async context => {
+  const { ensOrAddress, tag } = context.req.param()
 
   try {
-    const tokenId: bigint | undefined = await inputToTokenId(context, id)
-    if (tokenId === undefined) {
+    const primaryListTokenId: bigint | undefined = await primaryList(context, ensOrAddress)
+    if (primaryListTokenId === undefined) {
       return context.text('error while fetching following count', 500)
     }
-    const taggedListRecords: any[] = await efpIndexerService(context).getListRecordsFilterByTags(tokenId as bigint, tag)
+    const taggedListRecords: any[] = await efpIndexerService(context).getListRecordsFilterByTags(
+      primaryListTokenId,
+      tag
+    )
     return context.json(taggedListRecords, 200)
   } catch (error) {
     apiLogger.error(`error while fetching blocked by: ${JSON.stringify(error, undefined, 2)}`)
@@ -179,19 +138,12 @@ api.get('/users/:id/following/tagged/:tag', async context => {
   }
 })
 
-/**
- * Fetch Following with Tags
- * Purpose: Retrieves a list of list records that a given ID is following, along with the tags associated with each followed list record.
- * Request Parameters: `id` - The identifier to query the following list with tags.
- * Response: JSON array containing the list of followed list records and their associated tags.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/following/tags', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/following/tags', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const tokenId: bigint | undefined = await inputToTokenId(context, id)
-    if (tokenId === undefined) {
+    const primaryListTokenId: bigint | undefined = await primaryList(context, ensOrAddress)
+    if (primaryListTokenId === undefined) {
       return context.json([], 200)
     }
     const listRecords: {
@@ -199,7 +151,7 @@ api.get('/users/:id/following/tags', async context => {
       recordType: number
       data: `0x${string}`
       tags: string[]
-    }[] = await efpIndexerService(context).getListRecordsWithTags(tokenId as bigint)
+    }[] = await efpIndexerService(context).getListRecordsWithTags(primaryListTokenId)
     return context.json(listRecords, 200)
   } catch (error) {
     apiLogger.error(`error while fetching following with tags: ${JSON.stringify(error, undefined, 2)}`)
@@ -207,18 +159,11 @@ api.get('/users/:id/following/tags', async context => {
   }
 })
 
-/**
- * Fetch Primary List from EFP
- * Purpose: Retrieves the primary list associated with a given ID from the EFP indexer service.
- * Request Parameters: `id` - The identifier to query the primary list.
- * Response: JSON object containing the primary list information.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/primary-list', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/primary-list', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const address: Address = await ensMetadataService().getAddress(id)
+    const address: Address = await ensMetadataService().getAddress(ensOrAddress)
     const primaryListHex: string | undefined = await efpIndexerService(context).getPrimaryList(address)
     if (primaryListHex === undefined) {
       return context.json(undefined, 200)
@@ -231,31 +176,23 @@ api.get('/users/:id/primary-list', async context => {
   }
 })
 
-/**
- * Fetch Stats
- * Purpose: Retrieves statistical data such as the number of followers and following count for a given ID.
- * Request Parameters: `id` - The identifier to query statistical data.
- * Response: JSON object containing statistical data like followers and following count.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/stats', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/stats', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const followersCount: number = await efpIndexerService(context).getFollowerCount(address)
+    const address: Address = await ensMetadataService().getAddress(ensOrAddress)
+    const followersCount: number = await efpIndexerService(context).getFollowersCount(address)
     const stats = {
       followersCount,
       followingCount: 0
     }
 
-    const tokenId: bigint | undefined = await inputToTokenId(context, id)
-    if (tokenId === undefined) {
+    const primaryListTokenId: bigint | undefined = await primaryList(context, address)
+    if (primaryListTokenId === undefined) {
       return context.json(stats, 200)
     }
 
-    const listRecordCount: number = await efpIndexerService(context).getListRecordCount(tokenId as bigint)
-    stats.followingCount = listRecordCount
+    stats.followingCount = await efpIndexerService(context).getListRecordCount(primaryListTokenId)
     return context.json(stats, 200)
   } catch (error) {
     apiLogger.error(`error while fetching stats: ${JSON.stringify(error, undefined, 2)}`)
@@ -263,19 +200,15 @@ api.get('/users/:id/stats', async context => {
   }
 })
 
-/**
- * Who Blocks
- * Purpose: Retrieves a list of accounts that have blocked the given ID.
- * Request Parameters: `id` - The identifier to query the list of accounts that have blocked it.
- * Response: JSON array containing the details of accounts that have blocked the given ID.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/whoblocks', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/whoblocks', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const blockedBy: any[] = await efpIndexerService(context).getWhoBlocks(address)
+    const address: Address = await ensMetadataService().getAddress(ensOrAddress)
+    const blockedBy: {
+      token_id: number
+      list_user: string
+    }[] = await efpIndexerService(context).getWhoBlocks(address)
     return context.json(blockedBy, 200)
   } catch (error) {
     apiLogger.error(`error while fetching blocked by: ${JSON.stringify(error, undefined, 2)}`)
@@ -283,19 +216,15 @@ api.get('/users/:id/whoblocks', async context => {
   }
 })
 
-/**
- * Who Mutes
- * Purpose: Retrieves a list of accounts that have muted the given ID.
- * Request Parameters: `id` - The identifier to query the list of accounts that have muted it.
- * Response: JSON array containing the details of accounts that have muted the given ID.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/whomutes', async context => {
-  const { id } = context.req.param()
+api.get('/users/:ensOrAddress/whomutes', async context => {
+  const { ensOrAddress } = context.req.param()
 
   try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const mutedBy: any[] = await efpIndexerService(context).getWhoMutes(address)
+    const address: Address = await ensMetadataService().getAddress(ensOrAddress)
+    const mutedBy: {
+      token_id: number
+      list_user: string
+    }[] = await efpIndexerService(context).getWhoMutes(address)
     return context.json(mutedBy, 200)
   } catch (error) {
     apiLogger.error(`error while fetching muted by: ${JSON.stringify(error, undefined, 2)}`)

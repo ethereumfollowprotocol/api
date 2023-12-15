@@ -5,12 +5,12 @@ import type { Kysely } from 'kysely'
 import type { Address } from 'viem'
 
 export interface IEFPIndexerService {
-  getPrimaryList(address: Address): Promise<string | undefined>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
-  getFollowerCount(address: `0x${string}`): Promise<number>
+  getFollowersCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]>
+  getPrimaryList(address: Address): Promise<string | undefined>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -34,7 +34,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return accountMetadataPrimaryList as `0x${string}`
     }
 
-    console.log("didn't find account metadata primary list for address: ", address)
+    // console.log("didn't find account metadata primary list for address: ", address)
     // else try and look for an EFP List NFT where
     // the user is set to the address
     // try looking for a list_nft_view WHERE list_user = address
@@ -45,7 +45,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       .execute()
     const tokenIds = result2.map(({ token_id }) => token_id)
     if (tokenIds.length === 0) {
-      console.log("didn't find any list nft for address: ", address)
+      // console.log("didn't find any list nft for address: ", address)
       return undefined
     }
     // else choose the lowest token id
@@ -206,7 +206,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     })
   }
 
-  async getFollowerCount(address: Address): Promise<number> {
+  async getFollowersCount(address: Address): Promise<number> {
     const possibleDuplicates = await this.getFollowers(address)
     const uniqueUsers = new Set(possibleDuplicates.map(({ list_user }) => list_user))
     return uniqueUsers.size
