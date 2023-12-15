@@ -1,12 +1,12 @@
-import { type Context, Hono } from 'hono'
+import { Hono, type Context } from 'hono'
 
-import type { Address } from 'viem'
 import { DOCS_URL } from '#/constant.ts'
 import { database } from '#/database.ts'
 import { apiLogger } from '#/logger.ts'
 import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
 import type { Environment } from '#/types'
+import type { Address } from 'viem'
 
 export const api = new Hono<{ Bindings: Environment }>().basePath('/v1')
 
@@ -103,30 +103,6 @@ api.get('/users/:id/ens', async context => {
   } catch (error) {
     apiLogger.error(`error while fetching ENS profile: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching ENS profile', 500)
-  }
-})
-
-/**
- * Fetch Primary List from EFP
- * Purpose: Retrieves the primary list associated with a given ID from the EFP indexer service.
- * Request Parameters: `id` - The identifier to query the primary list.
- * Response: JSON object containing the primary list information.
- * Error Handling: Returns an error message and a 500 status code if fetching fails.
- */
-api.get('/users/:id/primary-list', async context => {
-  const { id } = context.req.param()
-
-  try {
-    const address: Address = await ensMetadataService().getAddress(id)
-    const primaryListHex: string | undefined = await efpIndexerService(context).getPrimaryList(address)
-    if (primaryListHex === undefined) {
-      return context.json(undefined, 200)
-    }
-    const primaryList: number = parseInt(primaryListHex.replace('0x', '') as string, 16)
-    return context.json(primaryList, 200)
-  } catch (error) {
-    apiLogger.error(`error while fetching primary list: ${JSON.stringify(error, undefined, 2)}`)
-    return context.text('error while fetching primary list', 500)
   }
 })
 
@@ -228,6 +204,30 @@ api.get('/users/:id/following/tags', async context => {
   } catch (error) {
     apiLogger.error(`error while fetching following with tags: ${JSON.stringify(error, undefined, 2)}`)
     return context.text('error while fetching following with tags', 500)
+  }
+})
+
+/**
+ * Fetch Primary List from EFP
+ * Purpose: Retrieves the primary list associated with a given ID from the EFP indexer service.
+ * Request Parameters: `id` - The identifier to query the primary list.
+ * Response: JSON object containing the primary list information.
+ * Error Handling: Returns an error message and a 500 status code if fetching fails.
+ */
+api.get('/users/:id/primary-list', async context => {
+  const { id } = context.req.param()
+
+  try {
+    const address: Address = await ensMetadataService().getAddress(id)
+    const primaryListHex: string | undefined = await efpIndexerService(context).getPrimaryList(address)
+    if (primaryListHex === undefined) {
+      return context.json(undefined, 200)
+    }
+    const primaryList: number = parseInt(primaryListHex.replace('0x', '') as string, 16)
+    return context.json(primaryList, 200)
+  } catch (error) {
+    apiLogger.error(`error while fetching primary list: ${JSON.stringify(error, undefined, 2)}`)
+    return context.text('error while fetching primary list', 500)
   }
 })
 
