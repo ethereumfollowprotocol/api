@@ -4,14 +4,14 @@
   "description": "Ethereum Follow Protocol Public API",
   "type": "module",
   "scripts": {
+    "build": "bunx wrangler deploy --dry-run --experimental-json-config --config=wrangler.json --outdir=dist --minify=true --latest=true --compatibility-flag=node_compat --compatibility-date=2023-06-30",
+    "clean": "rm -rf dist .wrangler node_modules",
     "dev": "bunx wrangler dev --experimental-json-config --config=wrangler.json --latest=true",
     "dev:remote": "bun dev --remote",
-    "build": "bunx wrangler deploy --dry-run --experimental-json-config --config=wrangler.json --outdir=dist --minify=true --latest=true --compatibility-flag=node_compat --compatibility-date=2023-06-30",
     "database:generate-types": "kysely-codegen --dialect='postgres' --type-only-imports --log-level='error' --out-file='./src/types/generated/index.ts' && bun format",
-    "lint": "biome check --apply .",
     "format": "biome format . --write",
+    "lint": "biome check --apply .",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "clean": "rm -rf dist .wrangler node_modules",
     "update-dependencies": "bun ./scripts/update-dependencies.ts"
   },
   "dependencies": {
