@@ -34,10 +34,7 @@ services:
       - 8787
     ports:
       - 8787:8787/tcp
-      - 8788:8788/tcp
     networks:
       - default
     environment:
-      - CLOUDFLARE_ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:-0e82b1fbb0099f030f822d34c6af9fa8}"
-      - CLOUDFLARE_API_TOKEN="${CLOUDFLARE_API_TOKEN}"
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@efp-database:5432/efp?sslmode=disable}

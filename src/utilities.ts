@@ -26,8 +26,3 @@ export function urlSearchParams(params: Record<string, string | number | boolean
 export function raise(error: unknown): never {
   throw typeof error === 'string' ? new Error(error) : error
 }
-
-export function parseBaseURL(_url: URL | string) {
-  const url = typeof _url === 'string' ? new URL(_url) : _url
-  return `${url.protocol}//${url.host}`
-}

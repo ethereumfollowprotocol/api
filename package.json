@@ -36,7 +36,7 @@
     "kysely-codegen": "^0.11.0",
     "pg": "^8.11.3",
     "typescript": "^5.3.3",
-    "wrangler": "^3.20.0"
+    "wrangler": "^3.21.0"
   },
   "sideEffects": false,
   "repository": "github:ethereumfollowprotocol/api",
