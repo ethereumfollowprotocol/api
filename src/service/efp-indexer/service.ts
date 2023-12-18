@@ -4,13 +4,27 @@ import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
 
+function decodePrimaryList(hexstringUint256: string): number | undefined {
+  if (!hexstringUint256.startsWith('0x') || hexstringUint256.length !== 66) {
+    return undefined
+  }
+  const tokenId = BigInt(hexstringUint256.slice(2))
+  if (tokenId > Number.MAX_SAFE_INTEGER) {
+    return undefined
+  }
+  return Number(tokenId)
+}
+
 export interface IEFPIndexerService {
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
+  getListRecordsWithTags(
+    tokenId: bigint
+  ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]>
   getFollowersCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]>
-  getPrimaryList(address: Address): Promise<string | undefined>
+  getPrimaryList(address: Address): Promise<number | undefined>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -20,7 +34,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     this.db = database(env)
   }
 
-  async getPrimaryList(address: Address): Promise<`0x${string}` | undefined> {
+  async getPrimaryList(address: Address): Promise<number | undefined> {
     const result1 = await this.db
       .selectFrom('account_metadata')
       .select('value')
@@ -31,7 +45,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     const accountMetadataPrimaryList = result1?.value as string | undefined
 
     if (accountMetadataPrimaryList?.startsWith('0x')) {
-      return accountMetadataPrimaryList as `0x${string}`
+      return decodePrimaryList(accountMetadataPrimaryList)
     }
 
     // console.log("didn't find account metadata primary list for address: ", address)
@@ -59,17 +73,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return undefined
     }
     const val: number = Number(lowestTokenId)
-
-    // convert lowestTokenId to a 32-byte hex string
-    // Convert the number to a hexadecimal string
-    let hex = val.toString(16)
-
-    // Pad the hexadecimal string to 64 characters (32 bytes)
-    while (hex.length < 64) {
-      hex = `0${hex}`
-    }
-
-    return `0x${hex}`
+    return val
   }
 
   async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {

@@ -1,7 +1,7 @@
-import { type InsertObject, Kysely } from 'kysely'
+import type { DB } from '#/types/generated/index.ts'
+import { Kysely, type InsertObject } from 'kysely'
 import { PostgresJSDialect } from 'kysely-postgres-js'
 import postgres from 'postgres'
-import type { DB } from '#/types/generated/index.ts'
 
 export type Row<T extends keyof DB> = InsertObject<DB, T>
 

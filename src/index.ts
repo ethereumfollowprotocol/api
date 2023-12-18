@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-
 import { cache } from 'hono/cache'
 import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
@@ -10,8 +9,12 @@ import { cacheHeader } from 'pretty-cache-header'
 
 import { DOCS_URL } from '#/constant.ts'
 import { apiLogger } from '#/logger.ts'
-import { api } from '#/routes.ts'
+import { api } from '#/router/api/v1'
+import { errorHandler, errorLogger } from '#/router/middleware'
+import { EFPIndexerService } from '#/service/efp-indexer/service'
+import { ENSMetadataService } from '#/service/ens-metadata/service'
 import type { Environment } from '#/types'
+import type { Services } from './service'
 
 const app = new Hono<{ Bindings: Environment }>()
 
@@ -81,7 +84,15 @@ app.get('/routes', async () => {
   return new Response(null, { status: 418 })
 })
 
-app.route('/', api)
+const services: Services = {
+  ens: () => new ENSMetadataService(),
+  efp: (env: Env) => new EFPIndexerService(env)
+}
+app.route('/', api(services))
+
+// Error handling middleware should be at the end
+app.use('*', errorLogger)
+app.use('*', errorHandler)
 
 const PORT = 8_787
 
