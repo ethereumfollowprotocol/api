@@ -1,19 +1,22 @@
-// solidity shown below:
-
-// struct ListStorageLocation {
-//     /**
-//      * @dev The version byte allows for:
-//      * 1. Differentiating between record formats for upgradability.
-//      * 2. Ensuring backward compatibility with older versions.
-//      * 3. Identifying the record's schema or processing logic.
-//      */
-//     uint8 version;
-//     /// @dev type of list location
-//     uint8 locationType;
-//     /// @dev data for the list location
-//     bytes data;
-// }
-
+/**
+ * solidity shown below:
+ * // @dev The version byte allows for:
+ * // 1. Differentiating between record formats for upgradability.
+ * // 2. Ensuring backward compatibility with older versions.
+ * // 3. Identifying the record's schema or processing logic.
+ * ```solidity
+ * struct ListStorageLocation {
+ *    uint8
+ *    version
+ *    // @dev type of list location
+ *    uint8
+ *    locationType
+ *    // @dev data for the list location
+ *    bytes
+ *    data
+ * }
+ * ```
+ */
 export type ListLocationType = {
   version: number
   locationType: number

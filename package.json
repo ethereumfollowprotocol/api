@@ -18,20 +18,20 @@
   },
   "dependencies": {
     "consola": "^3.2.3",
-    "hono": "^3.11.7",
+    "hono": "^3.11.8",
     "kysely": "^0.26.3",
     "kysely-postgres-js": "^2.0.0",
     "postgres": "^3.4.3",
     "pretty-cache-header": "^1.0.0",
-    "viem": "^2.0.0-beta.15"
+    "viem": "^2.0.0-beta.16"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.4.1",
     "@cloudflare/workers-types": "^4.20231121.0",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/node": "^20.10.4",
+    "@types/node": "^20.10.5",
     "bun": "^1.0.18",
-    "bun-types": "^1.0.18",
+    "bun-types": "^1.0.18-1",
     "kysely-codegen": "^0.11.0",
     "pg": "^8.11.3",
     "typescript": "^5.3.3",

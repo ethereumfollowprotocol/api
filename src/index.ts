@@ -86,7 +86,7 @@ app.get('/routes', async () => {
 
 const services: Services = {
   ens: () => new ENSMetadataService(),
-  efp: (env: Env) => new EFPIndexerService(env)
+  efp: (env: Environment) => new EFPIndexerService(env)
 }
 app.route('/', api(services))
 

@@ -1,5 +1,6 @@
 import type { Kysely } from 'kysely'
 import type { Address } from 'viem'
+
 import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
@@ -249,7 +250,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getWhoBlocks(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
+  async getWhoBlocks(address: Address): Promise<{ token_id: number; list_user: string }[]> {
     const result = await this.db
       .selectFrom('list_record_tags_extended_view')
       .select(['token_id', 'list_user'])
@@ -276,7 +277,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getWhoMutes(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]> {
+  async getWhoMutes(address: Address): Promise<{ token_id: number; list_user: string }[]> {
     const result = await this.db
       .selectFrom('list_record_tags_extended_view')
       .select(['token_id', 'list_user'])

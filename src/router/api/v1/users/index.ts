@@ -1,10 +1,11 @@
+import { Hono } from 'hono'
+import type { Address } from 'viem'
+
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { IENSMetadataService } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
-import { Hono } from 'hono'
-import type { Address } from 'viem'
 
 async function getPrimaryList(
   ens: IENSMetadataService,

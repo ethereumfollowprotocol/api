@@ -1,4 +1,5 @@
-import type { Address } from 'viem'
+import { type Address, isAddress } from 'viem'
+
 import { raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
 
@@ -12,7 +13,7 @@ export class ENSMetadataService implements IENSMetadataService {
 
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
-    if (ensNameOrAddress.startsWith('0x') && ensNameOrAddress.length === 42) {
+    if (isAddress(ensNameOrAddress)) {
       return ensNameOrAddress.toLowerCase() as Address
     }
 

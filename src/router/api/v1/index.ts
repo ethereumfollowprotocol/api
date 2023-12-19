@@ -1,9 +1,10 @@
+import { Hono } from 'hono'
+
 // api/v1/index.ts
 import { database } from '#/database'
 import { apiLogger } from '#/logger'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
-import { Hono } from 'hono'
 import { users } from './users'
 
 export function api(services: Services): Hono<{ Bindings: Environment }> {

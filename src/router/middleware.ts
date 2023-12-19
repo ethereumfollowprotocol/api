@@ -1,5 +1,6 @@
-import { apiLogger } from '#/logger'
 import type { MiddlewareHandler } from 'hono'
+
+import { apiLogger } from '#/logger'
 
 export const errorLogger: MiddlewareHandler = async (c, next) => {
   try {
