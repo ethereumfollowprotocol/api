@@ -1,5 +1,5 @@
 import type { Kysely } from 'kysely'
-import type { Address } from 'viem'
+import type { Address } from '#/types'
 
 import { database } from '#/database'
 import type { DB } from '#/types'

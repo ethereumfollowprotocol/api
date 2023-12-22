@@ -1,4 +1,4 @@
-import type { Address } from 'viem'
+import type { Address } from '#/types'
 
 export type ENSProfile = {
   name: string

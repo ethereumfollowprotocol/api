@@ -1,6 +1,5 @@
-import { type Address, isAddress } from 'viem'
-
-import { raise } from '#/utilities.ts'
+import type { Address } from '#/types'
+import { isAddress, raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
 
 export interface IENSMetadataService {

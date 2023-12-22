@@ -5,7 +5,6 @@ import { HTTPException } from 'hono/http-exception'
 import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
 import { secureHeaders } from 'hono/secure-headers'
-import { cacheHeader } from 'pretty-cache-header'
 
 import { DOCS_URL } from '#/constant.ts'
 import { apiLogger } from '#/logger.ts'
@@ -36,11 +35,7 @@ app.use('*', async (context, next) => {
   if (ENV === 'development') return
   cache({
     cacheName: 'efp-api',
-    cacheControl: cacheHeader({
-      maxAge: '60days',
-      sMaxage: '60days',
-      staleWhileRevalidate: '7days'
-    })
+    cacheControl: 'max-age=5184000, s-maxage=5184000, stale-while-revalidate=604800'
   })
 })
 

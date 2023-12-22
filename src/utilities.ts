@@ -1,4 +1,13 @@
 import { apiLogger } from '#/logger.ts'
+import type { Address } from '#/types'
+
+export function raise(error: unknown): never {
+  throw typeof error === 'string' ? new Error(error) : error
+}
+
+export function isAddress(address: string): address is Address {
+  return /^0x[a-fA-F0-9]{40}$/.test(address)
+}
 
 export async function fetcher<T>(url: string, options?: RequestInit) {
   const response = await fetch(url, {
@@ -11,8 +20,4 @@ export async function fetcher<T>(url: string, options?: RequestInit) {
   }
   const data = (await response.json()) as T
   return data
-}
-
-export function raise(error: unknown): never {
-  throw typeof error === 'string' ? new Error(error) : error
 }

@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { Address } from 'viem'
+import type { Address } from '#/types'
 
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
