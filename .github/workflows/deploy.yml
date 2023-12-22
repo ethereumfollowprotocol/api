@@ -48,6 +48,7 @@ jobs:
       - name: 'Install Wrangler CLI'
         run: bun add --global wrangler@latest
 
+        # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
       - name: 'Deploy Cloudflare Workers 🔶'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -59,4 +60,5 @@ jobs:
             --latest=true \
             --keep-vars=true \
             --compatibility-date=2023-06-20 \
-            ----compatibility-flag=node_compat
+            --compatibility-flag=node_compat \
+            --var COMMIT_SHA=$(git rev-parse HEAD)

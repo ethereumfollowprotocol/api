@@ -18,7 +18,6 @@
   "files.associations": {
     "biome.json": "jsonc",
     ".dev.vars": "dotenv",
-    "wrangler.json": "jsonc",
     ".dev.vars.example": "dotenv"
   },
   "search.exclude": {

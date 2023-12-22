@@ -15,6 +15,8 @@ interface Env extends EnvironmentVariables {
   readonly ens: Record<string, unknown>
   // EFP_API_KV is a binded kv namespace in wrangler.toml
   readonly EFP_API_KV: KVNamespace
+  // generated in ci during deployment
+  readonly COMMIT_SHA: string
 }
 
 // Node.js

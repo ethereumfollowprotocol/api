@@ -6,7 +6,7 @@ import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
 import { secureHeaders } from 'hono/secure-headers'
 
-import { DOCS_URL } from '#/constant.ts'
+import { DOCS_URL, SOURCE_CODE_URL } from '#/constant.ts'
 import { demoRouter } from '#/demo'
 import { apiLogger } from '#/logger.ts'
 import { api } from '#/router/api/v1'
@@ -73,10 +73,25 @@ app.get('/health', context => context.text('ok'))
 
 app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
+app.get('/build-version', context => context.text(context.env.COMMIT_SHA))
+
+app.get('/v1', context =>
+  context.json({
+    sha: context.env.COMMIT_SHA,
+    name: 'efp-public-api',
+    version: 'v1',
+    docs: DOCS_URL,
+    source: SOURCE_CODE_URL
+  })
+)
+
 /** Logs all registered routes to the console. */
-app.get('/routes', async () => {
-  const { showRoutes } = await import('hono/dev')
-  showRoutes(app, { verbose: false })
+app.get('/routes', async context => {
+  const env = context.env.ENV
+  if (env === 'development') {
+    const { showRoutes } = await import('hono/dev')
+    showRoutes(app, { verbose: false })
+  }
   return new Response(null, { status: 418 })
 })
 
