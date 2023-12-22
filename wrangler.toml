@@ -1,0 +1,16 @@
+name = "indexer"
+main = "./src/index.ts"
+keep_vars = true
+node_compat = true
+compatibility_date = "2023-10-30"
+
+[placement]
+mode = "smart"
+
+[[services]]
+binding = "ens"
+service = "ens"
+
+[[kv_namespaces]]
+binding = "EFP_API_KV"
+id = "33355cdeb5c34e7e84e264fea28a33df"

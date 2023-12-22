@@ -8,7 +8,7 @@
   "files": {
     "include": ["./**/*.ts", "./**/*.js", "./**/*.cjs", "./**/*.mjs", "./**/*.d.ts", "./**/*.json", "./**/*.jsonc"],
     "ignoreUnknown": true,
-    "ignore": ["node_modules", "dist", "_"]
+    "ignore": ["node_modules", "dist", "_", "./src/demo/data.json"]
   },
   "organizeImports": {
     "enabled": true
@@ -19,9 +19,11 @@
     "indentWidth": 2,
     "indentStyle": "space",
     "formatWithErrors": true,
-    "include": ["./**/*.ts", "./**/*.js", "./**/*.cjs", "./**/*.mjs", "./**/*.d.ts", "./**/*.json", "./**/*.jsonc"]
+    "include": ["./**/*.ts", "./**/*.js", "./**/*.cjs", "./**/*.mjs", "./**/*.d.ts", "./**/*.json", "./**/*.jsonc"],
+    "ignore": ["node_modules", "dist", "_", "./src/demo/data.json"]
   },
   "linter": {
+    "ignore": ["node_modules", "dist", "_", "./src/demo/data.json"],
     "enabled": true,
     "rules": {
       "all": true,

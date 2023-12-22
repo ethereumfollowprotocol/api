@@ -5,14 +5,16 @@ interface EnvironmentVariables {
   readonly ALCHEMY_ID: string
   readonly INFURA_ID: string
   readonly DATABASE_URL: string
-  readonly SUPABASE_PROJECT_REF: string
   readonly ENABLE_DATABASE_LOGGING: 'true' | 'false'
 }
 
 // Cloudflare Workers
 interface Env extends EnvironmentVariables {
   readonly ENV: 'development' | 'production' | 'test'
+  // ens is a binded service in wrangler.toml
   readonly ens: Record<string, unknown>
+  // EFP_API_KV is a binded kv namespace in wrangler.toml
+  readonly EFP_API_KV: KVNamespace
 }
 
 // Node.js

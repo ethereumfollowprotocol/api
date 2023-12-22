@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 3
     runs-on: ['ubuntu-latest']
     steps:
-      - name: 🔑 Checkout
+      - name: '🔑 Checkout'
         uses: actions/checkout@v4.1.1
 
       - name: 'Install Dependencies'
@@ -48,17 +48,15 @@ jobs:
       - name: 'Install Wrangler CLI'
         run: bun add --global wrangler@latest
 
-      - name: Deploy Cloudflare Workers
+      - name: 'Deploy Cloudflare Workers 🔶'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          # wrangler deploy ./src/index.ts \
-          #   --name=indexer \
-          #   --minify \
-          #   --latest=true \
-          #   --keep-vars=true \
-          #   --experimental-json-config \
-          #   --config=wrangler.json \
-          #   --compatibility-date=2023-06-20 \
-          #   ----compatibility-flag=node_compat
+          wrangler deploy ./src/index.ts \
+            --name=indexer \
+            --minify \
+            --latest=true \
+            --keep-vars=true \
+            --compatibility-date=2023-06-20 \
+            ----compatibility-flag=node_compat

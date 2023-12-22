@@ -81,6 +81,14 @@ Assuming you have an indexer running and postgres database setup, follow these s
     # should return 'ok'
     ```
 
+### [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
+
+Wrangler is a CLI tool through which you interact with Cloudflare Workers runtime and Cloudflare Platform. It is used to:
+  - run the development server,
+  - publish the API to Cloudflare Workers,
+  - CRUD KV namespaces, R2 Buckets, D1 Database, and a number of other CF platform resources,
+
+See a list of all Wrangler commands [here](https://developers.cloudflare.com/workers/cli-wrangler/commands).
 ____
 TODO: Continue documentation
 ____

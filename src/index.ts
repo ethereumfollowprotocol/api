@@ -7,6 +7,7 @@ import { prettyJSON } from 'hono/pretty-json'
 import { secureHeaders } from 'hono/secure-headers'
 
 import { DOCS_URL } from '#/constant.ts'
+import { demoRouter } from '#/demo'
 import { apiLogger } from '#/logger.ts'
 import { api } from '#/router/api/v1'
 import { errorHandler, errorLogger } from '#/router/middleware'
@@ -84,6 +85,10 @@ const services: Services = {
   efp: (env: Environment) => new EFPIndexerService(env)
 }
 app.route('/', api(services))
+
+/** DEMO START */
+app.route('/', demoRouter)
+/** DEMO END */
 
 // Error handling middleware should be at the end
 app.use('*', errorLogger)

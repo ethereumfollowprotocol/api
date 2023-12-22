@@ -1,9 +1,0 @@
-{
-  "$schema": "https://gist.githubusercontent.com/o-az/d298a1776165407ba63ee763d32f7a89/raw/537e3939a87034e68bc2fdc8d1c11332e79e66b7/wrangler.json",
-  "name": "indexer",
-  "main": "./src/index.ts",
-  "node_compat": true,
-  "placement": { "mode": "smart" },
-  "compatibility_date": "2023-10-30",
-  "services": [{ "binding": "ens", "service": "ens" }]
-}
