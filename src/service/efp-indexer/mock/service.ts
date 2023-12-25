@@ -1,4 +1,3 @@
-import type { MaybePromise } from '#/types'
 import type { IEFPIndexerService } from '../service'
 import { SocialGraph, makeSocialGraph } from './social-graph'
 
@@ -61,10 +60,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getPrimaryList(address: `0x${string}`): Promise<number | undefined> {
+  async getPrimaryList(address: `0x${string}`): Promise<bigint | undefined> {
     const result: bigint | undefined = this.socialGraph.getPrimaryList(address)
     if (result === undefined) return undefined
-    return Number(result)
+    return result
   }
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getLeaderboardFollowers(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
