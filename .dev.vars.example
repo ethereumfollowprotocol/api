@@ -2,6 +2,8 @@ NODE_ENV="development"
 PORT="8787"
 IS_DEMO="false"
 
+IS_DEMO=""
+
 # https://llamanodes.com
 LLAMAFOLIO_ID=""
 # https://www.ankr.com

@@ -45,8 +45,8 @@ jobs:
       - name: 'Install Dependencies'
         uses: ./.github/actions/setup
 
-      - name: 'Install Wrangler CLI'
-        run: bun add --global wrangler@latest
+      - name: 'Get Commit SHA'
+        run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
         # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
       - name: 'Deploy Cloudflare Workers 🔶'
@@ -54,11 +54,11 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          wrangler deploy ./src/index.ts \
+          bunx wrangler@latest deploy ./src/index.ts \
             --name=indexer \
             --minify \
             --latest=true \
             --keep-vars=true \
             --node-compat=true \
-            --compatibility-date=2023-06-20 \
-            --var COMMIT_SHA=$(git rev-parse HEAD)
+            --compatibility-date=2023-10-30 \
+            --var COMMIT_SHA:"$COMMIT_SHA"

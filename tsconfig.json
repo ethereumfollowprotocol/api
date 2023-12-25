@@ -5,7 +5,7 @@
     "paths": {
       "#/*": ["./src/*"]
     },
-    "types": ["node", "bun-types", "@cloudflare/workers-types"],
+    "types": ["node", "bun", "@cloudflare/workers-types"],
     "lib": ["ESNext"],
     "module": "ESNext",
     "target": "ESNext",

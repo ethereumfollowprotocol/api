@@ -1,3 +1,4 @@
+import type { MaybePromise } from '#/types'
 import type { IEFPIndexerService } from '../service'
 import { SocialGraph, makeSocialGraph } from './social-graph'
 
@@ -23,8 +24,8 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
-  async getListRecordCount(tokenId: bigint): Promise<number> {
-    return (await this.socialGraph.getListRecords(tokenId)).length
+  getListRecordCount(tokenId: bigint): number {
+    return this.socialGraph.getListRecords(tokenId).length
   }
 
   async getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {

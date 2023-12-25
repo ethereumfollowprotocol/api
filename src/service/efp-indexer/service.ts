@@ -1,5 +1,5 @@
-import type { Address } from '#/types'
-import { sql, type Kysely, type QueryResult } from 'kysely'
+import { type Kysely, type QueryResult, sql } from 'kysely'
+import type { Address, MaybePromise } from '#/types'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -24,7 +24,7 @@ export interface IEFPIndexerService {
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
-  getListRecordCount(tokenId: bigint): Promise<number>
+  getListRecordCount(tokenId: bigint): MaybePromise<number>
   getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
   getListRecordsWithTags(
     tokenId: bigint
@@ -33,14 +33,14 @@ export interface IEFPIndexerService {
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
-  private readonly db: Kysely<DB>
+  readonly #db: Kysely<DB>
 
   constructor(env: Env) {
-    this.db = database(env)
+    this.#db = database(env)
   }
 
   async getPrimaryList(address: Address): Promise<number | undefined> {
-    const result1 = await this.db
+    const result1 = await this.#db
       .selectFrom('account_metadata')
       .select('value')
       .where('address', '=', address)
@@ -57,7 +57,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     // else try and look for an EFP List NFT where
     // the user is set to the address
     // try looking for a list_nft_view WHERE list_user = address
-    const result2 = await this.db
+    const result2 = await this.#db
       .selectFrom('list_nfts_view')
       .select('token_id')
       .where('list_user', '=', address)
@@ -82,7 +82,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
-    const result = await this.db
+    const result = await this.#db
       .selectFrom('list_nfts')
       .select('list_storage_location')
       .where('token_id', '=', tokenId.toString())
@@ -98,7 +98,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
     console.log({ version, locationType, chainId, contractAddress, nonce })
 
-    const countResult = await this.db
+    const countResult = await this.#db
       .selectFrom('list_records')
       .select(({ fn, val, ref }) => [
         // The `fn` module contains the most common
@@ -123,7 +123,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
     const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    const result = await this.db
+    const result = await this.#db
       .selectFrom('list_records')
       .select(['version', 'type', 'data'])
       // TODO: WHERE chain id
@@ -153,7 +153,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
     const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    const result = await this.db
+    const result = await this.#db
       .selectFrom('list_record_tags as tags')
       .fullJoin('list_records as lr', join =>
         join
@@ -198,7 +198,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
     const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    const result = await this.db
+    const result = await this.#db
       .selectFrom('list_record_tags')
       .select(['record'])
       .where('chain_id', '=', chainId.toString())
@@ -231,7 +231,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getFollowers(address: Address): Promise<Address[]> {
     const query = sql`SELECT * FROM public.get_unique_followers(${address})`
-    const result: QueryResult<unknown> = await query.execute(this.db)
+    const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
       return []
@@ -241,7 +241,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getWhoBlocks(address: Address): Promise<{ token_id: number; list_user: string }[]> {
-    const result = await this.db
+    const result = await this.#db
       .selectFrom('list_record_tags_extended_view')
       .select(['token_id', 'list_user'])
       .where('has_block_tag', '=', true)
@@ -268,7 +268,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getWhoMutes(address: Address): Promise<{ token_id: number; list_user: string }[]> {
-    const result = await this.db
+    const result = await this.#db
       .selectFrom('list_record_tags_extended_view')
       .select(['token_id', 'list_user'])
       .where('has_mute_tag', '=', true)
@@ -304,7 +304,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
     const query = sql`SELECT * FROM public.count_unique_followers_by_address(${limit})`
-    const result: QueryResult<unknown> = await query.execute(this.db)
+    const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
       return []
@@ -318,7 +318,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
     const query = sql`SELECT * FROM public.count_unique_following_by_address(${limit})`
-    const result: QueryResult<unknown> = await query.execute(this.db)
+    const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
       return []

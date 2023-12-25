@@ -1,5 +1,7 @@
 export * from './generated'
 
+export type MaybePromise<T> = T | Promise<T> | PromiseLike<T>
+
 export type Address = `0x${string}`
 
 export type Environment = Pretty<Env>

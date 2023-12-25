@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "consola": "^3.2.3",
-    "hono": "^3.11.9",
+    "hono": "^3.11.10",
     "kysely": "^0.26.3",
     "kysely-postgres-js": "^2.0.0",
     "postgres": "^3.4.3"
@@ -27,9 +27,9 @@
     "@biomejs/biome": "^1.4.1",
     "@cloudflare/workers-types": "^4.20231218.0",
     "@total-typescript/ts-reset": "^0.5.1",
+    "@types/bun": "^1.0.0",
     "@types/node": "^20.10.5",
-    "bun": "^1.0.19",
-    "bun-types": "^1.0.19",
+    "bun": "^1.0.20",
     "kysely-codegen": "^0.11.0",
     "pg": "^8.11.3",
     "typescript": "^5.3.3",
