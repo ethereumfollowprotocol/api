@@ -9,18 +9,38 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
+  async getFollowersCount(address: `0x${string}`): Promise<number> {
+    throw new Error('MockEFPIndexerService::getFollowersCount not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getFollowers(address: `0x${string}`): Promise<`0x${string}`[]> {
+    throw new Error('MockEFPIndexerService::getFollowers not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowingCount(address: `0x${string}`): Promise<number> {
-    throw new Error('Method not implemented.')
+    throw new Error('MockEFPIndexerService::getFollowingCount not implemented.')
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowing(address: `0x${string}`): Promise<`0x${string}`[]> {
-    throw new Error('Method not implemented.')
+    throw new Error('MockEFPIndexerService::getFollowing not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getLeaderboardFollowers(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
+    throw new Error('MockEFPIndexerService::getLeaderboardFollowers not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getLeaderboardFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
+    throw new Error('MockEFPIndexerService::getLeaderboardFollowing not implemented.')
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
-    throw new Error('Method not implemented.')
+    throw new Error('MockEFPIndexerService::getListStorageLocation not implemented.')
   }
 
   getListRecordCount(tokenId: bigint): number {
@@ -50,28 +70,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowersCount(address: `0x${string}`): Promise<number> {
-    throw new Error('Method not implemented.')
-  }
-
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowers(address: `0x${string}`): Promise<`0x${string}`[]> {
-    throw new Error('Method not implemented.')
-  }
-
-  // biome-ignore lint/nursery/useAwait: <explanation>
   async getPrimaryList(address: `0x${string}`): Promise<bigint | undefined> {
     const result: bigint | undefined = this.socialGraph.getPrimaryList(address)
     if (result === undefined) return undefined
     return result
-  }
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardFollowers(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
-    throw new Error('Method not implemented.')
-  }
-
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
-    throw new Error('Method not implemented.')
   }
 }
