@@ -12,9 +12,9 @@ async function getPrimaryList(
   ens: IENSMetadataService,
   efp: IEFPIndexerService,
   ensOrAddress: string
-): Promise<number | undefined> {
+): Promise<bigint | undefined> {
   const address: Address = await ens.getAddress(ensOrAddress)
-  const primaryList: number | undefined = await efp.getPrimaryList(address)
+  const primaryList: bigint | undefined = await efp.getPrimaryList(address)
   return primaryList
 }
 
@@ -111,14 +111,14 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
          * TODO: need to implement getFollowing in EFPIndexerService. `null` placeholder for now.
          */
         include.includes('following-list') ? null : null,
-        include.includes('primary-list') ? getPrimaryList(services.ens(), efp, address) : null
+        include.includes('primary-list') ? getPrimaryList(services.ens(), efp, address) : undefined
       ])
 
       const listRecords: {
         version: number
         recordType: number
         data: `0x${string}`
-      }[] = !primaryList ? [] : await efp.getListRecords(BigInt(primaryList))
+      }[] = primaryList === undefined ? [] : await efp.getListRecords(primaryList)
 
       const listRecordsLabeled: {
         version: number
@@ -129,7 +129,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
         {
           address,
           ens,
-          primary_list: primaryList ?? null,
+          primary_list: primaryList !== undefined ? primaryList.toString() : null,
           following: listRecordsLabeled,
           followers
         },
@@ -153,7 +153,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
     const { ensOrAddress } = context.req.param()
 
     const efp: IEFPIndexerService = services.efp(context.env)
-    const primaryList: number | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
+    const primaryList: bigint | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
     if (primaryList === undefined) {
       return context.json([], 200)
     }
@@ -162,7 +162,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
       version: number
       recordType: number
       data: `0x${string}`
-    }[] = await efp.getListRecords(BigInt(primaryList))
+    }[] = await efp.getListRecords(primaryList)
     const listRecordsLabeled: {
       version: number
       record_type: string
@@ -177,7 +177,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
 
     const efp: IEFPIndexerService = services.efp(context.env)
     console.log(context.req.param())
-    const primaryList: number | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
+    const primaryList: bigint | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
     if (primaryList === undefined) {
       return context.json([], 200)
     }
@@ -187,7 +187,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
       recordType: number
       data: `0x${string}`
       tags: string[]
-    }[] = await efp.getListRecordsWithTags(BigInt(primaryList))
+    }[] = await efp.getListRecordsWithTags(primaryList)
     const listRecordsLabeled: {
       version: number
       record_type: string
@@ -201,12 +201,17 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   users.get('/:ensOrAddress/primary-list', async context => {
     const { ensOrAddress } = context.req.param()
 
-    const primaryList: number | undefined = await getPrimaryList(
+    const primaryList: bigint | undefined = await getPrimaryList(
       services.ens(),
       services.efp(context.env),
       ensOrAddress
     )
-    return context.json({ primary_list: primaryList ?? null }, 200)
+    return context.json(
+      {
+        primary_list: primaryList !== undefined ? primaryList.toString() : null
+      },
+      200
+    )
   })
 
   // Muted by user
@@ -240,7 +245,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
       following_count: 0
     }
 
-    const primaryList: number | undefined = await getPrimaryList(
+    const primaryList: bigint | undefined = await getPrimaryList(
       services.ens(),
       services.efp(context.env),
       ensOrAddress
@@ -249,7 +254,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
       return context.json(stats, 200)
     }
 
-    stats.following_count = await efp.getListRecordCount(BigInt(primaryList))
+    stats.following_count = await efp.getListRecordCount(primaryList)
     return context.json(stats, 200)
   })
 
