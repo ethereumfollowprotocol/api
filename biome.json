@@ -40,6 +40,8 @@
         "noEmptyBlockStatements": "off"
       },
       "complexity": {
+        "noBannedTypes": "off",
+        "noUselessFragments": "off",
         "useLiteralKeys": "off"
       },
       "correctness": {},
