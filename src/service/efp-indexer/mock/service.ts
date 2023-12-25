@@ -9,6 +9,16 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
+  async getFollowingCount(address: `0x${string}`): Promise<number> {
+    throw new Error('Method not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getFollowing(address: `0x${string}`): Promise<`0x${string}`[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
   async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
     throw new Error('Method not implemented.')
   }

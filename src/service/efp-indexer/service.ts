@@ -1,5 +1,5 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
 import type { Address } from '#/types'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -225,7 +225,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getFollowersCount(address: Address): Promise<number> {
     const possibleDuplicates = await this.getFollowers(address)
-    const uniqueUsers = new Set(possibleDuplicates.map(({ list_user }) => list_user))
+    const uniqueUsers = new Set(possibleDuplicates)
     return uniqueUsers.size
   }
 
