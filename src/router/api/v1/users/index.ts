@@ -1,5 +1,5 @@
-import { Hono } from 'hono'
 import type { Address } from '#/types'
+import { Hono } from 'hono'
 
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
@@ -205,6 +205,13 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
 
     stats.following_count = await efp.getListRecordCount(BigInt(primaryList))
     return context.json(stats, 200)
+  })
+
+  users.get('/top-followed', async context => {
+    const mostFollowers: { address: string; followers_count: number }[] = await services
+      .efp(context.env)
+      .getTopFollowed(10)
+    return context.json(mostFollowers, 200)
   })
 
   return users

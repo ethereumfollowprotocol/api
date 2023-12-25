@@ -26,6 +26,7 @@ export interface IEFPIndexerService {
   getFollowersCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<Address[]>
   getPrimaryList(address: Address): Promise<number | undefined>
+  getTopFollowed(top_n: number): Promise<{ address: Address; followers_count: number }[]>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -288,5 +289,19 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getMutes(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
     return await this.getListRecordsFilterByTags(tokenId, 'mute')
+  }
+
+  async getTopFollowed(top_n: number): Promise<{ address: Address; followers_count: number }[]> {
+    const query = sql`SELECT * FROM public.count_unique_followers_by_address(${top_n})`
+    const result: QueryResult<unknown> = await query.execute(this.db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      followers_count: row.followers_count
+    }))
   }
 }
