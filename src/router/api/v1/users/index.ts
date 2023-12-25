@@ -78,10 +78,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
     const { ensOrAddress } = context.req.param()
 
     const address: Address = await services.ens().getAddress(ensOrAddress)
-    const followers: {
-      token_id: number
-      list_user: string
-    }[] = await services.efp(context.env).getFollowers(address)
+    const followers: `0x${string}`[] = await services.efp(context.env).getFollowers(address)
     return context.json(
       {
         followers
@@ -212,6 +209,13 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
       .efp(context.env)
       .getTopFollowed(10)
     return context.json(mostFollowers, 200)
+  })
+
+  users.get('/top-following', async context => {
+    const mostFollowing: { address: string; following_count: number }[] = await services
+      .efp(context.env)
+      .getTopFollowing(10)
+    return context.json(mostFollowing, 200)
   })
 
   return users

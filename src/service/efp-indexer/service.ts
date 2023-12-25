@@ -27,6 +27,7 @@ export interface IEFPIndexerService {
   getFollowers(address: `0x${string}`): Promise<Address[]>
   getPrimaryList(address: Address): Promise<number | undefined>
   getTopFollowed(top_n: number): Promise<{ address: Address; followers_count: number }[]>
+  getTopFollowing(top_n: number): Promise<{ address: Address; following_count: number }[]>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -302,6 +303,20 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result.rows.map((row: any) => ({
       address: row.address,
       followers_count: row.followers_count
+    }))
+  }
+
+  async getTopFollowing(top_n: number): Promise<{ address: Address; following_count: number }[]> {
+    const query = sql`SELECT * FROM public.count_unique_following_by_address(${top_n})`
+    const result: QueryResult<unknown> = await query.execute(this.db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      following_count: row.following_count
     }))
   }
 }
