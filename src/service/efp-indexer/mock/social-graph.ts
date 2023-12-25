@@ -1,4 +1,4 @@
-import { serializeListRecord, type ListRecord } from '#/types/list-record'
+import { type ListRecord, serializeListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -221,6 +221,10 @@ export class SocialGraph {
     return followers
   }
 
+  getFollowersCount(address: `0x${string}`): number {
+    return this.getFollowers(address).length
+  }
+
   getFollowing(address: `0x${string}`): ListRecord[] {
     const primaryList: TokenId | undefined = this.getPrimaryList(address)
     if (primaryList === undefined) return []
@@ -236,6 +240,60 @@ export class SocialGraph {
       following.push(record)
     }
     return following
+  }
+
+  getFollowingCount(address: `0x${string}`): number {
+    return this.getFollowing(address).length
+  }
+
+  // iterate over each of the users with a primary list set
+  // count their following
+  // sort by following count
+  getLeaderboardFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
+    const leaderboard: { address: `0x${string}`; following_count: number }[] = []
+    for (const [listUser, tokenId] of this.primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const followingCount: number = this.getFollowingCount(listUser)
+      leaderboard.push({ address: listUser, following_count: followingCount })
+    }
+    leaderboard.sort((a, b) => b.following_count - a.following_count)
+    return Promise.resolve(leaderboard.slice(0, limit))
+  }
+
+  // step 1: iterate over all known list records and extract the set of address records with >= 1 follow (de-duped into a set)
+  // then format that set into an array of { address, followers_count } objects
+  // step 2: sort the array by followers_count
+  // step 3: return the top N results
+  getLeaderboardFollowers(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
+    const followersByAddress: Map<`0x${string}`, Set<`0x${string}`>> = new Map()
+
+    // step 1: iterate over all list records for all lists
+    for (const [listId, list] of this.listRecords.entries()) {
+      let node = list.head
+      while (node) {
+        const record = node.value
+        const tags = this.getTags(listId, record)
+        if (SocialGraph.isFollow(record, tags)) {
+          const followed: `0x${string}` = `0x${record.data.toString('hex')}` as `0x${string}`
+          const follower: `0x${string}` = listId.toString() as `0x${string}`
+          if (!followersByAddress.has(followed)) {
+            followersByAddress.set(followed, new Set())
+          }
+          const followers = followersByAddress.get(followed)
+          if (followers) {
+            followers.add(follower)
+          }
+        }
+        node = node.next
+      }
+    }
+
+    const leaderboard: { address: `0x${string}`; followers_count: number }[] = []
+    for (const [address, followers] of followersByAddress.entries()) {
+      leaderboard.push({ address, followers_count: followers.size })
+    }
+    leaderboard.sort((a, b) => b.followers_count - a.followers_count)
+    return Promise.resolve(leaderboard.slice(0, limit))
   }
 }
 

@@ -9,8 +9,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     this.socialGraph = makeSocialGraph()
   }
 
+  // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowersCount(address: `0x${string}`): Promise<number> {
-    return (await this.socialGraph.getFollowers(address)).length
+    return this.socialGraph.getFollowersCount(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
@@ -18,8 +19,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.socialGraph.getFollowers(address)
   }
 
+  // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowingCount(address: `0x${string}`): Promise<number> {
-    return (await this.socialGraph.getFollowing(address)).length
+    return this.socialGraph.getFollowingCount(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
@@ -29,12 +31,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getLeaderboardFollowers(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
-    throw new Error('MockEFPIndexerService::getLeaderboardFollowers not implemented.')
+    return this.socialGraph.getLeaderboardFollowers(limit)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getLeaderboardFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
-    throw new Error('MockEFPIndexerService::getLeaderboardFollowing not implemented.')
+    return this.socialGraph.getLeaderboardFollowing(limit)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
