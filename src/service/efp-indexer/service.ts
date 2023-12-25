@@ -1,5 +1,5 @@
-import type { Kysely } from 'kysely'
 import type { Address } from '#/types'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -217,36 +217,17 @@ export class EFPIndexerService implements IEFPIndexerService {
     return uniqueUsers.size
   }
 
-  async getFollowers(address: Address): Promise<{ token_id: number; list_user: string }[]> {
-    const subquery = this.db
-      .selectFrom('list_records as lr')
-      // inner join because we only want to count records associated with a list nft
-      // this will exclude cases where a list record is created but not associated with a list nft
-      .innerJoin('list_nfts_view as nft', join =>
-        // list storage location
-        // - chain id
-        // - contract address
-        // - nonce
-        join
-          .onRef('nft.list_storage_location_chain_id', '=', 'lr.chain_id')
-          .onRef('nft.list_storage_location_contract_address', '=', 'lr.contract_address')
-          .onRef('nft.list_storage_location_nonce', '=', 'lr.nonce')
-      )
-      // bring in token id and list user
-      .select(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'nft.token_id', 'nft.list_user'])
-      .where('version', '=', 1)
-      .where('type', '=', 1)
-      // filter by query parameters
-      .where('data', '=', address)
-      .orderBy('nft.token_id', 'asc')
+  async getFollowers(address: Address) {
+    const query = sql`SELECT * FROM public.get_followers(${address})`
+    const result: QueryResult<unknown> = await query.execute(this.db)
 
-    const result = await subquery.execute()
-    if (result === undefined) {
+    if (!result || result.rows.length === 0) {
       return []
     }
-    return result.map(({ token_id, list_user }) => ({
-      token_id: Number(token_id),
-      list_user: list_user || ''
+
+    return result.rows.map((row: any) => ({
+      token_id: Number(row.token_id),
+      list_user: row.list_user
     }))
   }
 
