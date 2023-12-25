@@ -1,5 +1,5 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
 import type { Address, MaybePromise } from '#/types'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -230,7 +230,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowers(address: Address): Promise<Address[]> {
-    const query = sql`SELECT * FROM public.get_unique_followers(${address})`
+    const query = sql`SELECT * FROM public.get_unique_followers(${address.toLowerCase()})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {

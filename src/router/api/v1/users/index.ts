@@ -1,5 +1,5 @@
-import { Hono } from 'hono'
 import type { Address } from '#/types'
+import { Hono } from 'hono'
 
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
@@ -71,6 +71,28 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
 
     const ensProfile: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
     return context.json({ ens: ensProfile }, 200)
+  })
+
+  users.get('/:ensOrAddress/profile', async context => {
+    const { ensOrAddress } = context.req.param()
+
+    const ens: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
+    const efp: IEFPIndexerService = services.efp(context.env)
+    const followers: `0x${string}`[] = await efp.getFollowers(ens.address)
+    const primaryList: number | undefined = await getPrimaryList(services.ens(), efp, ens.address)
+    // TODO: need to implement getFollowing in EFPIndexerService
+
+    const listRecords: {
+      version: number
+      recordType: number
+      data: `0x${string}`
+    }[] = primaryList === undefined ? [] : await efp.getListRecords(BigInt(primaryList))
+    const listRecordsLabeled: {
+      version: number
+      record_type: string
+      data: `0x${string}`
+    }[] = label(listRecords)
+    return context.json({ ens: ens, primary_list: primaryList ?? null, following: listRecordsLabeled, followers }, 200)
   })
 
   // Followers list
