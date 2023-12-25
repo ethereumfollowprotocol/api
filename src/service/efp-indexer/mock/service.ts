@@ -9,26 +9,22 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     this.socialGraph = makeSocialGraph()
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowersCount(address: `0x${string}`): Promise<number> {
-    throw new Error('MockEFPIndexerService::getFollowersCount not implemented.')
+    return (await this.socialGraph.getFollowers(address)).length
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowers(address: `0x${string}`): Promise<`0x${string}`[]> {
-    throw new Error('MockEFPIndexerService::getFollowers not implemented.')
+    return this.socialGraph.getFollowers(address)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowingCount(address: `0x${string}`): Promise<number> {
-    throw new Error('MockEFPIndexerService::getFollowingCount not implemented.')
+    return (await this.socialGraph.getFollowing(address)).length
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowing(address: `0x${string}`): Promise<ListRecord[]> {
-    const primaryList: bigint | undefined = this.socialGraph.getPrimaryList(address)
-    if (primaryList === undefined) return []
-    throw new Error('MockEFPIndexerService::getFollowing not implemented.')
+    return this.socialGraph.getFollowing(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
@@ -46,7 +42,8 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('MockEFPIndexerService::getListStorageLocation not implemented.')
   }
 
-  getListRecordCount(tokenId: bigint): number {
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getListRecordCount(tokenId: bigint): Promise<number> {
     return this.socialGraph.getListRecords(tokenId).length
   }
 

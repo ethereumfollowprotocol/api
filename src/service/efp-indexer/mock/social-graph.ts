@@ -1,4 +1,4 @@
-import { type ListRecord, serializeListRecord } from '#/types/list-record'
+import { serializeListRecord, type ListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -191,16 +191,46 @@ export class SocialGraph {
     return records
   }
 
-  getFollowing(listId: TokenId): ListRecord[] {
-    const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(listId)
+  static isFollow(record: ListRecord, tags: Set<Tag>): boolean {
+    if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
+      return false
+    }
+    if (tags.has('block') || tags.has('mute')) {
+      return false
+    }
+    return true
+  }
+
+  getFollowers(address: `0x${string}`): `0x${string}`[] {
+    const followers: `0x${string}`[] = []
+    // check every primary list to see if it contains the address
+    for (const [listUser, tokenId] of this.primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(tokenId)
+      for (const listRecordTag of listRecordTags) {
+        const { record, tags } = listRecordTag
+        if (!SocialGraph.isFollow(record, tags)) {
+          continue
+        }
+        const follower: `0x${string}` = `0x${record.data.toString('hex')}` as `0x${string}`
+        if (follower.toLowerCase() === address.toLowerCase()) {
+          followers.push(listUser)
+        }
+      }
+    }
+    return followers
+  }
+
+  getFollowing(address: `0x${string}`): ListRecord[] {
+    const primaryList: TokenId | undefined = this.getPrimaryList(address)
+    if (primaryList === undefined) return []
+
+    const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(primaryList)
     // filter all the ones with "block" or "mute" in the tags
     const following: ListRecord[] = []
     for (const listRecordTag of listRecordTags) {
       const { record, tags } = listRecordTag
-      if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
-        continue
-      }
-      if (tags.has('block') || tags.has('mute')) {
+      if (!SocialGraph.isFollow(record, tags)) {
         continue
       }
       following.push(record)
