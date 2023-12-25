@@ -125,14 +125,14 @@ export class EFPIndexerService implements IEFPIndexerService {
     const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
     const result = await this.#db
       .selectFrom('list_records')
-      .select(['version', 'type', 'data'])
+      .select(['version', 'record_type', 'data'])
       // TODO: WHERE chain id
       .where('contract_address', '=', contractAddress)
       .where('nonce', '=', nonce.toString())
       .execute()
-    return result.map(({ version, type, data }) => ({
+    return result.map(({ version, record_type, data }) => ({
       version,
-      recordType: type,
+      recordType: record_type,
       data: data as Address
     }))
   }
@@ -164,7 +164,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       )
       .select(({ fn, ref }) => [
         'lr.version',
-        'lr.type',
+        'lr.record_type',
         'lr.data',
 
         // Using fn.agg to aggregate tags into an array
@@ -178,12 +178,13 @@ export class EFPIndexerService implements IEFPIndexerService {
       .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record'])
       .execute()
     // filter nulls
-    const filtered: { version: number; type: number; data: `0x${string}`; agg_tags: string[] }[] = result.filter(
-      ({ version, type, data, agg_tags }) => version !== null && type !== null && data !== null && agg_tags !== null
-    ) as { version: number; type: number; data: `0x${string}`; agg_tags: string[] }[]
-    return filtered.map(({ version, type, data, agg_tags }) => ({
+    const filtered: { version: number; record_type: number; data: `0x${string}`; agg_tags: string[] }[] = result.filter(
+      ({ version, record_type, data, agg_tags }) =>
+        version !== null && record_type !== null && data !== null && agg_tags !== null
+    ) as { version: number; record_type: number; data: `0x${string}`; agg_tags: string[] }[]
+    return filtered.map(({ version, record_type, data, agg_tags }) => ({
       version,
-      recordType: type,
+      recordType: record_type,
       data: data as Address,
       tags: agg_tags as string[]
     }))
@@ -246,7 +247,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       .select(['token_id', 'list_user'])
       .where('has_block_tag', '=', true)
       .where('version', '=', 1)
-      .where('type', '=', 1)
+      .where('record_type', '=', 1)
       .where('data', '=', address)
       .execute()
 
@@ -273,7 +274,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       .select(['token_id', 'list_user'])
       .where('has_mute_tag', '=', true)
       .where('version', '=', 1)
-      .where('type', '=', 1)
+      .where('record_type', '=', 1)
       .where('data', '=', address)
       .execute()
 
