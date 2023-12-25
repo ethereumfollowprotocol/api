@@ -1,4 +1,4 @@
-import type { ListRecord } from '#/types/list-record'
+import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type { IEFPIndexerService } from '../service'
 import { SocialGraph, makeSocialGraph } from './social-graph'
 
@@ -25,7 +25,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowing(address: `0x${string}`): Promise<ListRecord[]> {
+  async getFollowing(address: `0x${string}`): Promise<TaggedListRecord[]> {
     return this.socialGraph.getFollowing(address)
   }
 

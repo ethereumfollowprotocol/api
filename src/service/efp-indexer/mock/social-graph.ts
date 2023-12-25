@@ -1,4 +1,4 @@
-import { type ListRecord, serializeListRecord } from '#/types/list-record'
+import { type ListRecord, type TaggedListRecord, serializeListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -225,19 +225,19 @@ export class SocialGraph {
     return this.getFollowers(address).length
   }
 
-  getFollowing(address: `0x${string}`): ListRecord[] {
+  getFollowing(address: `0x${string}`): TaggedListRecord[] {
     const primaryList: TokenId | undefined = this.getPrimaryList(address)
     if (primaryList === undefined) return []
 
     const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(primaryList)
     // filter all the ones with "block" or "mute" in the tags
-    const following: ListRecord[] = []
+    const following: TaggedListRecord[] = []
     for (const listRecordTag of listRecordTags) {
       const { record, tags } = listRecordTag
       if (!SocialGraph.isFollow(record, tags)) {
         continue
       }
-      following.push(record)
+      following.push({ ...record, tags: Array.from(tags) })
     }
     return following
   }

@@ -4,13 +4,13 @@ import type { Address, MaybePromise } from '#/types'
 import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
-import type { ListRecord } from '#/types/list-record'
+import type { TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
   getFollowersCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<Address[]>
   getFollowingCount(address: `0x${string}`): Promise<number>
-  getFollowing(address: `0x${string}`): Promise<ListRecord[]>
+  getFollowing(address: `0x${string}`): Promise<TaggedListRecord[]>
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
@@ -56,7 +56,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return new Set(await this.getFollowing(address)).size
   }
 
-  async getFollowing(address: `0x${string}`): Promise<ListRecord[]> {
+  async getFollowing(address: `0x${string}`): Promise<TaggedListRecord[]> {
     const query = sql`SELECT * FROM public.get_following(${address.toLowerCase()})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -64,22 +64,26 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    const rows: {
+    type Row = {
       token_id: bigint
       version: number
       record_type: number
       data: string
-    }[] = result.rows as {
+      tags: string[]
+    }
+    const rows: Row[] = result.rows as {
       token_id: bigint
       version: number
       record_type: number
       data: string
+      tags: string[]
     }[]
 
-    return rows.map((row: { token_id: bigint; version: number; record_type: number; data: string }) => ({
+    return rows.map((row: Row) => ({
       version: row.version,
       recordType: row.record_type,
-      data: Buffer.from(row.data.replace('0x', ''), 'hex')
+      data: Buffer.from(row.data.replace('0x', ''), 'hex'),
+      tags: row.tags.sort()
     }))
   }
 

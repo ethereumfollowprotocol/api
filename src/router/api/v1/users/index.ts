@@ -6,7 +6,7 @@ import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { IENSMetadataService } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
-import type { ListRecord } from '#/types/list-record'
+import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import { ensureArray } from '#/utilities.ts'
 
 async function getPrimaryList(
@@ -19,15 +19,17 @@ async function getPrimaryList(
   return primaryList
 }
 
-function label(listRecords: ListRecord[]): {
+function label(listRecords: TaggedListRecord[]): {
   version: number
   record_type: string
   data: `0x${string}`
+  tags: string[]
 }[] {
-  return listRecords.map(({ version, recordType, data }) => ({
+  return listRecords.map(({ version, recordType, data, tags }) => ({
     version,
     record_type: recordType === 1 ? 'address' : `${recordType}`,
-    data: `0x${Buffer.from(data).toString('hex')}` as `0x${string}`
+    data: `0x${Buffer.from(data).toString('hex')}` as `0x${string}`,
+    tags
   }))
 }
 
@@ -144,12 +146,13 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
     const address: Address = await services.ens().getAddress(ensOrAddress)
     const efp: IEFPIndexerService = services.efp(context.env)
     const followingListRecords: ListRecord[] = await efp.getFollowing(address)
-    const listRecordsLabeled: {
+    const prettyFollowingListRecords: {
       version: number
       record_type: string
       data: `0x${string}`
+      tags: string[]
     }[] = label(followingListRecords)
-    return context.json({ following: listRecordsLabeled }, 200)
+    return context.json({ following: prettyFollowingListRecords }, 200)
   })
 
   // // Following list with tags included in response json

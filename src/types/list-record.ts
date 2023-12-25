@@ -4,6 +4,10 @@ export type ListRecord = {
   data: Buffer
 }
 
+export type TaggedListRecord = ListRecord & {
+  tags: string[]
+}
+
 function toHexString(num: number): string {
   return num.toString(16).padStart(2, '0')
 }
