@@ -1,3 +1,4 @@
+import type { ListRecord } from '#/types/list-record'
 import type { IEFPIndexerService } from '../service'
 import { SocialGraph, makeSocialGraph } from './social-graph'
 
@@ -24,7 +25,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowing(address: `0x${string}`): Promise<`0x${string}`[]> {
+  async getFollowing(address: `0x${string}`): Promise<ListRecord[]> {
+    const primaryList: bigint | undefined = this.socialGraph.getPrimaryList(address)
+    if (primaryList === undefined) return []
     throw new Error('MockEFPIndexerService::getFollowing not implemented.')
   }
 

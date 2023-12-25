@@ -1,15 +1,16 @@
+import { type Kysely, type QueryResult, sql } from 'kysely'
 import type { Address, MaybePromise } from '#/types'
-import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
+import type { ListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
   getFollowersCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<Address[]>
   getFollowingCount(address: `0x${string}`): Promise<number>
-  getFollowing(address: `0x${string}`): Promise<Address[]>
+  getFollowing(address: `0x${string}`): Promise<ListRecord[]>
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
@@ -33,9 +34,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getFollowersCount(address: Address): Promise<number> {
-    const possibleDuplicates = await this.getFollowers(address)
-    const uniqueUsers = new Set(possibleDuplicates)
-    return uniqueUsers.size
+    return new Set(await this.getFollowers(address)).size
   }
 
   async getFollowers(address: Address): Promise<Address[]> {
@@ -53,12 +52,35 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Following
   /////////////////////////////////////////////////////////////////////////////
 
-  getFollowingCount(address: `0x${string}`): Promise<number> {
-    throw new Error('Method not implemented.')
+  async getFollowingCount(address: `0x${string}`): Promise<number> {
+    return new Set(await this.getFollowing(address)).size
   }
 
-  getFollowing(address: `0x${string}`): Promise<`0x${string}`[]> {
-    throw new Error('Method not implemented.')
+  async getFollowing(address: `0x${string}`): Promise<ListRecord[]> {
+    const query = sql`SELECT * FROM public.get_following(${address.toLowerCase()})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    const rows: {
+      token_id: bigint
+      version: number
+      record_type: number
+      data: string
+    }[] = result.rows as {
+      token_id: bigint
+      version: number
+      record_type: number
+      data: string
+    }[]
+
+    return rows.map((row: { token_id: bigint; version: number; record_type: number; data: string }) => ({
+      version: row.version,
+      recordType: row.record_type,
+      data: Buffer.from(row.data.replace('0x', ''), 'hex')
+    }))
   }
 
   /////////////////////////////////////////////////////////////////////////////

@@ -6,6 +6,7 @@ import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { IENSMetadataService } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
+import type { ListRecord } from '#/types/list-record'
 import { ensureArray } from '#/utilities.ts'
 
 async function getPrimaryList(
@@ -18,13 +19,7 @@ async function getPrimaryList(
   return primaryList
 }
 
-function label(
-  listRecords: {
-    version: number
-    recordType: number
-    data: `0x${string}`
-  }[]
-): {
+function label(listRecords: ListRecord[]): {
   version: number
   record_type: string
   data: `0x${string}`
@@ -32,7 +27,7 @@ function label(
   return listRecords.map(({ version, recordType, data }) => ({
     version,
     record_type: recordType === 1 ? 'address' : `${recordType}`,
-    data
+    data: `0x${Buffer.from(data).toString('hex')}` as `0x${string}`
   }))
 }
 
@@ -110,21 +105,15 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
         /**
          * TODO: need to implement getFollowing in EFPIndexerService. `null` placeholder for now.
          */
-        include.includes('following-list') ? null : null,
+        include.includes('following-list') ? efp.getFollowing(address) : null,
         include.includes('primary-list') ? getPrimaryList(services.ens(), efp, address) : undefined
       ])
-
-      const listRecords: {
-        version: number
-        recordType: number
-        data: `0x${string}`
-      }[] = primaryList === undefined ? [] : await efp.getListRecords(primaryList)
 
       const listRecordsLabeled: {
         version: number
         record_type: string
         data: `0x${string}`
-      }[] = label(listRecords)
+      }[] = label(following !== null ? following : [])
       return context.json(
         {
           address,
@@ -152,50 +141,42 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   users.get('/:ensOrAddress/following', async context => {
     const { ensOrAddress } = context.req.param()
 
+    const address: Address = await services.ens().getAddress(ensOrAddress)
     const efp: IEFPIndexerService = services.efp(context.env)
-    const primaryList: bigint | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
-    if (primaryList === undefined) {
-      return context.json([], 200)
-    }
-
-    const listRecords: {
-      version: number
-      recordType: number
-      data: `0x${string}`
-    }[] = await efp.getListRecords(primaryList)
+    const followingListRecords: ListRecord[] = await efp.getFollowing(address)
     const listRecordsLabeled: {
       version: number
       record_type: string
       data: `0x${string}`
-    }[] = label(listRecords)
+    }[] = label(followingListRecords)
     return context.json({ following: listRecordsLabeled }, 200)
   })
 
-  // Following list with tags included in response json
-  users.get('/:ensOrAddress/following/tags', async context => {
-    const { ensOrAddress } = context.req.param()
+  // // Following list with tags included in response json
+  // users.get('/:ensOrAddress/following/tags', async context => {
+  //   const { ensOrAddress } = context.req.param()
 
-    const efp: IEFPIndexerService = services.efp(context.env)
-    console.log(context.req.param())
-    const primaryList: bigint | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
-    if (primaryList === undefined) {
-      return context.json([], 200)
-    }
+  //   const efp: IEFPIndexerService = services.efp(context.env)
+  //   console.log(context.req.param())
+  //   const primaryList: bigint | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
+  //   if (primaryList === undefined) {
+  //     return context.json([], 200)
+  //   }
 
-    const listRecords: {
-      version: number
-      recordType: number
-      data: `0x${string}`
-      tags: string[]
-    }[] = await efp.getListRecordsWithTags(primaryList)
-    const listRecordsLabeled: {
-      version: number
-      record_type: string
-      data: `0x${string}`
-      tags: string[]
-    }[] = labelWithTags(listRecords)
-    return context.json({ following: listRecordsLabeled }, 200)
-  })
+  //   const listRecords: {
+  //     version: number
+  //     recordType: number
+  //     data: `0x${string}`
+  //     tags: string[]
+  //   }[] = await efp.getListRecordsWithTags(primaryList)
+  //   const listRecordsLabeled: {
+  //     version: number
+  //     record_type: string
+  //     data: `0x${string}`
+  //     tags: string[]
+  //   }[] = labelWithTags(listRecords)
+  //   return context.json({ following: listRecordsLabeled }, 200)
+  // })
 
   // Primary list
   users.get('/:ensOrAddress/primary-list', async context => {
@@ -256,22 +237,6 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
 
     stats.following_count = await efp.getListRecordCount(primaryList)
     return context.json(stats, 200)
-  })
-
-  users.get('/top-followed', async context => {
-    const limit = context.req.query('limit') ? parseInt(context.req.query('limit') as string, 10) : 10
-    const mostFollowers: { address: string; followers_count: number }[] = await services
-      .efp(context.env)
-      .getLeaderboardFollowers(limit)
-    return context.json(mostFollowers, 200)
-  })
-
-  users.get('/top-following', async context => {
-    const limit = context.req.query('limit') ? parseInt(context.req.query('limit') as string, 10) : 10
-    const mostFollowing: { address: string; following_count: number }[] = await services
-      .efp(context.env)
-      .getLeaderboardFollowing(limit)
-    return context.json(mostFollowing, 200)
   })
 
   return users
