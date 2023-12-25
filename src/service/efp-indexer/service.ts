@@ -24,7 +24,7 @@ export interface IEFPIndexerService {
     tokenId: bigint
   ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]>
   getFollowersCount(address: `0x${string}`): Promise<number>
-  getFollowers(address: `0x${string}`): Promise<{ token_id: number; list_user: string }[]>
+  getFollowers(address: `0x${string}`): Promise<Address[]>
   getPrimaryList(address: Address): Promise<number | undefined>
 }
 
@@ -217,18 +217,15 @@ export class EFPIndexerService implements IEFPIndexerService {
     return uniqueUsers.size
   }
 
-  async getFollowers(address: Address) {
-    const query = sql`SELECT * FROM public.get_followers(${address})`
+  async getFollowers(address: Address): Promise<Address[]> {
+    const query = sql`SELECT * FROM public.get_unique_followers(${address})`
     const result: QueryResult<unknown> = await query.execute(this.db)
 
     if (!result || result.rows.length === 0) {
       return []
     }
 
-    return result.rows.map((row: any) => ({
-      token_id: Number(row.token_id),
-      list_user: row.list_user
-    }))
+    return result.rows.map((row: any) => row.list_user)
   }
 
   async getWhoBlocks(address: Address): Promise<{ token_id: number; list_user: string }[]> {
