@@ -292,8 +292,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     return await this.getListRecordsFilterByTags(tokenId, 'mute')
   }
 
-  async getTopFollowed(top_n: number): Promise<{ address: Address; followers_count: number }[]> {
-    const query = sql`SELECT * FROM public.count_unique_followers_by_address(${top_n})`
+  async getTopFollowed(limit: number): Promise<{ address: Address; followers_count: number }[]> {
+    const query = sql`SELECT * FROM public.count_unique_followers_by_address(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.db)
 
     if (!result || result.rows.length === 0) {
@@ -306,8 +306,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getTopFollowing(top_n: number): Promise<{ address: Address; following_count: number }[]> {
-    const query = sql`SELECT * FROM public.count_unique_following_by_address(${top_n})`
+  async getTopFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
+    const query = sql`SELECT * FROM public.count_unique_following_by_address(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.db)
 
     if (!result || result.rows.length === 0) {
