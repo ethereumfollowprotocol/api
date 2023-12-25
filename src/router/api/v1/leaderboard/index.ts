@@ -10,7 +10,7 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
     const limit = context.req.query('limit') ? parseInt(context.req.query('limit') as string, 10) : 10
     const mostFollowers: { address: string; followers_count: number }[] = await services
       .efp(context.env)
-      .getTopFollowed(limit)
+      .getLeaderboardFollowers(limit)
     return context.json(mostFollowers, 200)
   })
 
@@ -18,7 +18,7 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
     const limit = context.req.query('limit') ? parseInt(context.req.query('limit') as string, 10) : 10
     const mostFollowing: { address: string; following_count: number }[] = await services
       .efp(context.env)
-      .getTopFollowing(limit)
+      .getLeaderboardFollowing(limit)
     return context.json(mostFollowing, 200)
   })
 

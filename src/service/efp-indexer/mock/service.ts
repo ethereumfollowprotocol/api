@@ -56,12 +56,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return Number(result)
   }
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getTopFollowed(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
+  async getLeaderboardFollowers(limit: number): Promise<{ address: `0x${string}`; followers_count: number }[]> {
     throw new Error('Method not implemented.')
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getTopFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
+  async getLeaderboardFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
     throw new Error('Method not implemented.')
   }
 }

@@ -1,4 +1,4 @@
-import { serializeListRecord, type ListRecord } from '#/types/list-record'
+import { type ListRecord, serializeListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint

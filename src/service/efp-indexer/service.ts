@@ -1,5 +1,5 @@
+import { type Kysely, type QueryResult, sql } from 'kysely'
 import type { Address } from '#/types'
-import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -17,17 +17,19 @@ function decodePrimaryList(hexstringUint256: string): number | undefined {
 }
 
 export interface IEFPIndexerService {
+  getFollowersCount(address: `0x${string}`): Promise<number>
+  getFollowers(address: `0x${string}`): Promise<Address[]>
+  getFollowingCount(address: `0x${string}`): Promise<number>
+  getFollowing(address: `0x${string}`): Promise<Address[]>
+  getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
+  getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
   getListRecordsWithTags(
     tokenId: bigint
   ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]>
-  getFollowersCount(address: `0x${string}`): Promise<number>
-  getFollowers(address: `0x${string}`): Promise<Address[]>
   getPrimaryList(address: Address): Promise<number | undefined>
-  getTopFollowed(limit: number): Promise<{ address: Address; followers_count: number }[]>
-  getTopFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -133,6 +135,14 @@ export class EFPIndexerService implements IEFPIndexerService {
       recordType: type,
       data: data as Address
     }))
+  }
+
+  getFollowingCount(address: `0x${string}`): Promise<number> {
+    throw new Error('Method not implemented.')
+  }
+
+  getFollowing(address: `0x${string}`): Promise<`0x${string}`[]> {
+    throw new Error('Method not implemented.')
   }
 
   async getListRecordsWithTags(
@@ -292,7 +302,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return await this.getListRecordsFilterByTags(tokenId, 'mute')
   }
 
-  async getTopFollowed(limit: number): Promise<{ address: Address; followers_count: number }[]> {
+  async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
     const query = sql`SELECT * FROM public.count_unique_followers_by_address(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.db)
 
@@ -306,7 +316,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getTopFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
+  async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
     const query = sql`SELECT * FROM public.count_unique_following_by_address(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.db)
 

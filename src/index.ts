@@ -11,11 +11,11 @@ import { demoRouter } from '#/demo'
 import { apiLogger } from '#/logger.ts'
 import { api } from '#/router/api/v1'
 import { errorHandler, errorLogger } from '#/router/middleware'
+import { MockEFPIndexerService } from '#/service/efp-indexer/mock/service'
 import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
 import type { Environment } from '#/types'
 import type { Services } from './service'
-import { MockEFPIndexerService } from './service/efp-indexer/mock/service'
 
 const app = new Hono<{ Bindings: Environment }>()
 
