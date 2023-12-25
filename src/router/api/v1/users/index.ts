@@ -205,16 +205,18 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   })
 
   users.get('/top-followed', async context => {
+    const n = context.req.query('n') ? parseInt(context.req.query('n') as string, 10) : 10
     const mostFollowers: { address: string; followers_count: number }[] = await services
       .efp(context.env)
-      .getTopFollowed(10)
+      .getTopFollowed(n)
     return context.json(mostFollowers, 200)
   })
 
   users.get('/top-following', async context => {
+    const n = context.req.query('n') ? parseInt(context.req.query('n') as string, 10) : 10
     const mostFollowing: { address: string; following_count: number }[] = await services
       .efp(context.env)
-      .getTopFollowing(10)
+      .getTopFollowing(n)
     return context.json(mostFollowing, 200)
   })
 
