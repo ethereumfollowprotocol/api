@@ -1,4 +1,6 @@
 interface EnvironmentVariables {
+  readonly NODE_ENV: 'development' | 'production' | 'test'
+  ENV: 'development' | 'production' | 'test'
   readonly PORT: string
   readonly LLAMAFOLIO_ID: string
   readonly ANKR_ID: string
@@ -11,7 +13,6 @@ interface EnvironmentVariables {
 
 // Cloudflare Workers
 interface Env extends EnvironmentVariables {
-  readonly ENV: 'development' | 'production' | 'test'
   // ens is a binded service in wrangler.toml
   readonly ens: Record<string, unknown>
   // EFP_API_KV is a binded kv namespace in wrangler.toml

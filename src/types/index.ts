@@ -1,5 +1,7 @@
 export * from './generated'
 
+export type StringifiedBoolean = 'true' | 'false'
+
 export type MaybePromise<T> = T | Promise<T> | PromiseLike<T>
 
 export type Address = `0x${string}`
