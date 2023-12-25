@@ -20,6 +20,9 @@ export class ENSMetadataService implements IENSMetadataService {
   }
 
   async getENSProfile(ensNameOrAddress: Address | string): Promise<ENSProfile> {
+    if (ensNameOrAddress === undefined) {
+      raise('ENS name or address is required')
+    }
     const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
 
     if (!response.ok) {

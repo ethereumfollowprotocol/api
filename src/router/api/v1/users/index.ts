@@ -93,11 +93,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
     const { ensOrAddress } = context.req.param()
 
     const efp: IEFPIndexerService = services.efp(context.env)
-    const primaryList: number | undefined = await getPrimaryList(
-      services.ens(),
-      services.efp(context.env),
-      ensOrAddress
-    )
+    const primaryList: number | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
     if (primaryList === undefined) {
       return context.json([], 200)
     }
@@ -120,14 +116,12 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
     const { ensOrAddress } = context.req.param()
 
     const efp: IEFPIndexerService = services.efp(context.env)
-    const primaryList: number | undefined = await getPrimaryList(
-      services.ens(),
-      services.efp(context.env),
-      ensOrAddress
-    )
+    console.log(context.req.param())
+    const primaryList: number | undefined = await getPrimaryList(services.ens(), efp, ensOrAddress)
     if (primaryList === undefined) {
       return context.json([], 200)
     }
+
     const listRecords: {
       version: number
       recordType: number

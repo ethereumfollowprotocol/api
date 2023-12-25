@@ -148,7 +148,7 @@ export class SocialGraph {
   // read-only functions
 
   // O(n) time
-  getRecords(listId: TokenId): ListRecord[] {
+  getListRecords(listId: TokenId): ListRecord[] {
     const records: ListRecord[] = []
     const list = this.listRecords.get(listId)
     if (list) {
@@ -175,6 +175,37 @@ export class SocialGraph {
       }
     }
     return new Set<Tag>()
+  }
+
+  getListRecordTags(listId: TokenId): { record: ListRecord; tags: Set<Tag> }[] {
+    const records: { record: ListRecord; tags: Set<Tag> }[] = []
+    const list = this.listRecords.get(listId)
+    if (list) {
+      let node = list.head
+      while (node) {
+        const tags = this.getTags(listId, node.value)
+        records.push({ record: node.value, tags })
+        node = node.next
+      }
+    }
+    return records
+  }
+
+  getFollowing(listId: TokenId): ListRecord[] {
+    const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(listId)
+    // filter all the ones with "block" or "mute" in the tags
+    const following: ListRecord[] = []
+    for (const listRecordTag of listRecordTags) {
+      const { record, tags } = listRecordTag
+      if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
+        continue
+      }
+      if (tags.has('block') || tags.has('mute')) {
+        continue
+      }
+      following.push(record)
+    }
+    return following
   }
 }
 

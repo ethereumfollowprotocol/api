@@ -1,7 +1,7 @@
 export type ListRecord = {
   version: number
   recordType: number
-  data: Uint8Array
+  data: Buffer
 }
 
 function toHexString(num: number): string {

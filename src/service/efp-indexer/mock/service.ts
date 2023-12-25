@@ -14,12 +14,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   async getListRecordCount(tokenId: bigint): Promise<number> {
-    return (await this.socialGraph.getRecords(tokenId)).length
+    return (await this.socialGraph.getListRecords(tokenId)).length
   }
 
   async getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
     const result: { version: number; recordType: number; data: `0x${string}` }[] = this.socialGraph
-      .getRecords(tokenId)
+      .getListRecords(tokenId)
       .map(record => ({
         version: record.version,
         recordType: record.recordType,
@@ -28,11 +28,15 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return result
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
   async getListRecordsWithTags(
     tokenId: bigint
   ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]> {
-    throw new Error('Method not implemented.')
+    return this.socialGraph.getListRecordTags(tokenId).map(obj => ({
+      version: obj.record.version,
+      recordType: obj.record.recordType,
+      data: `0x${Buffer.from(obj.record.data).toString('hex')}` as `0x${string}`,
+      tags: Array.from(obj.tags).sort()
+    }))
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
