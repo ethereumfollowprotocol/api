@@ -49,15 +49,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.socialGraph.getListRecords(tokenId).length
   }
 
-  async getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
-    const result: { version: number; recordType: number; data: `0x${string}` }[] = this.socialGraph
-      .getListRecords(tokenId)
-      .map(record => ({
-        version: record.version,
-        recordType: record.recordType,
-        data: `0x${Buffer.from(record.data).toString('hex')}` as `0x${string}`
-      }))
-    return result
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getListRecords(tokenId: bigint): Promise<ListRecord[]> {
+    return this.socialGraph.getListRecords(tokenId)
   }
 
   async getListRecordsWithTags(

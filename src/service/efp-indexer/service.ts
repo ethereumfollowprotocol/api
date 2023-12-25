@@ -1,10 +1,10 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
-import type { Address, MaybePromise } from '#/types'
+import type { Address } from '#/types'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
 import { decodeListStorageLocation } from '#/types/list-location-type'
-import type { TaggedListRecord } from '#/types/list-record'
+import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
   getFollowersCount(address: `0x${string}`): Promise<number>
@@ -14,8 +14,8 @@ export interface IEFPIndexerService {
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
-  getListRecordCount(tokenId: bigint): MaybePromise<number>
-  getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]>
+  getListRecordCount(tokenId: bigint): Promise<number>
+  getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(
     tokenId: bigint
   ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]>
@@ -136,51 +136,29 @@ export class EFPIndexerService implements IEFPIndexerService {
   // List Records
   /////////////////////////////////////////////////////////////////////////////
 
-  async getListRecordCount(tokenId: bigint): Promise<number> {
-    const listStorageLocation: Address | undefined = await this.getListStorageLocation(tokenId)
-    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
-      return 0
-    }
-    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    console.log({ version, locationType, chainId, contractAddress, nonce })
+  async getListRecords(tokenId: bigint): Promise<ListRecord[]> {
+    const query = sql`SELECT * FROM public.get_list_records(${tokenId})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
 
-    const countResult = await this.#db
-      .selectFrom('list_records')
-      .select(({ fn, val, ref }) => [
-        // The `fn` module contains the most common
-        // functions.
-        fn
-          .count<number>('record')
-          .as('count')
-      ])
-      // TODO: WHERE chain id
-      .where('contract_address', '=', contractAddress)
-      .where('nonce', '=', nonce.toString())
-      // TODO: GROUP BY chain id
-      .groupBy('contract_address')
-      .groupBy('nonce')
-      .executeTakeFirst()
-    return Number(countResult?.count ?? 0)
-  }
-
-  async getListRecords(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
-    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
-    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
+    if (!result || result.rows.length === 0) {
       return []
     }
-    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    const result = await this.#db
-      .selectFrom('list_records')
-      .select(['version', 'record_type', 'data'])
-      // TODO: WHERE chain id
-      .where('contract_address', '=', contractAddress)
-      .where('nonce', '=', nonce.toString())
-      .execute()
-    return result.map(({ version, record_type, data }) => ({
-      version,
-      recordType: record_type,
-      data: data as Address
+
+    type Row = {
+      version: number
+      record_type: number
+      data: `0x${string}`
+    }
+
+    return (result.rows as Row[]).map((row: Row) => ({
+      version: row.version,
+      recordType: row.record_type,
+      data: Buffer.from(row.data.replace('0x', ''), 'hex')
     }))
+  }
+
+  async getListRecordCount(tokenId: bigint): Promise<number> {
+    return (await this.getListRecords(tokenId)).length
   }
 
   async getListRecordsWithTags(
