@@ -1,5 +1,6 @@
 NODE_ENV="development"
 PORT="8787"
+IS_DEMO="false"
 
 # https://llamanodes.com
 LLAMAFOLIO_ID=""

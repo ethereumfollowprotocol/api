@@ -6,6 +6,7 @@ interface EnvironmentVariables {
   readonly INFURA_ID: string
   readonly DATABASE_URL: string
   readonly ENABLE_DATABASE_LOGGING: 'true' | 'false'
+  readonly IS_DEMO: 'true' | 'false'
 }
 
 // Cloudflare Workers

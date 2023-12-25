@@ -15,6 +15,7 @@ import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
 import type { Environment } from '#/types'
 import type { Services } from './service'
+import { MockEFPIndexerService } from './service/efp-indexer/mock/service'
 
 const app = new Hono<{ Bindings: Environment }>()
 
@@ -97,7 +98,7 @@ app.get('/routes', async context => {
 
 const services: Services = {
   ens: () => new ENSMetadataService(),
-  efp: (env: Environment) => new EFPIndexerService(env)
+  efp: (env: Environment) => (env.IS_DEMO === 'true' ? new MockEFPIndexerService() : new EFPIndexerService(env))
 }
 app.route('/', api(services))
 

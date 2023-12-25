@@ -26,8 +26,8 @@ export interface IEFPIndexerService {
   getFollowersCount(address: `0x${string}`): Promise<number>
   getFollowers(address: `0x${string}`): Promise<Address[]>
   getPrimaryList(address: Address): Promise<number | undefined>
-  getTopFollowed(top_n: number): Promise<{ address: Address; followers_count: number }[]>
-  getTopFollowing(top_n: number): Promise<{ address: Address; following_count: number }[]>
+  getTopFollowed(limit: number): Promise<{ address: Address; followers_count: number }[]>
+  getTopFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
