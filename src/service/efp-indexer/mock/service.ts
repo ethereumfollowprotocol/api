@@ -67,8 +67,6 @@ export class MockEFPIndexerService implements IEFPIndexerService {
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getPrimaryList(address: `0x${string}`): Promise<bigint | undefined> {
-    const result: bigint | undefined = this.socialGraph.getPrimaryList(address)
-    if (result === undefined) return undefined
-    return result
+    return this.socialGraph.getPrimaryList(address)
   }
 }
