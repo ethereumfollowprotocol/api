@@ -64,7 +64,6 @@ export interface ListNfts {
   chain_id: Int8
   contract_address: string
   created_at: Generated<Timestamp | null>
-  list_manager: string | null
   list_storage_location: string | null
   list_storage_location_chain_id: Int8 | null
   list_storage_location_contract_address: string | null
@@ -127,10 +126,12 @@ export interface ListRecordTagsExtendedView {
   data: string | null
   has_block_tag: boolean | null
   has_mute_tag: boolean | null
+  list_manager: string | null
   list_storage_location_chain_id: Int8 | null
   list_storage_location_contract_address: string | null
   list_storage_location_nonce: Int8 | null
   list_user: string | null
+  owner: string | null
   record: string | null
   record_type: number | null
   tags: string[] | null
