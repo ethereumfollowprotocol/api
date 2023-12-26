@@ -73,21 +73,6 @@ export interface ListNfts {
   updated_at: Generated<Timestamp | null>
 }
 
-export interface ListNftsView {
-  chain_id: Int8 | null
-  contract_address: string | null
-  created_at: Timestamp | null
-  list_manager: string | null
-  list_storage_location: string | null
-  list_storage_location_chain_id: Int8 | null
-  list_storage_location_contract_address: string | null
-  list_storage_location_nonce: Int8 | null
-  list_user: string | null
-  owner: string | null
-  token_id: Int8 | null
-  updated_at: Timestamp | null
-}
-
 export interface ListOps {
   chain_id: Int8
   contract_address: string
@@ -122,7 +107,26 @@ export interface ListRecordTags {
   updated_at: Generated<Timestamp | null>
 }
 
-export interface ListRecordTagsExtendedView {
+export interface SchemaMigrations {
+  version: string
+}
+
+export interface ViewListNftsWithManagerUser {
+  chain_id: Int8 | null
+  contract_address: string | null
+  created_at: Timestamp | null
+  list_manager: string | null
+  list_storage_location: string | null
+  list_storage_location_chain_id: Int8 | null
+  list_storage_location_contract_address: string | null
+  list_storage_location_nonce: Int8 | null
+  list_user: string | null
+  owner: string | null
+  token_id: Int8 | null
+  updated_at: Timestamp | null
+}
+
+export interface ViewListRecordsWithNftManagerUserTags {
   data: string | null
   has_block_tag: boolean | null
   has_mute_tag: boolean | null
@@ -139,7 +143,7 @@ export interface ListRecordTagsExtendedView {
   version: number | null
 }
 
-export interface ListRecordTagsView {
+export interface ViewListRecordsWithTagArray {
   chain_id: Int8 | null
   contract_address: string | null
   data: string | null
@@ -150,21 +154,17 @@ export interface ListRecordTagsView {
   version: number | null
 }
 
-export interface SchemaMigrations {
-  version: string
-}
-
 export interface DB {
   account_metadata: AccountMetadata
   contracts: Contracts
   events: Events
   list_metadata: ListMetadata
   list_nfts: ListNfts
-  list_nfts_view: ListNftsView
   list_ops: ListOps
   list_record_tags: ListRecordTags
-  list_record_tags_extended_view: ListRecordTagsExtendedView
-  list_record_tags_view: ListRecordTagsView
   list_records: ListRecords
   schema_migrations: SchemaMigrations
+  view_list_nfts_with_manager_user: ViewListNftsWithManagerUser
+  view_list_records_with_nft_manager_user_tags: ViewListRecordsWithNftManagerUserTags
+  view_list_records_with_tag_array: ViewListRecordsWithTagArray
 }
