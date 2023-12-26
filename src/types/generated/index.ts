@@ -18,6 +18,8 @@ export type JsonPrimitive = boolean | number | string | null
 
 export type JsonValue = JsonArray | JsonObject | JsonPrimitive
 
+export type Numeric = ColumnType<string, number | string, number | string>
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
 export interface AccountMetadata {
@@ -30,23 +32,26 @@ export interface AccountMetadata {
   value: string
 }
 
+export interface ContractEvents {
+  block_hash: string
+  block_number: Int8
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  event_name: string
+  event_parameters: Json
+  log_index: Numeric
+  transaction_hash: string
+  transaction_index: Numeric
+  updated_at: Generated<Timestamp | null>
+}
+
 export interface Contracts {
   address: string
   chain_id: Int8
   created_at: Generated<Timestamp | null>
   name: string
   owner: string
-  updated_at: Generated<Timestamp | null>
-}
-
-export interface Events {
-  block_number: Int8
-  contract_address: string
-  created_at: Generated<Timestamp | null>
-  event_name: string
-  event_parameters: Json
-  id: Generated<string>
-  transaction_hash: string
   updated_at: Generated<Timestamp | null>
 }
 
@@ -156,8 +161,8 @@ export interface ViewListRecordsWithTagArray {
 
 export interface DB {
   account_metadata: AccountMetadata
+  contract_events: ContractEvents
   contracts: Contracts
-  events: Events
   list_metadata: ListMetadata
   list_nfts: ListNfts
   list_ops: ListOps
