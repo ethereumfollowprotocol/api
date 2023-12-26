@@ -1,7 +1,8 @@
-import type { Services } from '#/service'
-import type { Environment } from '#/types'
 import type { Hono } from 'hono'
 import { validator } from 'hono/validator'
+import type { Services } from '#/service'
+import type { Environment } from '#/types'
+import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export function records(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
@@ -17,16 +18,16 @@ export function records(users: Hono<{ Bindings: Environment }>, services: Servic
       const token_id = BigInt(context.req.param().token_id)
       const includeTags = context.req.query('includeTags')
 
-      const records =
+      const records: ListRecord[] =
         includeTags === 'false'
           ? await services.efp(context.env).getListRecords(token_id)
           : await services.efp(context.env).getListRecordsWithTags(token_id)
 
-      const formattedRecords = records.map(({ version, recordType, data, tags }) => ({
-        version,
-        record_type: recordType === 1 ? 'address' : `${recordType}`,
-        data: data.toString('hex'),
-        ...(includeTags !== 'false' && { tags })
+      const formattedRecords = records.map((record: ListRecord) => ({
+        version: record,
+        record_type: record.recordType === 1 ? 'address' : `${record.recordType}`,
+        data: record.data.toString('hex'),
+        ...(includeTags !== 'false' && { tags: (record as TaggedListRecord).tags })
       }))
 
       return context.json({ records: formattedRecords }, 200)

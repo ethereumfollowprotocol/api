@@ -1,5 +1,5 @@
+import { type Kysely, type QueryResult, sql } from 'kysely'
 import type { Address } from '#/types'
-import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -17,6 +17,13 @@ export interface IEFPIndexerService {
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
   getPrimaryList(address: Address): Promise<bigint | undefined>
+  // incoming relationship means another list has the given address tagged with the given tag
+  getIncomingRelationships(
+    address: Address,
+    tag: string
+  ): Promise<{ token_id: bigint; list_user: Address; tags: string[] }[]>
+  // outgoing relationship means the given address has the given tag on another list
+  getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
 }
 
 export class EFPIndexerService implements IEFPIndexerService {
@@ -187,74 +194,135 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   /////////////////////////////////////////////////////////////////////////////
+  // Relationships
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getIncomingRelationships(
+    address: `0x${string}`,
+    tag: string
+  ): Promise<{ token_id: bigint; list_user: `0x${string}`; tags: string[] }[]> {
+    const query = sql`
+      SELECT * FROM public.get_incoming_relationships(${address.toLowerCase()}, ${tag})
+    `
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    type Row = {
+      token_id: bigint
+      list_user: Address
+      tags: string[]
+    }
+    const rows: Row[] = result.rows as Row[]
+
+    return rows.map((row: Row) => ({
+      token_id: row.token_id,
+      list_user: row.list_user,
+      tags: row.tags.sort()
+    }))
+  }
+
+  async getOutgoingRelationships(address: `0x${string}`, tag: string): Promise<TaggedListRecord[]> {
+    const query = sql`
+      SELECT * FROM public.get_outgoing_relationships(${address.toLowerCase()}, ${tag})
+    `
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      console.warn('getOutgoingRelationships no results')
+      return []
+    }
+
+    type Row = {
+      token_id: bigint
+      list_user: Address
+      version: number
+      record_type: number
+      data: `0x${string}`
+      tags: string[]
+    }
+    const rows: Row[] = result.rows as Row[]
+    console.warn('getOutgoingRelationships rows', rows)
+
+    return rows.map((row: Row) => ({
+      version: row.version,
+      recordType: row.record_type,
+      data: Buffer.from(row.data.replace('0x', ''), 'hex'),
+      tags: row.tags.sort()
+    }))
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
   // Blocks
   /////////////////////////////////////////////////////////////////////////////
 
-  async getBlocks(tokenId: bigint): Promise<ListRecord[]> {
-    return await this.getListRecordsFilterByTags(tokenId, 'block')
-  }
+  // async getBlocks(tokenId: bigint): Promise<ListRecord[]> {
+  //   return await this.getListRecordsFilterByTags(tokenId, 'block')
+  // }
 
-  async getWhoBlocks(address: Address): Promise<{ token_id: number; list_user: string }[]> {
-    const result = await this.#db
-      .selectFrom('list_record_tags_extended_view')
-      .select(['token_id', 'list_user'])
-      .where('has_block_tag', '=', true)
-      .where('version', '=', 1)
-      .where('record_type', '=', 1)
-      .where('data', '=', address)
-      .execute()
+  // async getWhoBlocks(address: Address): Promise<{ token_id: number; list_user: string }[]> {
+  //   const result = await this.#db
+  //     .selectFrom('list_record_tags_extended_view')
+  //     .select(['token_id', 'list_user'])
+  //     .where('has_block_tag', '=', true)
+  //     .where('version', '=', 1)
+  //     .where('record_type', '=', 1)
+  //     .where('data', '=', address)
+  //     .execute()
 
-    const filtered: { token_id: number; list_user: string }[] = []
-    for (const row of result) {
-      if (row.token_id === null || row.list_user === null) {
-        continue
-      }
-      filtered.push({
-        token_id: Number(row.token_id),
-        list_user: row.list_user
-      })
-    }
+  //   const filtered: { token_id: number; list_user: string }[] = []
+  //   for (const row of result) {
+  //     if (row.token_id === null || row.list_user === null) {
+  //       continue
+  //     }
+  //     filtered.push({
+  //       token_id: Number(row.token_id),
+  //       list_user: row.list_user
+  //     })
+  //   }
 
-    return filtered.map(row => ({
-      token_id: Number(row.token_id),
-      list_user: row.list_user
-    }))
-  }
+  //   return filtered.map(row => ({
+  //     token_id: Number(row.token_id),
+  //     list_user: row.list_user
+  //   }))
+  // }
 
   /////////////////////////////////////////////////////////////////////////////
   // Mutes
   /////////////////////////////////////////////////////////////////////////////
 
-  async getMutes(tokenId: bigint): Promise<ListRecord[]> {
-    return await this.getListRecordsFilterByTags(tokenId, 'mute')
-  }
+  // async getMutes(tokenId: bigint): Promise<ListRecord[]> {
+  //   return await this.getListRecordsFilterByTags(tokenId, 'mute')
+  // }
 
-  async getWhoMutes(address: Address): Promise<{ token_id: number; list_user: string }[]> {
-    const result = await this.#db
-      .selectFrom('list_record_tags_extended_view')
-      .select(['token_id', 'list_user'])
-      .where('has_mute_tag', '=', true)
-      .where('version', '=', 1)
-      .where('record_type', '=', 1)
-      .where('data', '=', address)
-      .execute()
+  // async getWhoMutes(address: Address): Promise<{ token_id: number; list_user: string }[]> {
+  //   const result = await this.#db
+  //     .selectFrom('list_record_tags_extended_view')
+  //     .select(['token_id', 'list_user'])
+  //     .where('has_mute_tag', '=', true)
+  //     .where('version', '=', 1)
+  //     .where('record_type', '=', 1)
+  //     .where('data', '=', address)
+  //     .execute()
 
-    const filtered: { token_id: number; list_user: string }[] = []
-    for (const row of result) {
-      if (row.token_id === null || row.list_user === null) {
-        continue
-      }
-      filtered.push({
-        token_id: Number(row.token_id),
-        list_user: row.list_user
-      })
-    }
+  //   const filtered: { token_id: number; list_user: string }[] = []
+  //   for (const row of result) {
+  //     if (row.token_id === null || row.list_user === null) {
+  //       continue
+  //     }
+  //     filtered.push({
+  //       token_id: Number(row.token_id),
+  //       list_user: row.list_user
+  //     })
+  //   }
 
-    return filtered.map(row => ({
-      token_id: Number(row.token_id),
-      list_user: row.list_user
-    }))
-  }
+  //   return filtered.map(row => ({
+  //     token_id: Number(row.token_id),
+  //     list_user: row.list_user
+  //   }))
+  // }
 
   /////////////////////////////////////////////////////////////////////////////
   // Primary List

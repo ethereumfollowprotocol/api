@@ -7,6 +7,7 @@ import { followers } from './followers'
 import { following } from './following'
 import { primaryList } from './primary-list'
 import { profile } from './profile'
+import { relationships } from './relationships'
 import { stats } from './stats'
 
 export function users(services: Services): Hono<{ Bindings: Environment }> {
@@ -18,6 +19,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   following(users, services)
   primaryList(users, services)
   profile(users, services)
+  relationships(users, services)
   stats(users, services)
 
   // Blocked by user
@@ -35,12 +37,6 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   // Mutuals with users
   // biome-ignore lint/nursery/useAwait: <explanation>
   users.get('/:ensOrAddress/mutuals', async context => {
-    return context.text('Not implemented', 501)
-  })
-
-  // Incoming/Outgoing tagged relationships
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  users.get('/:ensOrAddress/relationships', async context => {
     return context.text('Not implemented', 501)
   })
 

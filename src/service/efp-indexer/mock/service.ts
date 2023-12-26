@@ -64,4 +64,17 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   async getPrimaryList(address: Address): Promise<bigint | undefined> {
     return this.socialGraph.getPrimaryList(address)
   }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getIncomingRelationships(
+    address: `0x${string}`,
+    tag: string
+  ): Promise<{ token_id: bigint; list_user: `0x${string}`; tags: string[] }[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getOutgoingRelationships(address: `0x${string}`, tag: string): Promise<TaggedListRecord[]> {
+    throw new Error('Method not implemented.')
+  }
 }
