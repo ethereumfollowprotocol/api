@@ -42,7 +42,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowers(address: Address): Promise<Address[]> {
-    const query = sql`SELECT * FROM public.get_unique_followers(${address.toLowerCase()})`
+    const query = sql`SELECT * FROM query.get_unique_followers(${address.toLowerCase()})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -61,7 +61,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowing(address: Address): Promise<TaggedListRecord[]> {
-    const query = sql`SELECT * FROM public.get_following(${address.toLowerCase()})`
+    const query = sql`SELECT * FROM query.get_following(${address.toLowerCase()})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -96,7 +96,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
-    const query = sql`SELECT * FROM public.count_unique_followers_by_address(${limit})`
+    const query = sql`SELECT * FROM query.count_unique_followers_by_address(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -110,7 +110,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
-    const query = sql`SELECT * FROM public.count_unique_following_by_address(${limit})`
+    const query = sql`SELECT * FROM query.count_unique_following_by_address(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -141,7 +141,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getListRecords(tokenId: bigint): Promise<ListRecord[]> {
-    const query = sql`SELECT * FROM public.get_list_records(${tokenId})`
+    const query = sql`SELECT * FROM query.get_list_records(${tokenId})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -166,7 +166,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
-    const query = sql`SELECT * FROM public.get_list_record_tags(${tokenId})`
+    const query = sql`SELECT * FROM query.get_list_record_tags(${tokenId})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -202,7 +202,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     tag: string
   ): Promise<{ token_id: bigint; list_user: `0x${string}`; tags: string[] }[]> {
     const query = sql`
-      SELECT * FROM public.get_incoming_relationships(${address.toLowerCase()}, ${tag})
+      SELECT * FROM query.get_incoming_relationships(${address.toLowerCase()}, ${tag})
     `
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -226,7 +226,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getOutgoingRelationships(address: `0x${string}`, tag: string): Promise<TaggedListRecord[]> {
     const query = sql`
-      SELECT * FROM public.get_outgoing_relationships(${address.toLowerCase()}, ${tag})
+      SELECT * FROM query.get_outgoing_relationships(${address.toLowerCase()}, ${tag})
     `
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -260,7 +260,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getPrimaryList(address: Address): Promise<bigint | undefined> {
     // Call the enhanced PostgreSQL function
-    const query = sql`SELECT public.get_primary_list(${address.toLowerCase()}) AS primary_list`
+    const query = sql`SELECT query.get_primary_list(${address.toLowerCase()}) AS primary_list`
     const result: QueryResult<unknown> = await query.execute(this.#db)
     if (!result || result.rows.length === 0) {
       return undefined
