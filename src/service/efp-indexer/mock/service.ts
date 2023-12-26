@@ -73,8 +73,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
   async getOutgoingRelationships(address: `0x${string}`, tag: string): Promise<TaggedListRecord[]> {
-    throw new Error('Method not implemented.')
+    const primaryList = await this.getPrimaryList(address)
+    if (!primaryList) return []
+    return (await this.getListRecordsWithTags(primaryList)).filter(r => r.tags.includes(tag))
   }
 }
