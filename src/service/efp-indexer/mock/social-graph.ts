@@ -1,4 +1,4 @@
-import { type ListRecord, type TaggedListRecord, serializeListRecord } from '#/types/list-record'
+import { serializeListRecord, type ListRecord, type TaggedListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -177,25 +177,31 @@ export class SocialGraph {
     return new Set<Tag>()
   }
 
-  getListRecordTags(listId: TokenId): { record: ListRecord; tags: Set<Tag> }[] {
-    const records: { record: ListRecord; tags: Set<Tag> }[] = []
+  getListRecordTags(listId: TokenId): TaggedListRecord[] {
+    const records: TaggedListRecord[] = []
     const list = this.listRecords.get(listId)
     if (list) {
       let node = list.head
       while (node) {
         const tags = this.getTags(listId, node.value)
-        records.push({ record: node.value, tags })
+        records.push({
+          version: node.value.version,
+          recordType: node.value.recordType,
+          data: node.value.data,
+          tags: Array.from(tags).sort()
+        })
         node = node.next
       }
     }
     return records
   }
 
-  static isFollow(record: ListRecord, tags: Set<Tag>): boolean {
+  static isFollow(record: ListRecord, tags: Set<Tag> | Tag[]): boolean {
     if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
       return false
     }
-    if (tags.has('block') || tags.has('mute')) {
+    const tagsSet = new Set(tags)
+    if (tagsSet.has('block') || tagsSet.has('mute')) {
       return false
     }
     return true
@@ -206,13 +212,13 @@ export class SocialGraph {
     // check every primary list to see if it contains the address
     for (const [listUser, tokenId] of this.primaryLists.entries()) {
       if (tokenId === undefined) continue
-      const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(tokenId)
+      const listRecordTags: TaggedListRecord[] = this.getListRecordTags(tokenId)
       for (const listRecordTag of listRecordTags) {
-        const { record, tags } = listRecordTag
-        if (!SocialGraph.isFollow(record, tags)) {
+        const { version, recordType, data, tags } = listRecordTag
+        if (!SocialGraph.isFollow({ version, recordType, data }, tags)) {
           continue
         }
-        const follower: `0x${string}` = `0x${record.data.toString('hex')}` as `0x${string}`
+        const follower: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
         if (follower.toLowerCase() === address.toLowerCase()) {
           followers.push(listUser)
         }
@@ -229,15 +235,15 @@ export class SocialGraph {
     const primaryList: TokenId | undefined = this.getPrimaryList(address)
     if (primaryList === undefined) return []
 
-    const listRecordTags: { record: ListRecord; tags: Set<Tag> }[] = this.getListRecordTags(primaryList)
+    const listRecordTags: TaggedListRecord[] = this.getListRecordTags(primaryList)
     // filter all the ones with "block" or "mute" in the tags
     const following: TaggedListRecord[] = []
     for (const listRecordTag of listRecordTags) {
-      const { record, tags } = listRecordTag
-      if (!SocialGraph.isFollow(record, tags)) {
+      const { version, recordType, data, tags } = listRecordTag
+      if (!SocialGraph.isFollow({ version, recordType, data }, tags)) {
         continue
       }
-      following.push({ ...record, tags: Array.from(tags) })
+      following.push({ version, recordType, data, tags: tags })
     }
     return following
   }

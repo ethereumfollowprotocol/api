@@ -3,22 +3,19 @@ import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
-import { decodeListStorageLocation } from '#/types/list-location-type'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
-  getFollowersCount(address: `0x${string}`): Promise<number>
-  getFollowers(address: `0x${string}`): Promise<Address[]>
-  getFollowingCount(address: `0x${string}`): Promise<number>
-  getFollowing(address: `0x${string}`): Promise<TaggedListRecord[]>
+  getFollowersCount(address: Address): Promise<number>
+  getFollowers(address: Address): Promise<Address[]>
+  getFollowingCount(address: Address): Promise<number>
+  getFollowing(address: Address): Promise<TaggedListRecord[]>
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
   getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
-  getListRecordsWithTags(
-    tokenId: bigint
-  ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]>
+  getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
   getPrimaryList(address: Address): Promise<bigint | undefined>
 }
 
@@ -52,11 +49,11 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Following
   /////////////////////////////////////////////////////////////////////////////
 
-  async getFollowingCount(address: `0x${string}`): Promise<number> {
+  async getFollowingCount(address: Address): Promise<number> {
     return new Set(await this.getFollowing(address)).size
   }
 
-  async getFollowing(address: `0x${string}`): Promise<TaggedListRecord[]> {
+  async getFollowing(address: Address): Promise<TaggedListRecord[]> {
     const query = sql`SELECT * FROM public.get_following(${address.toLowerCase()})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -161,90 +158,39 @@ export class EFPIndexerService implements IEFPIndexerService {
     return (await this.getListRecords(tokenId)).length
   }
 
-  async getListRecordsWithTags(
-    tokenId: bigint
-  ): Promise<{ version: number; recordType: number; data: `0x${string}`; tags: string[] }[]> {
-    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
-    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
+  async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
+    const query = sql`SELECT * FROM public.get_list_record_tags(${tokenId})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
       return []
     }
-    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    const result = await this.#db
-      .selectFrom('list_record_tags as tags')
-      .fullJoin('list_records as lr', join =>
-        join
-          .onRef('tags.chain_id', '=', 'lr.chain_id')
-          .onRef('tags.contract_address', '=', 'lr.contract_address')
-          .onRef('tags.nonce', '=', 'lr.nonce')
-          .onRef('tags.record', '=', 'lr.record')
-      )
-      .select(({ fn, ref }) => [
-        'lr.version',
-        'lr.record_type',
-        'lr.data',
 
-        // Using fn.agg to aggregate tags into an array
-        fn
-          .agg<string[]>('array_agg', ['tags.tag'])
-          .as('agg_tags')
-      ])
-      .where('lr.chain_id', '=', chainId.toString())
-      .where('lr.contract_address', '=', contractAddress.toLowerCase())
-      .where('lr.nonce', '=', nonce.toString())
-      .groupBy(['lr.chain_id', 'lr.contract_address', 'lr.nonce', 'lr.record'])
-      .execute()
-    // filter nulls
-    const filtered: { version: number; record_type: number; data: `0x${string}`; agg_tags: string[] }[] = result.filter(
-      ({ version, record_type, data, agg_tags }) =>
-        version !== null && record_type !== null && data !== null && agg_tags !== null
-    ) as { version: number; record_type: number; data: `0x${string}`; agg_tags: string[] }[]
-    return filtered.map(({ version, record_type, data, agg_tags }) => ({
-      version,
-      recordType: record_type,
-      data: data as Address,
-      tags: agg_tags as string[]
+    type Row = {
+      version: number
+      record_type: number
+      data: `0x${string}`
+      tags: string[]
+    }
+
+    return (result.rows as Row[]).map((row: Row) => ({
+      version: row.version,
+      recordType: row.record_type,
+      data: Buffer.from(row.data.replace('0x', ''), 'hex'),
+      tags: row.tags.sort()
     }))
   }
 
-  async getListRecordsFilterByTags(
-    tokenId: bigint,
-    tag: string
-  ): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
-    const listStorageLocation = (await this.getListStorageLocation(tokenId)) as Address
-    if (listStorageLocation === undefined || listStorageLocation.length !== 2 + (1 + 1 + 32 + 20 + 32) * 2) {
-      return []
-    }
-    const { version, locationType, chainId, contractAddress, nonce } = decodeListStorageLocation(listStorageLocation)
-    const result = await this.#db
-      .selectFrom('list_record_tags')
-      .select(['record'])
-      .where('chain_id', '=', chainId.toString())
-      .where('contract_address', '=', contractAddress)
-      .where('nonce', '=', nonce.toString())
-      .where('tag', '=', tag)
-      .execute()
-    // record will be a string 0x1234567890abcdef...
-    // the first byte is version
-    // the second byte is recordType
-    // the rest is data
-    // need to decode and convert to correct format
-    return result.map(({ record }) => {
-      const version: number = Number(`0x${record.slice(2, 4)}`)
-      const recordType = Number(`0x${record.slice(4, 6)}`)
-      const data: Address = `0x${record.slice(6)}` as Address
-      return {
-        version,
-        recordType,
-        data
-      }
-    })
+  async getListRecordsFilterByTags(tokenId: bigint, tag: string): Promise<ListRecord[]> {
+    const all: TaggedListRecord[] = await this.getListRecordsWithTags(tokenId)
+    return all.filter(record => record.tags.includes(tag))
   }
 
   /////////////////////////////////////////////////////////////////////////////
   // Blocks
   /////////////////////////////////////////////////////////////////////////////
 
-  async getBlocks(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
+  async getBlocks(tokenId: bigint): Promise<ListRecord[]> {
     return await this.getListRecordsFilterByTags(tokenId, 'block')
   }
 
@@ -279,7 +225,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Mutes
   /////////////////////////////////////////////////////////////////////////////
 
-  async getMutes(tokenId: bigint): Promise<{ version: number; recordType: number; data: `0x${string}` }[]> {
+  async getMutes(tokenId: bigint): Promise<ListRecord[]> {
     return await this.getListRecordsFilterByTags(tokenId, 'mute')
   }
 
