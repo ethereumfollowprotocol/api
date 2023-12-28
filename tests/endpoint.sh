@@ -58,7 +58,7 @@ function request() {
 }
 
 TEMP_FAILED_RESULTS_FILE=$(mktemp)
-echo "$TIMESTAMP $API_URL" > "$TEMP_FAILED_RESULTS_FILE"
+echo "$TIMESTAMP $API_URL" >"$TEMP_FAILED_RESULTS_FILE"
 
 # for each path, make a request and save the result (save status code and error message if any)
 for path in "${paths[@]}"; do
@@ -81,4 +81,4 @@ if [ -s "$TEMP_FAILED_RESULTS_FILE" ]; then
   exit 1
 fi
 
-
+rm "$TEMP_FAILED_RESULTS_FILE"
