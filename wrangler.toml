@@ -24,6 +24,9 @@ services = [{ binding = "ens", service = "ens" }]
 
 [env.production]
 name = "production"
-vars = { ENVIRONMENT = "production" }
+vars = { ENVIRONMENT = "production", IS_DEMO = "true" }
 routes = [{ pattern = "api.ethfollow.xyz", custom_domain = true }]
 services = [{ binding = "ens", service = "ens" }]
+kv_namespaces = [
+  { binding = "EFP_DEMO_KV", id = "b662b0a7236c4145888a7d700076e43b" },
+]

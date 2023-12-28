@@ -15,8 +15,8 @@ interface EnvironmentVariables {
 interface Env extends EnvironmentVariables {
   // ens is a binded service in wrangler.toml
   readonly ens: Record<string, unknown>
-  // EFP_API_KV is a binded kv namespace in wrangler.toml
-  readonly EFP_API_KV: KVNamespace
+  // EFP_DEMO_KV is a binded production service in wrangler.toml
+  readonly EFP_DEMO_KV: KVNamespace
   // generated in ci during deployment
   readonly COMMIT_SHA: string
 }
