@@ -1,6 +1,7 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 
+import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
@@ -49,7 +50,7 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
       const { include, limit } = context.req.valid('query')
       const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
       const mostFollowers: { address: string; followers_count: number }[] = await services
-        .efp(context.env)
+        .efp(env(context))
         .getLeaderboardFollowers(100)
       return context.json(mostFollowers, 200)
     }
@@ -63,7 +64,7 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit as string, 10)
     const mostFollowing: { address: string; following_count: number }[] = await services
-      .efp(context.env)
+      .efp(env(context))
       .getLeaderboardFollowing(parsedLimit)
     return context.json(mostFollowing, 200)
   })

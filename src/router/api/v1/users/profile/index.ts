@@ -5,6 +5,7 @@ import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
+import { env } from 'hono/adapter'
 
 export function profile(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
@@ -29,7 +30,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const { include } = context.req.valid('query')
 
       const { address, ...ens }: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
-      const efp: IEFPIndexerService = services.efp(context.env)
+      const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
         include.includes('followers-list') ? efp.getFollowers(address) : null,
         /**

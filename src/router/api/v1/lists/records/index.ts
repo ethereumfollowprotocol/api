@@ -3,6 +3,7 @@ import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
+import { env } from 'hono/adapter'
 
 export function records(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
@@ -20,8 +21,8 @@ export function records(users: Hono<{ Bindings: Environment }>, services: Servic
 
       const records: ListRecord[] =
         includeTags === 'false'
-          ? await services.efp(context.env).getListRecords(token_id)
-          : await services.efp(context.env).getListRecordsWithTags(token_id)
+          ? await services.efp(env(context)).getListRecords(token_id)
+          : await services.efp(env(context)).getListRecordsWithTags(token_id)
 
       const formattedRecords = records.map((record: ListRecord) => ({
         version: record.version,

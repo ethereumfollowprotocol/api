@@ -3,6 +3,7 @@ import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
+import { env } from 'hono/adapter'
 
 export function relationships(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
@@ -36,7 +37,7 @@ export function relationships(users: Hono<{ Bindings: Environment }>, services: 
 
       const address: Address = await services.ens().getAddress(ensOrAddress)
 
-      const efp: IEFPIndexerService = services.efp(context.env)
+      const efp: IEFPIndexerService = services.efp(env(context))
       let relationships: any[] = []
       // an english description of the relationship
       let description = ''

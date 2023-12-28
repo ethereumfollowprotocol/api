@@ -4,40 +4,41 @@ import type { IEFPIndexerService } from '../service'
 import { SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
-  private readonly socialGraph: SocialGraph
+  readonly #socialGraph: SocialGraph
 
   constructor() {
-    this.socialGraph = makeSocialGraph()
+    this.#socialGraph = makeSocialGraph()
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowersCount(address: Address): Promise<number> {
-    return this.socialGraph.getFollowersCount(address)
+    return this.#socialGraph.getFollowersCount(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowers(address: Address): Promise<Address[]> {
-    return this.socialGraph.getFollowers(address)
+    return this.#socialGraph.getFollowers(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowingCount(address: Address): Promise<number> {
-    return this.socialGraph.getFollowingCount(address)
+    return this.#socialGraph.getFollowingCount(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowing(address: Address): Promise<TaggedListRecord[]> {
-    return this.socialGraph.getFollowing(address)
+    return this.#socialGraph.getFollowing(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
-    return this.socialGraph.getLeaderboardFollowers(limit)
+    console.log('getLeaderboardFollowers')
+    return this.#socialGraph.getLeaderboardFollowers(limit)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
-    return this.socialGraph.getLeaderboardFollowing(limit)
+    return this.#socialGraph.getLeaderboardFollowing(limit)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
@@ -47,22 +48,22 @@ export class MockEFPIndexerService implements IEFPIndexerService {
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getListRecordCount(tokenId: bigint): Promise<number> {
-    return this.socialGraph.getListRecords(tokenId).length
+    return this.#socialGraph.getListRecords(tokenId).length
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getListRecords(tokenId: bigint): Promise<ListRecord[]> {
-    return this.socialGraph.getListRecords(tokenId)
+    return this.#socialGraph.getListRecords(tokenId)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
-    return this.socialGraph.getListRecordTags(tokenId)
+    return this.#socialGraph.getListRecordTags(tokenId)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getPrimaryList(address: Address): Promise<bigint | undefined> {
-    return this.socialGraph.getPrimaryList(address)
+    return this.#socialGraph.getPrimaryList(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>

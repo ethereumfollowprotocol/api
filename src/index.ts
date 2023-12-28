@@ -6,6 +6,7 @@ import { logger } from 'hono/logger'
 import { prettyJSON } from 'hono/pretty-json'
 import { secureHeaders } from 'hono/secure-headers'
 
+import { env } from 'hono/adapter'
 import { DOCS_URL, SOURCE_CODE_URL } from '#/constant.ts'
 import { demoRouter } from '#/demo'
 import { apiLogger } from '#/logger.ts'
@@ -32,7 +33,7 @@ app.use('*', logger())
  * - cache is disabled in development mode
  */
 app.use('*', async (context, next) => {
-  const { ENV } = context.env
+  const { ENV } = env(context)
   await next()
   if (ENV === 'development') return
   cache({
@@ -74,11 +75,11 @@ app.get('/health', context => context.text('ok'))
 
 app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
-app.get('/build-version', context => context.text(context.env.COMMIT_SHA))
+app.get('/build-version', context => context.text(env(context).COMMIT_SHA))
 
 app.get('/v1', context =>
   context.json({
-    sha: context.env.COMMIT_SHA,
+    sha: env(context).COMMIT_SHA,
     name: 'efp-public-api',
     version: 'v1',
     docs: DOCS_URL,
@@ -89,8 +90,8 @@ app.get('/v1', context =>
 /** Logs all registered routes to the console. */
 app.get('/routes', async context => {
   const verbose = context.req.query('verbose')
-  const env = context.env.ENV || process.env.ENV
-  if (env === 'development') {
+  const { env: environment } = env(context)
+  if (environment === 'development') {
     const { showRoutes } = await import('hono/dev')
     showRoutes(app, { verbose: verbose === 'true' || verbose === '1' })
     return new Response(JSON.stringify([...new Set(app.routes.map(({ path }) => path))], null, 2))

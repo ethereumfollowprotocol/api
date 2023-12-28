@@ -69,57 +69,57 @@ function stringify(listRecord: ListRecord): string {
 //
 // other tradeoffs are possible but this is a simple implementation shown as an example
 export class SocialGraph {
-  private readonly listRecords: Map<TokenId, LinkedList>
-  private readonly nodeMap: Map<`0x${string}`, LinkedListNode> // To quickly find the node for a given record
-  private readonly tags: Map<TokenId, Map<LinkedListNode, Set<Tag>>>
+  readonly #listRecords: Map<TokenId, LinkedList>
+  readonly #nodeMap: Map<`0x${string}`, LinkedListNode> // To quickly find the node for a given record
+  readonly #tags: Map<TokenId, Map<LinkedListNode, Set<Tag>>>
 
-  private readonly primaryLists: Map<`0x${string}`, TokenId>
+  readonly #primaryLists: Map<`0x${string}`, TokenId>
 
   constructor() {
-    this.listRecords = new Map()
-    this.tags = new Map()
-    this.nodeMap = new Map()
-    this.primaryLists = new Map()
+    this.#listRecords = new Map()
+    this.#tags = new Map()
+    this.#nodeMap = new Map()
+    this.#primaryLists = new Map()
   }
 
   setPrimaryList(listUser: `0x${string}`, tokenId: TokenId): void {
-    this.primaryLists.set(listUser.toLowerCase() as `0x${string}`, tokenId)
+    this.#primaryLists.set(listUser.toLowerCase() as `0x${string}`, tokenId)
   }
 
   getPrimaryList(listUser: `0x${string}`): TokenId | undefined {
-    return this.primaryLists.get(listUser.toLowerCase() as `0x${string}`)
+    return this.#primaryLists.get(listUser.toLowerCase() as `0x${string}`)
   }
 
   addRecord(listId: TokenId, record: ListRecord): void {
-    if (!this.listRecords.has(listId)) {
-      this.listRecords.set(listId, new LinkedList())
+    if (!this.#listRecords.has(listId)) {
+      this.#listRecords.set(listId, new LinkedList())
     }
-    const list = this.listRecords.get(listId)
+    const list = this.#listRecords.get(listId)
     if (!list) {
       throw new Error('List should exist')
     }
     const node = list.add(record)
-    this.nodeMap.set(serializeListRecord(record), node)
+    this.#nodeMap.set(serializeListRecord(record), node)
   }
 
   removeRecord(listId: TokenId, record: ListRecord): void {
-    const list = this.listRecords.get(listId)
-    const node = this.nodeMap.get(serializeListRecord(record))
+    const list = this.#listRecords.get(listId)
+    const node = this.#nodeMap.get(serializeListRecord(record))
     if (list !== undefined && node !== undefined) {
       list.remove(node)
-      this.nodeMap.delete(serializeListRecord(record))
+      this.#nodeMap.delete(serializeListRecord(record))
     }
   }
 
   tagRecord(listId: TokenId, record: ListRecord, tag: Tag): void {
-    if (!this.tags.has(listId)) {
-      this.tags.set(listId, new Map())
+    if (!this.#tags.has(listId)) {
+      this.#tags.set(listId, new Map())
     }
-    const listTags = this.tags.get(listId)
+    const listTags = this.#tags.get(listId)
     if (!listTags) {
       throw new Error('Tags should exist')
     }
-    const node = this.nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(serializeListRecord(record))
     if (!node) {
       throw new Error('Node should exist')
     }
@@ -134,11 +134,11 @@ export class SocialGraph {
   }
 
   untagRecord(listId: TokenId, record: ListRecord, tag: Tag): void {
-    const node = this.nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(serializeListRecord(record))
     if (!node) {
       throw new Error('Node should exist')
     }
-    const listTags = this.tags.get(listId)
+    const listTags = this.#tags.get(listId)
     const nodeTags = listTags?.get(node)
     if (nodeTags) {
       nodeTags.delete(tag)
@@ -150,7 +150,7 @@ export class SocialGraph {
   // O(n) time
   getListRecords(listId: TokenId): ListRecord[] {
     const records: ListRecord[] = []
-    const list = this.listRecords.get(listId)
+    const list = this.#listRecords.get(listId)
     if (list) {
       let node = list.head
       while (node) {
@@ -163,11 +163,11 @@ export class SocialGraph {
 
   // O(1) time
   getTags(listId: TokenId, record: ListRecord): Set<Tag> {
-    const node = this.nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(serializeListRecord(record))
     if (!node) {
       throw new Error('Node should exist')
     }
-    const listTags = this.tags.get(listId)
+    const listTags = this.#tags.get(listId)
     if (listTags?.has(node)) {
       const tags = listTags.get(node)
       if (tags) {
@@ -179,7 +179,7 @@ export class SocialGraph {
 
   getListRecordTags(listId: TokenId): TaggedListRecord[] {
     const records: TaggedListRecord[] = []
-    const list = this.listRecords.get(listId)
+    const list = this.#listRecords.get(listId)
     if (list) {
       let node = list.head
       while (node) {
@@ -210,7 +210,7 @@ export class SocialGraph {
   getFollowers(address: `0x${string}`): `0x${string}`[] {
     const followers: `0x${string}`[] = []
     // check every primary list to see if it contains the address
-    for (const [listUser, tokenId] of this.primaryLists.entries()) {
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
       if (tokenId === undefined) continue
       const listRecordTags: TaggedListRecord[] = this.getListRecordTags(tokenId)
       for (const listRecordTag of listRecordTags) {
@@ -257,7 +257,7 @@ export class SocialGraph {
   // sort by following count
   getLeaderboardFollowing(limit: number): Promise<{ address: `0x${string}`; following_count: number }[]> {
     const leaderboard: { address: `0x${string}`; following_count: number }[] = []
-    for (const [listUser, tokenId] of this.primaryLists.entries()) {
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
       if (tokenId === undefined) continue
       const followingCount: number = this.getFollowingCount(listUser)
       leaderboard.push({ address: listUser, following_count: followingCount })
@@ -274,7 +274,7 @@ export class SocialGraph {
     const followersByAddress: Map<`0x${string}`, Set<`0x${string}`>> = new Map()
 
     // step 1: iterate over all list records for all lists
-    for (const [listId, list] of this.listRecords.entries()) {
+    for (const [listId, list] of this.#listRecords.entries()) {
       let node = list.head
       while (node) {
         const record = node.value

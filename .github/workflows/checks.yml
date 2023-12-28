@@ -52,3 +52,7 @@ jobs:
 
       - name: '🔧 Build'
         run: bun run build
+
+      - name: '🧪 Test'
+        run: |
+          # /bin/bash ./tests/endpoints.sh

@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 
+import { env } from 'hono/adapter'
 // api/v1/index.ts
 import { database } from '#/database'
 import { apiLogger } from '#/logger'
@@ -15,7 +16,7 @@ export function api(services: Services): Hono<{ Bindings: Environment }> {
   api.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 301))
 
   api.get('/database/health', async context => {
-    const db = database(context.env)
+    const db = database(env(context))
 
     // do a simple query to check if the database is up
     try {
