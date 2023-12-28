@@ -41,6 +41,8 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      # Supabase database url
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
     steps:
       - name: '🔑 Checkout'
         uses: actions/checkout@v4.1.1
@@ -60,7 +62,8 @@ jobs:
       - name: '[development] Deploy Cloudflare Workers 🔶'
         if: ${{ contains(env.WORKERS_ENVIRONMENT, 'development') || contains(env.WORKERS_ENVIRONMENT, 'all') }}
         run: |
-          echo '${}'
+          echo ${{ env.DATABASE_URL }} | bunx wrangler@latest secret put DATABASE_URL --config=wrangler.toml --env=development
+
           bunx wrangler@latest deploy ./src/index.ts \
             --env=development \
             --minify=true \
