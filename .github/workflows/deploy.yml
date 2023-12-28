@@ -59,44 +59,11 @@ jobs:
       - name: 'Get Commit SHA'
         run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-        # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
-      - name: '[development] Deploy Cloudflare Workers 🔶'
-        if: |
-          ${{ contains(env.WORKERS_ENVIRONMENT, 'development') || 
-              contains(env.WORKERS_ENVIRONMENT, 'all') ||
-              contains(github.event.head_commit.message, '[development]') || 
-              contains(github.event.head_commit.message, '[all]') }}
-        run: |
-          echo ${{ env.DEVELOPMENT_DATABASE }} | bunx wrangler@latest secret put DATABASE_URL --config=wrangler.toml --env=development
-
-          bunx wrangler@latest deploy ./src/index.ts \
-            --env=development \
-            --minify=true \
-            --latest=true \
-            --keep-vars=true \
-            --node-compat=true \
-            --config=wrangler.toml \
-            --compatibility-date=2023-10-30 \
-            --var ENVIRONMENT:"development" \
-            --var COMMIT_SHA:"$COMMIT_SHA"
-
-        # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
-      - name: '[production] Deploy Cloudflare Workers 🔶'
-        if: |
-          ${{ contains(env.WORKERS_ENVIRONMENT, 'production') || 
-              contains(env.WORKERS_ENVIRONMENT, 'all') || 
-              contains(github.event.head_commit.message, '[production]') || 
-              contains(github.event.head_commit.message, '[all]') }}
-        run: |
-          # echo ${{ env.PRODUCTION_DATABASE }} | bunx wrangler@latest secret put DATABASE_URL --config=wrangler.toml --env=production
-
-          bunx wrangler@latest deploy ./src/index.ts \
-            --env=production \
-            --minify=true \
-            --latest=true \
-            --keep-vars=true \
-            --node-compat=true \
-            --config=wrangler.toml \
-            --compatibility-date=2023-10-30 \
-            --var ENVIRONMENT:"production" \
-            --var COMMIT_SHA:"$COMMIT_SHA"
+      # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
+      - name: 'Deploy Cloudflare Workers 🔶'
+        uses: './.github/actions/deploy'
+        with:
+          development: 'true'
+          production: 'false'
+          stage: 'false'
+          test: 'false'

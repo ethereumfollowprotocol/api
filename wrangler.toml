@@ -22,10 +22,25 @@ vars = { ENVIRONMENT = "development" }
 routes = [{ pattern = "development.api.ethfollow.xyz", custom_domain = true }]
 services = [{ binding = "ens", service = "ens" }]
 
+[env.stage]
+name = "stage"
+vars = { ENVIRONMENT = "stage" }
+routes = [{ pattern = "stage.api.ethfollow.xyz", custom_domain = true }]
+services = [{ binding = "ens", service = "ens" }]
+
+[env.test]
+name = "test"
+vars = { ENVIRONMENT = "test" }
+routes = [{ pattern = "test.api.ethfollow.xyz", custom_domain = true }]
+services = [{ binding = "ens", service = "ens" }]
+
 [env.production]
 name = "production"
 vars = { ENVIRONMENT = "production", IS_DEMO = "true" }
-routes = [{ pattern = "api.ethfollow.xyz", custom_domain = true }]
+routes = [
+  { pattern = "api.ethfollow.xyz", custom_domain = true },
+  { pattern = "production.api.ethfollow.xyz", custom_domain = true },
+]
 services = [{ binding = "ens", service = "ens" }]
 kv_namespaces = [
   { binding = "EFP_DEMO_KV", id = "b662b0a7236c4145888a7d700076e43b" },

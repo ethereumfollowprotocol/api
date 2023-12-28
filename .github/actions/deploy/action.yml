@@ -1,0 +1,117 @@
+name: 'Deploy to Cloudflare Workers'
+description: 'Deploy to a specific Cloudflare Workers environment'
+
+inputs:
+  development:
+    description: 'Whether to deploy to the development environment'
+    required: false
+    default: 'true'
+  production:
+    description: 'Whether to deploy to the production environment'
+    required: false
+    default: 'false'
+  stage:
+    description: 'Whether to deploy to the stage environment'
+    required: false
+    default: 'false'
+  test:
+    description: 'Whether to deploy to the test environment'
+    required: false
+    default: 'false'
+  secrets:
+    description: 'A JSON string of secrets to pass to the action'
+    required: false
+    default: '{}'
+
+runs:
+  using: composite
+  steps:
+    - name: '🐰 Set up Bun'
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: 'latest'
+
+    - name: 'Install Dependencies'
+      shell: bash
+      run: bun install --frozen-lockfile
+
+    - name: 'Get Commit SHA'
+      shell: bash
+      id: commit_sha
+      run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+    # deploy to development
+    - name: '[development] Deploy Cloudflare Workers 🔶'
+      shell: bash
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      if: ${{ inputs.development == 'true' }}
+      run: |
+        bunx wrangler@latest deploy ./src/index.ts \
+          --env=development \
+          --minify=true \
+          --latest=true \
+          --keep-vars=true \
+          --node-compat=true \
+          --config=wrangler.toml \
+          --compatibility-date=2023-10-30 \
+          --var ENVIRONMENT:"development" \
+          --var COMMIT_SHA:"$COMMIT_SHA"
+
+    # deploy to production
+    - name: '[production] Deploy Cloudflare Workers 🔶'
+      shell: bash
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      if: ${{ inputs.production == 'true' }}
+      run: |
+        bunx wrangler@latest deploy ./src/index.ts \
+          --env=production \
+          --minify=true \
+          --latest=true \
+          --keep-vars=true \
+          --node-compat=true \
+          --config=wrangler.toml \
+          --compatibility-date=2023-10-30 \
+          --var ENVIRONMENT:"production" \
+          --var COMMIT_SHA:"$COMMIT_SHA"
+
+    # deploy to stage
+    - name: '[stage] Deploy Cloudflare Workers 🔶'
+      shell: bash
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      if: ${{ inputs.stage == 'true' }}
+      run: |
+        bunx wrangler@latest deploy ./src/index.ts \
+          --env=stage \
+          --minify=true \
+          --latest=true \
+          --keep-vars=true \
+          --node-compat=true \
+          --config=wrangler.toml \
+          --compatibility-date=2023-10-30 \
+          --var ENVIRONMENT:"stage" \
+          --var COMMIT_SHA:"$COMMIT_SHA"
+
+    # deploy to test
+    - name: '[develtestopment] Deploy Cloudflare Workers 🔶'
+      shell: bash
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      if: ${{ inputs.test == 'true' }}
+      run: |
+        bunx wrangler@latest deploy ./src/index.ts \
+          --env=test \
+          --minify=true \
+          --latest=true \
+          --keep-vars=true \
+          --node-compat=true \
+          --config=wrangler.toml \
+          --compatibility-date=2023-10-30 \
+          --var ENVIRONMENT:"test" \
+          --var COMMIT_SHA:"$COMMIT_SHA"
