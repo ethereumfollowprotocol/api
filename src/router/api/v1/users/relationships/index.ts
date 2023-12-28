@@ -1,9 +1,9 @@
 import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
-import { env } from 'hono/adapter'
 
 export function relationships(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(

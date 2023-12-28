@@ -1,9 +1,9 @@
 import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import { env } from 'hono/adapter'
 
 export function records(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
