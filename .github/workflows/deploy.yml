@@ -43,7 +43,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          wrangler@latest deploy ./src/index.ts \
+          wrangler deploy ./src/index.ts \
             --name=indexer \
             --minify \
             --latest=true \
