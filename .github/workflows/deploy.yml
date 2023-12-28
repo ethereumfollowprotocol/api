@@ -31,8 +31,13 @@ jobs:
       - name: '🔑 Checkout'
         uses: actions/checkout@v4.1.1
 
-      - name: 'Install Wrangler CLI'
-        run: yarn global add wrangler@latest
+      - name: '🐰 Setup Bun'
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: 'latest'
+
+      - name: 'Install Dependencies'
+        run: bun install
 
       - name: 'Get Commit SHA'
         run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
@@ -43,7 +48,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          wrangler deploy ./src/index.ts \
+          bunx wrangler@latest deploy ./src/index.ts \
             --name=indexer \
             --minify \
             --latest=true \
