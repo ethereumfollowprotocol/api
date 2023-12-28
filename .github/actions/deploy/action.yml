@@ -2,6 +2,12 @@ name: 'Deploy to Cloudflare Workers'
 description: 'Deploy to a specific Cloudflare Workers environment'
 
 inputs:
+  CLOUDFLARE_ACCOUNT_ID:
+    description: 'The Cloudflare account ID'
+    required: true
+  CLOUDFLARE_API_TOKEN:
+    description: 'The Cloudflare API token'
+    required: true
   development:
     description: 'Whether to deploy to the development environment'
     required: false
@@ -63,8 +69,8 @@ runs:
     - name: '[production] Deploy Cloudflare Workers 🔶'
       shell: bash
       env:
-        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        CLOUDFLARE_API_TOKEN: ${{ inputs.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ inputs.CLOUDFLARE_ACCOUNT_ID }}
       if: ${{ inputs.production == 'true' }}
       run: |
         bunx wrangler@latest deploy ./src/index.ts \
