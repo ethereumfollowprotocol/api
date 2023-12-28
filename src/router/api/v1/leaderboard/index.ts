@@ -48,7 +48,6 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
       const { ensOrAddress } = context.req.param()
       const { include, limit } = context.req.valid('query')
       const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
-      console.log({ parsedLimit })
       const mostFollowers: { address: string; followers_count: number }[] = await services
         .efp(context.env)
         .getLeaderboardFollowers(100)

@@ -38,8 +38,8 @@ export interface ContractEvents {
   chain_id: Int8
   contract_address: string
   created_at: Generated<Timestamp | null>
+  event_args: Json
   event_name: string
-  event_parameters: Json
   log_index: Numeric
   transaction_hash: string
   transaction_index: Numeric
