@@ -1,18 +1,29 @@
+#: schema https://github.com/cloudflare/workers-sdk/files/12887590/wrangler.schema.json
+# https://developers.cloudflare.com/workers/wrangler/configuration
+
+# default stage is "development"
+
+# 
+# start of globally inheritable configuration
 name = "indexer"
 main = "./src/index.ts"
+route = "api.ethfollow.xyz"
+minify = true
 keep_vars = true
 node_compat = true
+placement = { mode = "smart" }
 compatibility_date = "2023-10-30"
-
-[placement]
-mode = "smart"
-
-[[services]]
-binding = "ens"
-service = "ens"
-
-[env.production]
-ENV = "production"
+# end of globally inheritable configuration
+#
 
 [env.development]
-ENV = "development"
+name = "development"
+vars = { ENVIRONMENT = "development" }
+routes = [{ pattern = "development.api.ethfollow.xyz", custom_domain = true }]
+services = [{ binding = "ens", service = "ens" }]
+
+[env.production]
+name = "production"
+vars = { ENVIRONMENT = "production" }
+routes = [{ pattern = "api.ethfollow.xyz", custom_domain = true }]
+services = [{ binding = "ens", service = "ens" }]

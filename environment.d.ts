@@ -1,6 +1,6 @@
 interface EnvironmentVariables {
   readonly NODE_ENV: 'development' | 'production' | 'test'
-  ENV: 'development' | 'production' | 'test'
+  readonly ENVIRONMENT: 'development' | 'production' | 'stage' | 'test'
   readonly PORT: string
   readonly LLAMAFOLIO_ID: string
   readonly ANKR_ID: string

@@ -21,8 +21,12 @@ import type { Services } from './service'
 const app = new Hono<{ Bindings: Environment }>()
 
 app.use('*', async (context, next) => {
+  const { COMMIT_SHA } = env(context)
+  context.res.headers.set('X-Commit-SHA', COMMIT_SHA)
+  const start = Date.now()
   await next()
-  context.header('X-Powered-By', 'Ethereum Follow Protocol')
+  const end = Date.now()
+  context.res.headers.set('X-Response-Time', `${end - start}ms`)
 })
 
 app.use('*', logger())
@@ -33,9 +37,9 @@ app.use('*', logger())
  * - cache is disabled in development mode
  */
 app.use('*', async (context, next) => {
-  const { ENV } = env(context)
+  const { ENVIRONMENT } = env(context)
   await next()
-  if (ENV === 'development') return
+  if (ENVIRONMENT === 'development') return
   cache({
     cacheName: 'efp-api',
     cacheControl: 'max-age=5184000, s-maxage=5184000, stale-while-revalidate=604800'

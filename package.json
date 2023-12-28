@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "bunx wrangler deploy --dry-run --outdir=dist --minify=true --latest=true",
-    "dev": "bunx wrangler dev --latest=true",
-    "dev:remote": "bun dev --remote",
+    "dev": "bunx wrangler dev --latest=true --env=development",
+    "dev:remote": "bun dev --remote --env=development",
     "database:generate-types": "kysely-codegen --dialect='postgres' --type-only-imports --log-level='error' --out-file='./src/types/generated/index.ts' && bun lint:format",
     "docker:api": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes api",
     "docker:ping": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes ping",
@@ -37,9 +37,6 @@
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
-  "contributors": [
-    "Omar Aziz <omar@ethfollow.xyz> esm.eth",
-    "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"
-  ],
+  "contributors": ["Omar Aziz <omar@ethfollow.xyz> esm.eth", "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"],
   "sideEffects": false
 }

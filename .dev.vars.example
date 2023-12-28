@@ -1,4 +1,5 @@
 NODE_ENV="development"
+ENVIRONMENT="development"
 PORT="8787"
 IS_DEMO="false"
 
@@ -15,6 +16,9 @@ ALCHEMY_ID=""
 INFURA_ID=""
 
 DATABASE_URL=""
+
+# only available in deployed worker (development and production)
+COMMIT_SHA="NOT_AVAILABLE_IN_LOCAL_DEVELOPMENT"
 
 # Supabase studio > Settings > General > Project Settings > Reference ID
 SUPABASE_PROJECT_REF=""

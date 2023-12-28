@@ -16,6 +16,7 @@
   "[jsonc]": { "editor.defaultFormatter": "biomejs.biome" },
   "[typescript]": { "editor.defaultFormatter": "biomejs.biome" },
   "[javascript]": { "editor.defaultFormatter": "biomejs.biome" },
+  "[toml]": { "editor.defaultFormatter": "tamasfe.even-better-toml" },
   "files.associations": {
     "biome.json": "jsonc",
     ".dev.vars": "dotenv",
@@ -28,6 +29,9 @@
   },
   "files.exclude": {
     "**/.wrangler": true
+  },
+  "evenBetterToml.schema.associations": {
+    "wrangler.toml": "https://github.com/cloudflare/workers-sdk/files/12887590/wrangler.schema.json"
   },
   // for github actions
   "yaml.completion": true,
