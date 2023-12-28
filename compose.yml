@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile
     command: >
-          bun --hot --watch ./src/index.ts
+          bun ./src/index.ts
     tty: true
     stdin_open: true
     expose:

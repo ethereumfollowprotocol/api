@@ -10,15 +10,15 @@
     "database:generate-types": "kysely-codegen --dialect='postgres' --type-only-imports --log-level='error' --out-file='./src/types/generated/index.ts' && bun format",
     "docker:api": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes api",
     "docker:ping": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes ping",
-    "format": "biome format . --write",
-    "lint": "biome check --apply .",
-    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "lint": "bunx @biomejs/biome check --apply . && bun lint:typecheck",
+    "lint:format": "bunx @biomejs/biome format . --write",
+    "lint:typecheck": "tsc --project tsconfig.json --noEmit",
     "clean": "rm -rf dist .wrangler node_modules",
     "update-dependencies": "bun ./scripts/update-dependencies.ts"
   },
   "dependencies": {
     "consola": "^3.2.3",
-    "hono": "^3.11.10",
+    "hono": "^3.11.11",
     "kysely": "^0.26.3",
     "kysely-postgres-js": "^2.0.0",
     "postgres": "^3.4.3"
@@ -37,9 +37,6 @@
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
-  "contributors": [
-    "Omar Aziz <omar@ethfollow.xyz> esm.eth",
-    "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"
-  ],
+  "contributors": ["Omar Aziz <omar@ethfollow.xyz> esm.eth", "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"],
   "sideEffects": false
 }

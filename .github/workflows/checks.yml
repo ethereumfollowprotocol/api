@@ -2,34 +2,53 @@ name: Checks
 
 on:
   pull_request:
+  # allow workflow to be called from other workflows
+  workflow_call:
+  # allow workflow to be called from github.com UI
   workflow_dispatch:
   push:
-    # since `deploy.yml` runs in main and does the same checks
-    branches-ignore: [main, develop]
+    branches-ignore: [develop]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: checks-${{ github.workflow }}-${{ github.ref }}
 
 defaults:
   run:
     shell: bash
 
 env:
+  NODE_OPTIONS: '--no-warnings'
   ACTIONS_RUNNER_DEBUG: true
 
 jobs:
   checks:
-    if: ${{ !contains(github.event.head_commit.message, '[skip-checks]') }}
+    name: '🔎 Checks'
     timeout-minutes: 3
     runs-on: ['ubuntu-latest']
     steps:
-      - name: 🔑 Checkout
+      - name: '🔑 Checkout'
         uses: actions/checkout@v4.1.1
 
-      - name: 'Install Dependencies'
-        uses: ./.github/actions/setup
-
-      - name: 'Lint / Build / Test'
-        uses: ./.github/actions/checks
+      - name: '🐰 Setup Bun'
+        uses: oven-sh/setup-bun@v1
         with:
-          skip-build: false
+          bun-version: 'latest'
+
+      - name: 'Setup Biome'
+        uses: biomejs/setup-biome@v1
+        with:
+          version: 'latest'
+
+      # if lint fails no need to continue
+      - name: '🧹 Lint'
+        continue-on-error: false
+        run: biome ci .
+
+      - name: '📦 Install Dependencies'
+        run: bun install --frozen-lockfile
+
+      - name: '🧪 Typecheck'
+        run: bunx tsc --project tsconfig.json --noEmit
+
+      - name: '🔧 Build'
+        run: bun run build
