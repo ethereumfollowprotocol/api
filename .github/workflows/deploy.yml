@@ -19,7 +19,6 @@ env:
 
 jobs:
   checks:
-    name: '🔎 Checks'
     uses: './.github/workflows/checks.yml'
 
   deploy-workers:

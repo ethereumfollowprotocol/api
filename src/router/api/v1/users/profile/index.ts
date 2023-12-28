@@ -9,7 +9,7 @@ import { ensureArray } from '#/utilities'
 export function profile(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
     '/:ensOrAddress/profile',
-    validator('query', (value, context) => {
+    validator('query', value => {
       const allFilters = ['ens', 'primary-list', 'following-list', 'followers-list']
       // if only one include query param, type is string, if 2+ then type is array, if none then undefined
       const { include } = <Record<'include', Array<string> | string | undefined>>value

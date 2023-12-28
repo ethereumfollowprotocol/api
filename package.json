@@ -37,6 +37,9 @@
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
-  "contributors": ["Omar Aziz <omar@ethfollow.xyz> esm.eth", "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"],
+  "contributors": [
+    "Omar Aziz <omar@ethfollow.xyz> esm.eth",
+    "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"
+  ],
   "sideEffects": false
 }
