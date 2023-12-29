@@ -9,19 +9,19 @@ inputs:
     description: 'The Cloudflare API token'
     required: true
   development:
-    description: 'Whether to deploy to the development environment'
+    description: 'deploy to development environment'
     required: false
     default: 'true'
   production:
-    description: 'Whether to deploy to the production environment'
+    description: 'deploy to production environment'
     required: false
     default: 'false'
   stage:
-    description: 'Whether to deploy to the stage environment'
+    description: 'deploy to stage environment'
     required: false
     default: 'false'
   test:
-    description: 'Whether to deploy to the test environment'
+    description: 'deploy to test environment'
     required: false
     default: 'false'
   secrets:

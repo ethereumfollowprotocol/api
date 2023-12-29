@@ -3,15 +3,31 @@ name: Deploy
 on:
   workflow_dispatch:
     inputs:
-      WORKERS_ENVIRONMENT:
-        type: choice
-        description: 'Cloudflare Workers Environment to deploy to'
+      development:
+        type: boolean
+        description: 'Deploy to development environment'
         required: false
-        options:
-          - 'development'
-          - 'production'
-          - 'all'
-        default: 'development'
+        default: true
+      production:
+        type: boolean
+        description: 'Deploy to production environment'
+        required: false
+        default: false
+      stage:
+        type: boolean
+        description: 'Deploy to stage environment'
+        required: false
+        default: false
+      test:
+        type: boolean
+        description: 'Deploy to test environment'
+        required: false
+        default: false
+      all:
+        type: boolean
+        description: 'Deploy to all environments'
+        required: false
+        default: false
 
   push:
     branches: [develop]
@@ -27,7 +43,6 @@ defaults:
 env:
   ACTIONS_RUNNER_DEBUG: true
   NODE_OPTIONS: '--no-warnings'
-  WORKERS_ENVIRONMENT: ${{ github.event.inputs.WORKERS_ENVIRONMENT }}
 
 jobs:
   checks:
@@ -65,7 +80,7 @@ jobs:
         with:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          development: 'true'
-          production: 'false'
-          stage: 'false'
-          test: 'false'
+          development: ${{ github.event.inputs.development || github.event.inputs.all }}
+          production: ${{ github.event.inputs.production || github.event.inputs.all }}
+          stage: ${{ github.event.inputs.stage || github.event.inputs.all }}
+          test: ${{ github.event.inputs.test || github.event.inputs.all }}

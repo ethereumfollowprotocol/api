@@ -94,8 +94,8 @@ app.get('/v1', context =>
 /** Logs all registered routes to the console. */
 app.get('/routes', async context => {
   const verbose = context.req.query('verbose')
-  const { env: environment } = env(context)
-  if (environment === 'development') {
+  const { ENVIRONMENT } = env(context)
+  if (ENVIRONMENT === 'development') {
     const { showRoutes } = await import('hono/dev')
     showRoutes(app, { verbose: verbose === 'true' || verbose === '1' })
     return new Response(JSON.stringify([...new Set(app.routes.map(({ path }) => path))], null, 2))
