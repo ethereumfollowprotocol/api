@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { cache } from 'hono/cache'
 import { cors } from 'hono/cors'
 import { HTTPException } from 'hono/http-exception'
 import { logger } from 'hono/logger'
@@ -30,21 +29,6 @@ app.use('*', async (context, next) => {
 })
 
 app.use('*', logger())
-
-/**
- * @link https://hono.dev/middleware/builtin/cache
- * - super heavy caching during demo period since data is dummy atm
- * - cache is disabled in development mode
- */
-app.use('*', async (context, next) => {
-  const { ENVIRONMENT } = env(context)
-  await next()
-  if (ENVIRONMENT === 'development') return
-  cache({
-    cacheName: 'efp-api',
-    cacheControl: 'max-age=5184000, s-maxage=5184000, stale-while-revalidate=604800'
-  })
-})
 
 app.use('*', cors({ origin: '*', allowMethods: ['GET', 'HEAD', 'OPTIONS'] }))
 
