@@ -20,7 +20,7 @@ export class ENSMetadataService implements IENSMetadataService {
   }
 
   /**
-   * TODO: 
+   * TODO:
    * currently our ENS metadata service can return a non-200 response with a JSON body
    * We should read that body and throw an error with the message
    */
