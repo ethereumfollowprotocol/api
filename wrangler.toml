@@ -15,9 +15,15 @@ placement = { mode = "smart" }
 compatibility_date = "2023-10-30"
 # end of globally inheritable configuration
 #
+vars = { ENVIRONMENT = "development" }
+services = [{ binding = "ens", service = "ens" }]
+kv_namespaces = [
+  { binding = "EFP_DEMO_KV", id = "b662b0a7236c4145888a7d700076e43b" },
+]
 
 [env.development]
 name = "development"
+workers_dev = true
 vars = { ENVIRONMENT = "development" }
 routes = [{ pattern = "development.api.ethfollow.xyz", custom_domain = true }]
 services = [{ binding = "ens", service = "ens" }]
@@ -36,6 +42,7 @@ services = [{ binding = "ens", service = "ens" }]
 
 [env.production]
 name = "production"
+workers_dev = true
 vars = { ENVIRONMENT = "production", IS_DEMO = "true" }
 routes = [
   { pattern = "api.ethfollow.xyz", custom_domain = true },
