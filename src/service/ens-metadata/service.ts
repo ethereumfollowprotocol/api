@@ -20,16 +20,22 @@ export class ENSMetadataService implements IENSMetadataService {
   }
 
   async getENSProfile(ensNameOrAddress: Address | string): Promise<ENSProfile> {
-    if (ensNameOrAddress === undefined) {
-      raise('ENS name or address is required')
-    }
-    const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+    try {
+      if (ensNameOrAddress === undefined) {
+        raise('ENS name or address is required')
+      }
+      const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
 
-    if (!response.ok) {
-      raise(`invalid ENS name: ${ensNameOrAddress}`)
-    }
+      const ensProfileData = (await response.json()) as ENSProfile | { status: number; error: string }
 
-    const ensProfileData = await response.json()
-    return ensProfileData as ENSProfile
+      if (!ensProfileData) raise(`Failed to fetch ENS profile for ${ensNameOrAddress}`)
+      // ENS worker still returns data when status code is not 200
+      if (Object.hasOwn(ensProfileData, 'error')) raise(ensProfileData)
+
+      return ensProfileData as ENSProfile
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : JSON.stringify(error)
+      raise(errorMessage)
+    }
   }
 }

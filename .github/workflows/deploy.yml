@@ -12,7 +12,7 @@ on:
         type: boolean
         description: 'Deploy to production environment'
         required: false
-        default: false
+        default: true
       stage:
         type: boolean
         description: 'Deploy to stage environment'

@@ -22,6 +22,23 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   relationships(users, services)
   stats(users, services)
 
+  users.get('/:ensOrAddress', context =>
+    context.json(
+      {
+        message: `Not a valid endpoint. Available subpaths: ${[
+          '/ens',
+          '/followers',
+          '/following',
+          '/primary-list',
+          '/profile',
+          '/relationships',
+          '/stats'
+        ].join(', ')}`
+      },
+      501
+    )
+  )
+
   // Blocked by user
   // biome-ignore lint/nursery/useAwait: <explanation>
   users.get('/:ensOrAddress/blocks', async context => {
