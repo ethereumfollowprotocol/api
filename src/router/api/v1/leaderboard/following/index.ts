@@ -3,7 +3,7 @@ import type { Environment } from '#/types'
 import type { Hono, MiddlewareHandler } from 'hono'
 import { env } from 'hono/adapter'
 
-export function following(
+export function followers(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
   limitValidator: MiddlewareHandler<
@@ -36,19 +36,15 @@ export function following(
   >
 ) {
   /**
-   * By default, only returns leaderboard with address and followers_count/following_count of each user.
-   * If include=ens, also returns ens profile of each user.
-   * If include=muted, also returns how many users each user has muted.
-   * If include=blocked, also returns how many users each user has blocked.
-   * If ensOrAddress path param is provided AND include=mutuals query param is provided, returns mutuals between ensOrAddress and each user.
+   * Same as /followers, but for following.
    */
-  leaderboard.get('/followers/:ensOrAddress?', limitValidator, includeValidator, async context => {
+  leaderboard.get('/following/:ensOrAddress?', limitValidator, includeValidator, async context => {
     const { ensOrAddress } = context.req.param()
     const { include, limit } = context.req.valid('query')
-    const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
-    const mostFollowers: { address: string; followers_count: number }[] = await services
+    const parsedLimit = Number.parseInt(limit as string, 10)
+    const mostFollowing: { address: string; following_count: number }[] = await services
       .efp(env(context))
-      .getLeaderboardFollowers(parsedLimit)
-    return context.json(mostFollowers, 200)
+      .getLeaderboardFollowing(parsedLimit)
+    return context.json(mostFollowing, 200)
   })
 }

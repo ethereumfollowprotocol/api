@@ -5,8 +5,8 @@ import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
 import { blocked } from './blocked'
-import { followers } from './followers'
-import { following } from './following'
+import { followers } from './following'
+import { following } from './followers'
 import { muted } from './muted'
 
 const limitValidator = validator('query', value => {

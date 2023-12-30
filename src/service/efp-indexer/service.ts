@@ -10,9 +10,11 @@ export interface IEFPIndexerService {
   getFollowers(address: Address): Promise<Address[]>
   getFollowingCount(address: Address): Promise<number>
   getFollowing(address: Address): Promise<TaggedListRecord[]>
+  getLeaderboardBlocked(limit: number): Promise<{ address: Address; blocked_count: number }[]>
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
-  getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
+  getLeaderboardMuted(limit: number): Promise<{ address: Address; muted_count: number }[]>
+  // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
@@ -99,11 +101,23 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Leaderboard
   /////////////////////////////////////////////////////////////////////////////
 
+  async getLeaderboardBlocked(limit: number): Promise<{ address: `0x${string}`; blocked_count: number }[]> {
+    const query = sql`SELECT * FROM query.get_leaderboard_blocked(${limit})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+    console.log('getLeaderboardBlocked result', result)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      blocked_count: row.blocked_count
+    }))
+  }
+
   async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
-    console.log('limit', limit)
-    console.log('typeof limit', typeof limit)
     const query = sql`SELECT * FROM query.get_leaderboard_followers(${limit})`
-    console.log(query.compile(this.#db))
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -117,8 +131,6 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
-    console.log('limit', limit)
-    console.log('typeof limit', typeof limit)
     const query = sql`SELECT * FROM query.get_leaderboard_following(${limit})`
     console.log(query.compile(this.#db))
     const result: QueryResult<unknown> = await query.execute(this.#db)
@@ -133,18 +145,32 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
+  async getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_count: number }[]> {
+    const query = sql`SELECT * FROM query.get_leaderboard_muted(${limit})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      muted_count: row.muted_count
+    }))
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // List Storage Location
   /////////////////////////////////////////////////////////////////////////////
 
-  async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
-    const result = await this.#db
-      .selectFrom('list_nfts')
-      .select('list_storage_location')
-      .where('token_id', '=', tokenId.toString())
-      .executeTakeFirst()
-    return (result?.list_storage_location as Address) || undefined
-  }
+  // async getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined> {
+  //   const result = await this.#db
+  //     .selectFrom('list_nfts')
+  //     .select('list_storage_location')
+  //     .where('token_id', '=', tokenId.toString())
+  //     .executeTakeFirst()
+  //   return (result?.list_storage_location as Address) || undefined
+  // }
 
   /////////////////////////////////////////////////////////////////////////////
   // List Records

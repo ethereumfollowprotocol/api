@@ -9,6 +9,18 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   constructor() {
     this.#socialGraph = makeSocialGraph()
   }
+  getLeaderboardBlocked(limit: number): Promise<
+    {
+      address: `0x${string}`
+      blocked_count: number
+    }[]
+  > {
+    throw new Error('Method not implemented.')
+  }
+
+  getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_count: number }[]> {
+    throw new Error('Method not implemented.')
+  }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowersCount(address: Address): Promise<number> {
