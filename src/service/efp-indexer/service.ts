@@ -46,7 +46,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowers(address: Address): Promise<Address[]> {
-    const query = sql`SELECT * FROM query.get_unique_followers__record_type_001(${address})`
+    const query = sql`SELECT * FROM query.get_unique_followers(${address})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
