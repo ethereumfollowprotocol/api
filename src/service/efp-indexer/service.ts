@@ -26,6 +26,10 @@ export interface IEFPIndexerService {
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
 }
 
+function bufferize(data: Uint8Array | string): Buffer {
+  return typeof data === 'string' ? Buffer.from(data.replace('0x', ''), 'hex') : Buffer.from(data)
+}
+
 export class EFPIndexerService implements IEFPIndexerService {
   readonly #db: Kysely<DB>
 
@@ -42,14 +46,14 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowers(address: Address): Promise<Address[]> {
-    const query = sql`SELECT * FROM query.get_unique_followers(${address.toLowerCase()})`
+    const query = sql`SELECT * FROM query.get_unique_followers__record_type_001(${address})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
       return []
     }
 
-    return result.rows.map((row: any) => row.list_user)
+    return result.rows.map((row: any) => row.efp_list_user)
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -61,7 +65,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowing(address: Address): Promise<TaggedListRecord[]> {
-    const query = sql`SELECT * FROM query.get_following(${address.toLowerCase()})`
+    const query = sql`SELECT * FROM query.get_following__record_type_001(${address})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -86,7 +90,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return rows.map((row: Row) => ({
       version: row.record_version,
       recordType: row.record_type,
-      data: Buffer.from(row.following_address.replace('0x', ''), 'hex'),
+      data: bufferize(row.following_address),
       tags: row.tags.sort()
     }))
   }
@@ -147,17 +151,18 @@ export class EFPIndexerService implements IEFPIndexerService {
     if (!result || result.rows.length === 0) {
       return []
     }
+    console.warn('getListRecords result', result)
 
     type Row = {
-      version: number
+      record_version: number
       record_type: number
-      data: `0x${string}`
+      record_data: `0x${string}`
     }
 
     return (result.rows as Row[]).map((row: Row) => ({
-      version: row.version,
+      version: row.record_version,
       recordType: row.record_type,
-      data: Buffer.from(row.data.replace('0x', ''), 'hex')
+      data: bufferize(row.record_data)
     }))
   }
 
@@ -183,10 +188,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return (result.rows as Row[]).map((row: Row) => ({
       version: row.record_version,
       recordType: row.record_type,
-      data:
-        typeof row.record_data === 'string'
-          ? Buffer.from(row.record_data.replace('0x', ''), 'hex')
-          : Buffer.from(row.record_data),
+      data: bufferize(row.record_data),
       tags: row.tags.sort()
     }))
   }
@@ -205,7 +207,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     tag: string
   ): Promise<{ token_id: bigint; list_user: `0x${string}`; tags: string[] }[]> {
     const query = sql`
-      SELECT * FROM query.get_incoming_relationships(${address.toLowerCase()}, ${tag})
+      SELECT * FROM query.get_incoming_relationships(${address}, ${tag})
     `
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -229,7 +231,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getOutgoingRelationships(address: `0x${string}`, tag: string): Promise<TaggedListRecord[]> {
     const query = sql`
-      SELECT * FROM query.get_outgoing_relationships(${address.toLowerCase()}, ${tag})
+      SELECT * FROM query.get_outgoing_relationships(${address}, ${tag})
     `
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -252,7 +254,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return rows.map((row: Row) => ({
       version: row.version,
       recordType: row.record_type,
-      data: Buffer.from(row.data.replace('0x', ''), 'hex'),
+      data: bufferize(row.data),
       tags: row.tags.sort()
     }))
   }
@@ -263,7 +265,7 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getPrimaryList(address: Address): Promise<bigint | undefined> {
     // Call the enhanced PostgreSQL function
-    const query = sql`SELECT query.get_primary_list(${address.toLowerCase()}) AS primary_list`
+    const query = sql`SELECT query.get_primary_list(${address}) AS primary_list`
     const result: QueryResult<unknown> = await query.execute(this.#db)
     if (!result || result.rows.length === 0) {
       return undefined
