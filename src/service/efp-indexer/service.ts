@@ -236,7 +236,6 @@ export class EFPIndexerService implements IEFPIndexerService {
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
-      console.warn('getOutgoingRelationships no results')
       return []
     }
 
@@ -249,7 +248,6 @@ export class EFPIndexerService implements IEFPIndexerService {
       tags: string[]
     }
     const rows: Row[] = result.rows as Row[]
-    console.warn('getOutgoingRelationships rows', rows)
 
     return rows.map((row: Row) => ({
       version: row.version,
