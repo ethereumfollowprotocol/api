@@ -1,5 +1,5 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
 import type { Address } from '#/types'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { DB } from '#/types'
@@ -69,24 +69,24 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     type Row = {
-      token_id: bigint
-      version: number
+      efp_list_nft_token_id: bigint
+      record_version: number
       record_type: number
-      data: string
+      following_address: `0x${string}`
       tags: string[]
     }
     const rows: Row[] = result.rows as {
-      token_id: bigint
-      version: number
+      efp_list_nft_token_id: bigint
+      record_version: number
       record_type: number
-      data: string
+      following_address: `0x${string}`
       tags: string[]
     }[]
 
     return rows.map((row: Row) => ({
-      version: row.version,
+      version: row.record_version,
       recordType: row.record_type,
-      data: Buffer.from(row.data.replace('0x', ''), 'hex'),
+      data: Buffer.from(row.following_address.replace('0x', ''), 'hex'),
       tags: row.tags.sort()
     }))
   }
@@ -174,16 +174,19 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     type Row = {
-      version: number
+      record_version: number
       record_type: number
-      data: `0x${string}`
+      record_data: `0x${string}` | Uint8Array
       tags: string[]
     }
 
     return (result.rows as Row[]).map((row: Row) => ({
-      version: row.version,
+      version: row.record_version,
       recordType: row.record_type,
-      data: Buffer.from(row.data.replace('0x', ''), 'hex'),
+      data:
+        typeof row.record_data === 'string'
+          ? Buffer.from(row.record_data.replace('0x', ''), 'hex')
+          : Buffer.from(row.record_data),
       tags: row.tags.sort()
     }))
   }

@@ -3,12 +3,15 @@
 set -eou pipefail allexport
 
 # source .env and .dev.vars if they exist
-[ -f .env ] && source .env
-[ -f .dev.vars ] && source .dev.vars
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+
+[ -f "${SCRIPT_DIR}/../.env" ] && source "${SCRIPT_DIR}/../.env"
+[ -f "${SCRIPT_DIR}/../.dev.vars" ] && source "${SCRIPT_DIR}/../.dev.vars"
 
 [ -z "${IS_DEMO+x}" ] && echo "IS_DEMO is not set. Exiting..." && exit 1
 
-[ "$IS_DEMO" != "true" ] && echo "IS_DEMO=${IS_DEMO}\n"
+[ "$IS_DEMO" != "true" ] && echo "IS_DEMO=${IS_DEMO}"
 
 echo
 echo ==============================================
