@@ -1,10 +1,13 @@
 import { Hono } from 'hono'
 import { validator } from 'hono/validator'
 
-import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
+import { blocked } from './blocked'
+import { followers } from './followers'
+import { following } from './following'
+import { muted } from './muted'
 
 const limitValidator = validator('query', value => {
   const { limit } = value
@@ -31,51 +34,12 @@ const includeValidator = validator('query', value => {
 })
 
 export function leaderboard(services: Services): Hono<{ Bindings: Environment }> {
-  const users = new Hono<{ Bindings: Environment }>()
+  const leaderboard = new Hono<{ Bindings: Environment }>()
 
-  /**
-   * By default, only returns leaderboard with address and followers_count/following_count of each user.
-   * If include=ens, also returns ens profile of each user.
-   * If include=muted, also returns how many users each user has muted.
-   * If include=blocked, also returns how many users each user has blocked.
-   * If ensOrAddress path param is provided AND include=mutuals query param is provided, returns mutuals between ensOrAddress and each user.
-   */
-  users.get('/followers/:ensOrAddress?', limitValidator, includeValidator, async context => {
-    const { ensOrAddress } = context.req.param()
-    const { include, limit } = context.req.valid('query')
-    const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
-    const mostFollowers: { address: string; followers_count: number }[] = await services
-      .efp(env(context))
-      .getLeaderboardFollowers(100)
-    return context.json(mostFollowers, 200)
-  })
+  followers(leaderboard, services, limitValidator, includeValidator)
+  following(leaderboard, services, limitValidator, includeValidator)
+  blocked(leaderboard, services, limitValidator, includeValidator)
+  muted(leaderboard, services, limitValidator, includeValidator)
 
-  /**
-   * Same as /followers, but for following.
-   */
-  users.get('/following/:ensOrAddress?', limitValidator, includeValidator, async context => {
-    const { ensOrAddress } = context.req.param()
-    const { include, limit } = context.req.valid('query')
-    const parsedLimit = Number.parseInt(limit as string, 10)
-    const mostFollowing: { address: string; following_count: number }[] = await services
-      .efp(env(context))
-      .getLeaderboardFollowing(parsedLimit)
-    return context.json(mostFollowing, 200)
-  })
-
-  /**
-   * Same as /followers, but for primary list.
-   */
-  users.get('/blocked/:ensOrAddress?', limitValidator, includeValidator, context => {
-    return context.text('Not implemented', 501)
-  })
-
-  /**
-   * Same as /followers, but for primary list.
-   */
-  users.get('/muted/:ensOrAddress?', limitValidator, includeValidator, context => {
-    return context.text('Not implemented', 501)
-  })
-
-  return users
+  return leaderboard
 }
