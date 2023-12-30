@@ -6,16 +6,16 @@ set -eou pipefail allexport
 [ -f .env ] && source .env
 [ -f .dev.vars ] && source .dev.vars
 
+[ -z "${IS_DEMO+x}" ] && echo "IS_DEMO is not set. Exiting..." && exit 1
+
+[ "$IS_DEMO" != "true" ] && echo "IS_DEMO=${IS_DEMO}\n"
+
 echo
 echo ==============================================
 echo "                   Demo"
 echo ==============================================
 echo
 echo
-
-[ -z "${IS_DEMO+x}" ] && echo "IS_DEMO is not set. Exiting..." && exit 1
-
-[ "$IS_DEMO" != "true" ] && echo "IS_DEMO is not set to true. Exiting..." && exit 1
 
 if ! curl --silent --fail http://localhost:8787 >/dev/null; then
   echo "http://localhost:8787 is not running. Exiting..." && exit 1
@@ -56,6 +56,8 @@ paths=(
   '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=true'
 )
 
-for path in "${paths[@]}"; do
-  curl_endpoint "$path" "$path"
+for ((i=0; i<${#paths[@]}; i+=2)); do
+  path1=${paths[i]}
+  path2=${paths[i+1]}
+  curl_endpoint "$path1" "$path2"
 done
