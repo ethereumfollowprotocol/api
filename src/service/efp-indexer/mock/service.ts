@@ -9,18 +9,6 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   constructor() {
     this.#socialGraph = makeSocialGraph()
   }
-  getLeaderboardBlocked(limit: number): Promise<
-    {
-      address: `0x${string}`
-      blocked_count: number
-    }[]
-  > {
-    throw new Error('Method not implemented.')
-  }
-
-  getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_count: number }[]> {
-    throw new Error('Method not implemented.')
-  }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getFollowersCount(address: Address): Promise<number> {
@@ -43,8 +31,32 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
+  async getLeaderboardBlocked(limit: number): Promise<
+    {
+      address: `0x${string}`
+      blocked_by_count: number
+    }[]
+  > {
+    return this.#socialGraph.getLeaderboardBlockedBy(limit)
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getLeaderboardBlocks(limit: number): Promise<{ address: `0x${string}`; blocks_count: number }[]> {
+    return this.#socialGraph.getLeaderboardBlocks(limit)
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_by_count: number }[]> {
+    return this.#socialGraph.getLeaderboardMutedBy(limit)
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
+  async getLeaderboardMutes(limit: number): Promise<{ address: `0x${string}`; mutes_count: number }[]> {
+    return this.#socialGraph.getLeaderboardMutes(limit)
+  }
+
+  // biome-ignore lint/nursery/useAwait: <explanation>
   async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
-    console.log('getLeaderboardFollowers')
     return this.#socialGraph.getLeaderboardFollowers(limit)
   }
 

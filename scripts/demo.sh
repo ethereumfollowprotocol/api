@@ -53,10 +53,14 @@ paths=(
   '/users/:id/followers' '/users/dr3a.eth/followers'
   # '/users/:id/whoblocks' '/users/0x86A41524CB61edd8B115A72Ad9735F8068996688/whoblocks'
   # '/users/:id/whomutes' '/users/0x86A41524CB61edd8B115A72Ad9735F8068996688/whomutes'
+
   '/leaderboard/followers?limit=:limit' '/leaderboard/followers?limit=3'
   '/leaderboard/following?limit=:limit' '/leaderboard/following?limit=3'
   '/leaderboard/blocked?limit=:limit' '/leaderboard/blocked?limit=3'
+  '/leaderboard/blocks?limit=:limit' '/leaderboard/blocks?limit=3'
   '/leaderboard/muted?limit=:limit' '/leaderboard/muted?limit=3'
+  '/leaderboard/mutes?limit=:limit' '/leaderboard/mutes?limit=3'
+
   '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=false'
   '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=true'
 )

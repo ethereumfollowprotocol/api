@@ -10,10 +10,12 @@ export interface IEFPIndexerService {
   getFollowers(address: Address): Promise<Address[]>
   getFollowingCount(address: Address): Promise<number>
   getFollowing(address: Address): Promise<TaggedListRecord[]>
-  getLeaderboardBlocked(limit: number): Promise<{ address: Address; blocked_count: number }[]>
+  getLeaderboardBlocked(limit: number): Promise<{ address: Address; blocked_by_count: number }[]>
+  getLeaderboardBlocks(limit: number): Promise<{ address: Address; blocks_count: number }[]>
   getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]>
   getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]>
-  getLeaderboardMuted(limit: number): Promise<{ address: Address; muted_count: number }[]>
+  getLeaderboardMuted(limit: number): Promise<{ address: Address; muted_by_count: number }[]>
+  getLeaderboardMutes(limit: number): Promise<{ address: Address; mutes_count: number }[]>
   // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
@@ -100,11 +102,9 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
   // Leaderboard
   /////////////////////////////////////////////////////////////////////////////
-
-  async getLeaderboardBlocked(limit: number): Promise<{ address: `0x${string}`; blocked_count: number }[]> {
-    const query = sql`SELECT * FROM query.get_leaderboard_blocked(${limit})`
+  async getLeaderboardBlocks(limit: number): Promise<{ address: `0x${string}`; blocks_count: number }[]> {
+    const query = sql`SELECT * FROM query.get_leaderboard_blocks(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
-    console.log('getLeaderboardBlocked result', result)
 
     if (!result || result.rows.length === 0) {
       return []
@@ -112,7 +112,21 @@ export class EFPIndexerService implements IEFPIndexerService {
 
     return result.rows.map((row: any) => ({
       address: row.address,
-      blocked_count: row.blocked_count
+      blocks_count: row.blocks_count
+    }))
+  }
+
+  async getLeaderboardBlocked(limit: number): Promise<{ address: `0x${string}`; blocked_by_count: number }[]> {
+    const query = sql`SELECT * FROM query.get_leaderboard_blocked(${limit})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      blocked_by_count: row.blocked_count
     }))
   }
 
@@ -132,7 +146,6 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
     const query = sql`SELECT * FROM query.get_leaderboard_following(${limit})`
-    console.log(query.compile(this.#db))
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -145,7 +158,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
-  async getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_count: number }[]> {
+  async getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_by_count: number }[]> {
     const query = sql`SELECT * FROM query.get_leaderboard_muted(${limit})`
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
@@ -155,7 +168,21 @@ export class EFPIndexerService implements IEFPIndexerService {
 
     return result.rows.map((row: any) => ({
       address: row.address,
-      muted_count: row.muted_count
+      muted_by_count: row.muted_count
+    }))
+  }
+
+  async getLeaderboardMutes(limit: number): Promise<{ address: `0x${string}`; mutes_count: number }[]> {
+    const query = sql`SELECT * FROM query.get_leaderboard_mutes(${limit})`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      mutes_count: row.mutes_count
     }))
   }
 

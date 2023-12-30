@@ -5,9 +5,11 @@ import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
 import { blocked } from './blocked'
-import { followers } from './following'
+import { blocks } from './blocks'
 import { following } from './followers'
+import { followers } from './following'
 import { muted } from './muted'
+import { mutes } from './mutes'
 
 const limitValidator = validator('query', value => {
   const { limit } = value
@@ -40,9 +42,11 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
   const leaderboard = new Hono<{ Bindings: Environment }>()
 
   blocked(leaderboard, services, limitValidator, includeValidator)
+  blocks(leaderboard, services, limitValidator, includeValidator)
   followers(leaderboard, services, limitValidator, includeValidator)
   following(leaderboard, services, limitValidator, includeValidator)
   muted(leaderboard, services, limitValidator, includeValidator)
+  mutes(leaderboard, services, limitValidator, includeValidator)
 
   return leaderboard
 }

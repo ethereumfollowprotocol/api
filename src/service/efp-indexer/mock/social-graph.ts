@@ -1,4 +1,4 @@
-import { type ListRecord, type TaggedListRecord, serializeListRecord } from '#/types/list-record'
+import { serializeListRecord, type ListRecord, type TaggedListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -196,6 +196,13 @@ export class SocialGraph {
     return records
   }
 
+  static isBlock(record: ListRecord, tags: Set<Tag> | Tag[]): boolean {
+    if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
+      return false
+    }
+    return new Set(tags).has('block')
+  }
+
   static isFollow(record: ListRecord, tags: Set<Tag> | Tag[]): boolean {
     if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
       return false
@@ -205,6 +212,59 @@ export class SocialGraph {
       return false
     }
     return true
+  }
+
+  static isMute(record: ListRecord, tags: Set<Tag> | Tag[]): boolean {
+    if (record.version !== 1 || record.recordType !== 1 || record.data.length !== 20) {
+      return false
+    }
+    return new Set(tags).has('mute')
+  }
+
+  getBlockedBy(address: `0x${string}`): `0x${string}`[] {
+    const blockedBy: `0x${string}`[] = []
+    // check every primary list to see if it contains the address
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const listRecordTags: TaggedListRecord[] = this.getListRecordTags(tokenId)
+      for (const listRecordTag of listRecordTags) {
+        const { version, recordType, data, tags } = listRecordTag
+        if (!SocialGraph.isBlock({ version, recordType, data }, tags)) {
+          continue
+        }
+        const blockedByAddress: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
+        if (blockedByAddress.toLowerCase() === address.toLowerCase()) {
+          blockedBy.push(blockedByAddress)
+        }
+      }
+    }
+    return blockedBy
+  }
+
+  getBlockedByCount(address: `0x${string}`): number {
+    return this.getBlockedBy(address).length
+  }
+
+  // get following but only blocks
+  getBlocks(address: `0x${string}`): TaggedListRecord[] {
+    const primaryList: TokenId | undefined = this.getPrimaryList(address)
+    if (primaryList === undefined) return []
+
+    const listRecordTags: TaggedListRecord[] = this.getListRecordTags(primaryList)
+    // filter all the ones with "block" or "mute" in the tags
+    const blocks: TaggedListRecord[] = []
+    for (const listRecordTag of listRecordTags) {
+      const { version, recordType, data, tags } = listRecordTag
+      if (!SocialGraph.isBlock({ version, recordType, data }, tags)) {
+        continue
+      }
+      blocks.push({ version, recordType, data, tags: tags })
+    }
+    return blocks
+  }
+
+  getBlocksCount(address: `0x${string}`): number {
+    return this.getBlocks(address).length
   }
 
   getFollowers(address: `0x${string}`): `0x${string}`[] {
@@ -250,6 +310,77 @@ export class SocialGraph {
 
   getFollowingCount(address: `0x${string}`): number {
     return this.getFollowing(address).length
+  }
+
+  getMutedBy(address: `0x${string}`): `0x${string}`[] {
+    const mutedBy: `0x${string}`[] = []
+    // check every primary list to see if it contains the address
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const listRecordTags: TaggedListRecord[] = this.getListRecordTags(tokenId)
+      for (const listRecordTag of listRecordTags) {
+        const { version, recordType, data, tags } = listRecordTag
+        if (!SocialGraph.isBlock({ version, recordType, data }, tags)) {
+          continue
+        }
+        const mutedByAddress: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
+        if (mutedByAddress.toLowerCase() === address.toLowerCase()) {
+          mutedBy.push(mutedByAddress)
+        }
+      }
+    }
+    return mutedBy
+  }
+
+  getMutedByCount(address: `0x${string}`): number {
+    return this.getMutedBy(address).length
+  }
+
+  // get following but only mutes
+  getMutes(address: `0x${string}`): TaggedListRecord[] {
+    const primaryList: TokenId | undefined = this.getPrimaryList(address)
+    if (primaryList === undefined) return []
+
+    const listRecordTags: TaggedListRecord[] = this.getListRecordTags(primaryList)
+    // filter all the ones with "block" or "mute" in the tags
+    const mutes: TaggedListRecord[] = []
+    for (const listRecordTag of listRecordTags) {
+      const { version, recordType, data, tags } = listRecordTag
+      if (!SocialGraph.isMute({ version, recordType, data }, tags)) {
+        continue
+      }
+      mutes.push({ version, recordType, data, tags: tags })
+    }
+    return mutes
+  }
+
+  getMutesCount(address: `0x${string}`): number {
+    return this.getMutes(address).length
+  }
+
+  // iterate over each of the users with a primary list set
+  // count their blocks
+  // sort by blocks count
+  getLeaderboardBlocks(limit: number): Promise<{ address: `0x${string}`; blocks_count: number }[]> {
+    const leaderboard: { address: `0x${string}`; blocks_count: number }[] = []
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const blocksCount: number = this.getBlocksCount(listUser)
+      leaderboard.push({ address: listUser, blocks_count: blocksCount })
+    }
+    leaderboard.sort((a, b) => b.blocks_count - a.blocks_count)
+    return Promise.resolve(leaderboard.slice(0, limit))
+  }
+
+  getLeaderboardBlockedBy(limit: number): Promise<{ address: `0x${string}`; blocked_by_count: number }[]> {
+    const leaderboard: { address: `0x${string}`; blocked_by_count: number }[] = []
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const blockedByCount: number = this.getBlockedByCount(listUser)
+      leaderboard.push({ address: listUser, blocked_by_count: blockedByCount })
+    }
+    leaderboard.sort((a, b) => b.blocked_by_count - a.blocked_by_count)
+    return Promise.resolve(leaderboard.slice(0, limit))
   }
 
   // iterate over each of the users with a primary list set
@@ -299,6 +430,28 @@ export class SocialGraph {
       leaderboard.push({ address, followers_count: followers.size })
     }
     leaderboard.sort((a, b) => b.followers_count - a.followers_count)
+    return Promise.resolve(leaderboard.slice(0, limit))
+  }
+
+  getLeaderboardMutes(limit: number): Promise<{ address: `0x${string}`; mutes_count: number }[]> {
+    const leaderboard: { address: `0x${string}`; mutes_count: number }[] = []
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const mutesCount: number = this.getMutesCount(listUser)
+      leaderboard.push({ address: listUser, mutes_count: mutesCount })
+    }
+    leaderboard.sort((a, b) => b.mutes_count - a.mutes_count)
+    return Promise.resolve(leaderboard.slice(0, limit))
+  }
+
+  getLeaderboardMutedBy(limit: number): Promise<{ address: `0x${string}`; muted_by_count: number }[]> {
+    const leaderboard: { address: `0x${string}`; muted_by_count: number }[] = []
+    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+      if (tokenId === undefined) continue
+      const mutedByCount: number = this.getMutedByCount(listUser)
+      leaderboard.push({ address: listUser, muted_by_count: mutedByCount })
+    }
+    leaderboard.sort((a, b) => b.muted_by_count - a.muted_by_count)
     return Promise.resolve(leaderboard.slice(0, limit))
   }
 }
