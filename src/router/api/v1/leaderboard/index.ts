@@ -36,9 +36,9 @@ const includeValidator = validator('query', value => {
 export function leaderboard(services: Services): Hono<{ Bindings: Environment }> {
   const leaderboard = new Hono<{ Bindings: Environment }>()
 
+  blocked(leaderboard, services, limitValidator, includeValidator)
   followers(leaderboard, services, limitValidator, includeValidator)
   following(leaderboard, services, limitValidator, includeValidator)
-  blocked(leaderboard, services, limitValidator, includeValidator)
   muted(leaderboard, services, limitValidator, includeValidator)
 
   return leaderboard
