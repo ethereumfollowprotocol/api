@@ -210,7 +210,6 @@ export class EFPIndexerService implements IEFPIndexerService {
     if (!result || result.rows.length === 0) {
       return []
     }
-    console.warn('getListRecords result', result)
 
     type Row = {
       record_version: number
