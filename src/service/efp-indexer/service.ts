@@ -100,7 +100,10 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
-    const query = sql`SELECT * FROM query.count_unique_followers_by_address(${limit})`
+    console.log('limit', limit)
+    console.log('typeof limit', typeof limit)
+    const query = sql`SELECT * FROM query.get_leaderboard_followers(${limit})`
+    console.log(query.compile(this.#db))
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -114,7 +117,10 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
-    const query = sql`SELECT * FROM query.count_unique_following_by_address(${limit})`
+    console.log('limit', limit)
+    console.log('typeof limit', typeof limit)
+    const query = sql`SELECT * FROM query.get_leaderboard_following(${limit})`
+    console.log(query.compile(this.#db))
     const result: QueryResult<unknown> = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {

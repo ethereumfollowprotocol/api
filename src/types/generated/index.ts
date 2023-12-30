@@ -128,6 +128,11 @@ export interface ViewEfpAccountMetadata {
   value: string | null
 }
 
+export interface ViewEfpAccountsWithPrimaryList {
+  address: string | null
+  primary_list_token_id: Int8 | null
+}
+
 export interface ViewEfpContracts {
   address: string | null
   chain_id: Int8 | null
@@ -150,7 +155,7 @@ export interface ViewEfpListNfts {
   address: string | null
   chain_id: Int8 | null
   owner: string | null
-  token_id: string | null
+  token_id: Int8 | null
 }
 
 export interface ViewEfpListNftsWithManagerUser {
@@ -158,7 +163,7 @@ export interface ViewEfpListNftsWithManagerUser {
   efp_list_nft_chain_id: Int8 | null
   efp_list_nft_contract_address: string | null
   efp_list_nft_owner: string | null
-  efp_list_nft_token_id: string | null
+  efp_list_nft_token_id: Int8 | null
   efp_list_storage_location: Buffer | null
   efp_list_storage_location_chain_id: Int8 | null
   efp_list_storage_location_contract_address: string | null
@@ -224,6 +229,25 @@ export interface ViewEfpListRecordsDeleted {
   transaction_index: Numeric | null
 }
 
+export interface ViewEfpListRecordsWithNftManagerUserTags {
+  efp_list_manager: string | null
+  efp_list_nft_chain_id: Int8 | null
+  efp_list_nft_contract_address: string | null
+  efp_list_nft_owner: string | null
+  efp_list_nft_token_id: Int8 | null
+  efp_list_storage_location_chain_id: Int8 | null
+  efp_list_storage_location_contract_address: string | null
+  efp_list_storage_location_nonce: Int8 | null
+  efp_list_user: string | null
+  has_block_tag: boolean | null
+  has_mute_tag: boolean | null
+  record: Buffer | null
+  record_data: Buffer | null
+  record_type: number | null
+  record_version: number | null
+  tags: string[] | null
+}
+
 export interface ViewEfpListRecordsWithTags {
   chain_id: Int8 | null
   contract_address: string | null
@@ -266,7 +290,7 @@ export interface ViewEfpListRecordTagsDeleted {
 export interface ViewEfpListStorageLocations {
   efp_list_nft_chain_id: Int8 | null
   efp_list_nft_contract_address: string | null
-  efp_list_nft_token_id: string | null
+  efp_list_nft_token_id: Int8 | null
   efp_list_storage_location: Buffer | null
   efp_list_storage_location_chain_id: Int8 | null
   efp_list_storage_location_contract_address: string | null
@@ -284,49 +308,6 @@ export interface ViewLatestRecordTags {
   tag: string | null
 }
 
-export interface ViewListNftsWithManagerUser {
-  chain_id: Int8 | null
-  contract_address: string | null
-  created_at: Timestamp | null
-  list_manager: string | null
-  list_storage_location: string | null
-  list_storage_location_chain_id: Int8 | null
-  list_storage_location_contract_address: string | null
-  list_storage_location_nonce: Int8 | null
-  list_user: string | null
-  owner: string | null
-  token_id: Int8 | null
-  updated_at: Timestamp | null
-}
-
-export interface ViewListRecordsWithNftManagerUserTags {
-  data: string | null
-  has_block_tag: boolean | null
-  has_mute_tag: boolean | null
-  list_manager: string | null
-  list_storage_location_chain_id: Int8 | null
-  list_storage_location_contract_address: string | null
-  list_storage_location_nonce: Int8 | null
-  list_user: string | null
-  owner: string | null
-  record: string | null
-  record_type: number | null
-  tags: string[] | null
-  token_id: Int8 | null
-  version: number | null
-}
-
-export interface ViewListRecordsWithTagArray {
-  chain_id: Int8 | null
-  contract_address: string | null
-  data: string | null
-  nonce: Int8 | null
-  record: string | null
-  record_type: number | null
-  tags: string[] | null
-  version: number | null
-}
-
 export interface DB {
   account_metadata: AccountMetadata
   contract_events: ContractEvents
@@ -338,6 +319,7 @@ export interface DB {
   list_records: ListRecords
   schema_migrations: SchemaMigrations
   view__efp_account_metadata: ViewEfpAccountMetadata
+  view__efp_accounts_with_primary_list: ViewEfpAccountsWithPrimaryList
   view__efp_contracts: ViewEfpContracts
   view__efp_list_metadata: ViewEfpListMetadata
   view__efp_list_nfts: ViewEfpListNfts
@@ -348,10 +330,8 @@ export interface DB {
   view__efp_list_record_tags__deleted: ViewEfpListRecordTagsDeleted
   view__efp_list_records: ViewEfpListRecords
   view__efp_list_records__deleted: ViewEfpListRecordsDeleted
+  view__efp_list_records_with_nft_manager_user_tags: ViewEfpListRecordsWithNftManagerUserTags
   view__efp_list_records_with_tags: ViewEfpListRecordsWithTags
   view__efp_list_storage_locations: ViewEfpListStorageLocations
   view__latest_record_tags: ViewLatestRecordTags
-  view_list_nfts_with_manager_user: ViewListNftsWithManagerUser
-  view_list_records_with_nft_manager_user_tags: ViewListRecordsWithNftManagerUserTags
-  view_list_records_with_tag_array: ViewListRecordsWithTagArray
 }

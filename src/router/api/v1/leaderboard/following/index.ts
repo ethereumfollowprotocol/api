@@ -48,7 +48,7 @@ export function following(
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     const mostFollowers: { address: string; followers_count: number }[] = await services
       .efp(env(context))
-      .getLeaderboardFollowers(100)
+      .getLeaderboardFollowers(parsedLimit)
     return context.json(mostFollowers, 200)
   })
 }

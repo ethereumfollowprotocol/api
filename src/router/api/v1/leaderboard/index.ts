@@ -22,9 +22,12 @@ const includeValidator = validator('query', value => {
   const allFilters = ['ens', 'mutuals', 'blocked', 'muted']
   // if only one include query param, type is string, if 2+ then type is array, if none then undefined
   const { include } = <Record<'include', string | string[] | undefined>>value
+  const { limit } = <Record<'limit', string | string[] | undefined>>value
+  const limitAsNumber: number | undefined = limit === undefined ? undefined : Number.parseInt(limit as string, 10)
   // if no include query param, return minimal data
-  if (!include) return { include: [] }
-  if (ensureArray(include).every(filter => allFilters.includes(filter))) return { include }
+  if (!include) return limitAsNumber === undefined ? { include: [] } : { limit: limitAsNumber, include: [] }
+  if (ensureArray(include).every(filter => allFilters.includes(filter)))
+    return limitAsNumber === undefined ? { include } : { limit: limitAsNumber, include }
   return new Response(
     JSON.stringify({
       message: 'Accepted format for include: ?limit=50&include=ens&include=mutuals&include=blocked&include=muted'
