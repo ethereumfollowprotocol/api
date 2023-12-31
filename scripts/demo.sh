@@ -44,7 +44,7 @@ paths=(
   '/users/:id/stats' '/users/dr3a.eth/stats'
   '/users/:id/primary-list' '/users/dr3a.eth/primary-list'
   # '/users/:id/primary-list' '/users/0xC480C3FD10d8965EB74B9B53ee65Bea24B2a6A73/primary-list'
-  '/users/:id/folowing' '/users/dr3a.eth/following'
+  '/users/:id/following' '/users/dr3a.eth/following'
   # '/users/:id/following/tagged/:tag' '/users/dr3a.eth/following/tagged/efp'
   # '/users/:id/following/tagged/:tag' '/users/dr3a.eth/following/tagged/ens'
   # '/users/:id/following/tagged/:tag' '/users/dr3a.eth/following/tagged/block'

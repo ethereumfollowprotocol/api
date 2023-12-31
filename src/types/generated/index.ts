@@ -22,7 +22,7 @@ export type Numeric = ColumnType<string, number | string, number | string>
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
-export interface ContractEvents {
+export interface Events {
   block_hash: string
   block_number: Int8
   chain_id: Int8
@@ -233,7 +233,7 @@ export interface ViewLatestRecordTags {
 }
 
 export interface DB {
-  contract_events: ContractEvents
+  events: Events
   schema_migrations: SchemaMigrations
   view__efp_account_metadata: ViewEfpAccountMetadata
   view__efp_accounts_with_primary_list: ViewEfpAccountsWithPrimaryList
