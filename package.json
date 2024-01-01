@@ -10,6 +10,7 @@
     "database:generate-types": "kysely-codegen --dialect='postgres' --type-only-imports --log-level='error' --out-file='./src/types/generated/index.ts' && bun lint:format",
     "docker:api": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes api",
     "docker:ping": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes ping",
+    "test": "vitest --run",
     "lint": "bunx @biomejs/biome check --apply . && bun lint:typecheck",
     "lint:format": "bunx @biomejs/biome format . --write",
     "lint:typecheck": "tsc --project tsconfig.json --noEmit",
@@ -18,8 +19,8 @@
   },
   "dependencies": {
     "consola": "^3.2.3",
-    "hono": "^3.11.11",
-    "kysely": "^0.26.3",
+    "hono": "^3.11.12",
+    "kysely": "^0.27.0",
     "kysely-postgres-js": "^2.0.0",
     "postgres": "^3.4.3"
   },
@@ -28,18 +29,16 @@
     "@cloudflare/workers-types": "^4.20231218.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.0.0",
-    "@types/node": "^20.10.5",
+    "@types/node": "^20.10.6",
     "bun": "^1.0.20",
     "kysely-codegen": "^0.11.0",
     "pg": "^8.11.3",
     "typescript": "^5.3.3",
+    "vitest": "^1.1.1",
     "wrangler": "^3.22.1"
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
-  "contributors": [
-    "Omar Aziz <omar@ethfollow.xyz> esm.eth",
-    "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"
-  ],
+  "contributors": ["Omar Aziz <omar@ethfollow.xyz> esm.eth", "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"],
   "sideEffects": false
 }
