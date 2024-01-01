@@ -1,7 +1,7 @@
-import type { Services } from '#/service'
-import type { Environment } from '#/types'
 import type { Hono, MiddlewareHandler } from 'hono'
 import { env } from 'hono/adapter'
+import type { Services } from '#/service'
+import type { Environment } from '#/types'
 
 export function muted(
   leaderboard: Hono<{ Bindings: Environment }>,

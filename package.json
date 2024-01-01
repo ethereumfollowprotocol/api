@@ -20,7 +20,7 @@
   "dependencies": {
     "consola": "^3.2.3",
     "hono": "^3.11.12",
-    "kysely": "^0.27.0",
+    "kysely": "^0.26.3",
     "kysely-postgres-js": "^2.0.0",
     "postgres": "^3.4.3"
   },

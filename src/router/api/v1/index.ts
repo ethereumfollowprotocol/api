@@ -20,7 +20,7 @@ export function api(services: Services): Hono<{ Bindings: Environment }> {
 
     // do a simple query to check if the database is up
     try {
-      await db.selectFrom('contracts').select('name').limit(1).execute()
+      await db.selectFrom('events').select('event_name').limit(1).execute()
     } catch (error) {
       apiLogger.error(`error while checking postgres health: ${JSON.stringify(error, undefined, 2)}`)
       return context.text('error while checking postgres health', 500)
