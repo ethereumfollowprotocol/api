@@ -1,39 +1,15 @@
-import type { Hono, MiddlewareHandler } from 'hono'
+import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
+import type { IncludeValidator, LimitValidator } from '../validators'
 
 export function blocks(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
-  limitValidator: MiddlewareHandler<
-    any,
-    string,
-    {
-      in: {
-        query: Record<string, string | string[]>
-      }
-      out: {
-        query: Record<string, string | string[]>
-      }
-    }
-  >,
-  includeValidator: MiddlewareHandler<
-    any,
-    string,
-    {
-      in: {
-        query: {
-          include: string | string[]
-        }
-      }
-      out: {
-        query: {
-          include: string | string[]
-        }
-      }
-    }
-  >
+  limitValidator: LimitValidator,
+  includeValidator: IncludeValidator
 ) {
   /**
    * Same as /followers, but for following.

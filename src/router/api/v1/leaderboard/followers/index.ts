@@ -1,39 +1,15 @@
-import type { Hono, MiddlewareHandler } from 'hono'
+import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
+import type { IncludeValidator, LimitValidator } from '../validators'
 
 export function followers(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
-  limitValidator: MiddlewareHandler<
-    any,
-    string,
-    {
-      in: {
-        query: Record<string, string | string[]>
-      }
-      out: {
-        query: Record<string, string | string[]>
-      }
-    }
-  >,
-  includeValidator: MiddlewareHandler<
-    any,
-    string,
-    {
-      in: {
-        query: {
-          include: string | string[]
-        }
-      }
-      out: {
-        query: {
-          include: string | string[]
-        }
-      }
-    }
-  >
+  limitValidator: LimitValidator,
+  includeValidator: IncludeValidator
 ) {
   /**
    * By default, only returns leaderboard with address and followers_count/following_count of each user.
