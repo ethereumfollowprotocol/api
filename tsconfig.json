@@ -31,7 +31,7 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["src/**/*", "scripts/**/*"],
+  "include": ["src", "scripts", "tests"],
   "files": ["environment.d.ts", "reset.d.ts", "vitest.config.ts"],
   "exclude": ["_"]
 }
