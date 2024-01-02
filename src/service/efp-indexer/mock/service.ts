@@ -32,39 +32,32 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.#socialGraph.getFollowing(address)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardBlocked(limit: number): Promise<
-    {
-      address: `0x${string}`
-      blocked_by_count: number
-    }[]
-  > {
-    return this.#socialGraph.getLeaderboardBlockedBy(limit)
+  async getLeaderboardBlocked(
+    limit: number
+  ): Promise<{ rank: number; address: `0x${string}`; blocked_by_count: number }[]> {
+    return (await this.#socialGraph.getLeaderboardBlockedBy(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardBlocks(limit: number): Promise<{ address: `0x${string}`; blocks_count: number }[]> {
-    return this.#socialGraph.getLeaderboardBlocks(limit)
+  async getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: `0x${string}`; blocks_count: number }[]> {
+    return (await this.#socialGraph.getLeaderboardBlocks(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardMuted(limit: number): Promise<{ address: `0x${string}`; muted_by_count: number }[]> {
-    return this.#socialGraph.getLeaderboardMutedBy(limit)
+  async getLeaderboardMuted(
+    limit: number
+  ): Promise<{ rank: number; address: `0x${string}`; muted_by_count: number }[]> {
+    return (await this.#socialGraph.getLeaderboardMutedBy(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardMutes(limit: number): Promise<{ address: `0x${string}`; mutes_count: number }[]> {
-    return this.#socialGraph.getLeaderboardMutes(limit)
+  async getLeaderboardMutes(limit: number): Promise<{ rank: number; address: `0x${string}`; mutes_count: number }[]> {
+    return (await this.#socialGraph.getLeaderboardMutes(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardFollowers(limit: number): Promise<{ address: Address; followers_count: number }[]> {
-    return this.#socialGraph.getLeaderboardFollowers(limit)
+  async getLeaderboardFollowers(limit: number): Promise<{ rank: number; address: Address; followers_count: number }[]> {
+    return (await this.#socialGraph.getLeaderboardFollowers(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getLeaderboardFollowing(limit: number): Promise<{ address: Address; following_count: number }[]> {
-    return this.#socialGraph.getLeaderboardFollowing(limit)
+  async getLeaderboardFollowing(limit: number): Promise<{ rank: number; address: Address; following_count: number }[]> {
+    return (await this.#socialGraph.getLeaderboardFollowing(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
