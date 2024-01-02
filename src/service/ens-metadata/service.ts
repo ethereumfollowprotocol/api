@@ -5,6 +5,7 @@ import type { ENSProfile } from './types'
 export interface IENSMetadataService {
   getAddress(ensNameOrAddress: Address | string): Promise<Address>
   getENSProfile(ensNameOrAddress?: Address | string): Promise<ENSProfile>
+  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<Array<ENSProfile>>
 }
 
 export class ENSMetadataService implements IENSMetadataService {
@@ -36,5 +37,9 @@ export class ENSMetadataService implements IENSMetadataService {
 
     const ensProfileData = await response.json()
     return ensProfileData as ENSProfile
+  }
+
+  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<Array<ENSProfile>> {
+    throw new Error('Not implemented')
   }
 }
