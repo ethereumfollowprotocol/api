@@ -18,9 +18,17 @@ export function blocks(
     const { ensOrAddress } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit as string, 10)
-    const mostBlocks: { address: string; blocks_count: number }[] = await services
+    let mostBlocks: { address: string; blocks_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardBlocks(parsedLimit)
+    if (include?.includes('ens')) {
+      const ens = services.ens()
+      const ensProfiles = await Promise.all(mostBlocks.map(user => ens.getENSProfile(user.address)))
+      mostBlocks = mostBlocks.map((user, index) => ({
+        ...user,
+        ens: ensProfiles[index]
+      }))
+    }
     return context.json(mostBlocks, 200)
   })
 }

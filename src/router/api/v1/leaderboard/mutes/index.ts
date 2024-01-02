@@ -18,9 +18,17 @@ export function mutes(
     const { ensOrAddress } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit as string, 10)
-    const mostMutes: { address: string; mutes_count: number }[] = await services
+    let mostMutes: { address: string; mutes_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardMutes(parsedLimit)
+    if (include?.includes('ens')) {
+      const ens = services.ens()
+      const ensProfiles = await Promise.all(mostMutes.map(user => ens.getENSProfile(user.address)))
+      mostMutes = mostMutes.map((user, index) => ({
+        ...user,
+        ens: ensProfiles[index]
+      }))
+    }
     return context.json(mostMutes, 200)
   })
 }

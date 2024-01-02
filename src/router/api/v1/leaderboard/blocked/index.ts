@@ -18,9 +18,17 @@ export function blocked(
     const { ensOrAddress } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
-    const mostBlocked: { address: string; blocked_by_count: number }[] = await services
+    let mostBlocked: { address: string; blocked_by_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardBlocked(parsedLimit)
+    if (include?.includes('ens')) {
+      const ens = services.ens()
+      const ensProfiles = await Promise.all(mostBlocked.map(user => ens.getENSProfile(user.address)))
+      mostBlocked = mostBlocked.map((user, index) => ({
+        ...user,
+        ens: ensProfiles[index]
+      }))
+    }
     return context.json(mostBlocked, 200)
   })
 }

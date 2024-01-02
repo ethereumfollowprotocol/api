@@ -18,9 +18,17 @@ export function following(
     const { ensOrAddress } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit as string, 10)
-    const mostFollowing: { address: string; following_count: number }[] = await services
+    let mostFollowing: { address: string; following_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardFollowing(parsedLimit)
+    if (include?.includes('ens')) {
+      const ens = services.ens()
+      const ensProfiles = await Promise.all(mostFollowing.map(user => ens.getENSProfile(user.address)))
+      mostFollowing = mostFollowing.map((user, index) => ({
+        ...user,
+        ens: ensProfiles[index]
+      }))
+    }
     return context.json(mostFollowing, 200)
   })
 }
