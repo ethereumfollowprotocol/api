@@ -2,8 +2,7 @@ import { type InsertObject, Kysely } from 'kysely'
 import { PostgresJSDialect } from 'kysely-postgres-js'
 import postgres from 'postgres'
 
-import type { Environment } from '#/types'
-import type { DB } from '#/types/generated/index.ts'
+import type { DB, Environment } from '#/types'
 
 export type Row<T extends keyof DB> = InsertObject<DB, T>
 

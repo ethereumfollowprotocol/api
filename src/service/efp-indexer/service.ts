@@ -1,8 +1,8 @@
 import { type Kysely, type QueryResult, sql } from 'kysely'
-import type { Address } from '#/types'
 
 import { database } from '#/database'
-import type { DB } from '#/types'
+import type { Address } from '#/types'
+import type { DB, Environment } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
