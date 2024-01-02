@@ -7,7 +7,6 @@
 # start of globally inheritable configuration
 name = "indexer"
 main = "./src/index.ts"
-# route = "api.ethfollow.xyz/*"
 minify = true
 keep_vars = true
 node_compat = true
@@ -17,9 +16,6 @@ compatibility_date = "2023-10-30"
 #
 vars = { ENVIRONMENT = "development" }
 services = [{ binding = "ens", service = "ens" }]
-# kv_namespaces = [
-#   { binding = "EFP_DEMO_KV", id = "b662b0a7236c4145888a7d700076e43b" },
-# ]
 
 [env.development]
 name = "development"
@@ -29,9 +25,6 @@ routes = [
   { pattern = "development.api.ethfollow.xyz", custom_domain = true, zone_id = "8db41cc2c22fe00c6a852388bdea1e5f" },
 ]
 services = [{ binding = "ens", service = "ens" }]
-# kv_namespaces = [
-#   { binding = "EFP_DEMO_KV", id = "b662b0a7236c4145888a7d700076e43b" },
-# ]
 
 [env.production]
 name = "production"
