@@ -6,8 +6,8 @@ import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
 import { blocked } from './blocked'
 import { blocks } from './blocks'
-import { following } from './followers'
-import { followers } from './following'
+import { followers } from './followers'
+import { following } from './following'
 import { muted } from './muted'
 import { mutes } from './mutes'
 
@@ -28,8 +28,9 @@ const includeValidator = validator('query', value => {
   const limitAsNumber: number | undefined = limit === undefined ? undefined : Number.parseInt(limit as string, 10)
   // if no include query param, return minimal data
   if (!include) return limitAsNumber === undefined ? { include: [] } : { limit: limitAsNumber, include: [] }
-  if (ensureArray(include).every(filter => allFilters.includes(filter)))
+  if (ensureArray(include).every(filter => allFilters.includes(filter))) {
     return limitAsNumber === undefined ? { include } : { limit: limitAsNumber, include }
+  }
   return new Response(
     JSON.stringify({
       message: 'Accepted format for include: ?limit=50&include=ens&include=mutuals&include=blocked&include=muted'

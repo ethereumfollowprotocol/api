@@ -3,7 +3,7 @@ import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 
-export function following(
+export function followers(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
   limitValidator: MiddlewareHandler<
