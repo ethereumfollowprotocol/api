@@ -61,7 +61,6 @@ runs:
           --keep-vars=true \
           --node-compat=true \
           --config=wrangler.toml \
-          --compatibility-date=2023-10-30 \
           --var ENVIRONMENT:"development" \
           --var COMMIT_SHA:"$COMMIT_SHA"
 
@@ -73,17 +72,16 @@ runs:
         CLOUDFLARE_ACCOUNT_ID: ${{ inputs.CLOUDFLARE_ACCOUNT_ID }}
       # if: ${{ inputs.production == 'true' }}
       run: |
-        bunx wrangler deploy --outdir=dist --minify=true --latest=true --node-compat=true --keep-vars=true --config wrangler.toml --env production --var IS_DEMO:"true" --var ENVIRONMENT:"production" --var COMMIT_SHA:"$COMMIT_SHA"
-      # run: |
-      #   bunx wrangler@latest deploy ./src/index.ts \
-      #     --env=production \
-      #     --minify=true \
-      #     --latest=true \
-      #     --keep-vars=true \
-      #     --node-compat=true \
-      #     --config=wrangler.toml \
-      #     --compatibility-date=2023-10-30 \
-      #     --var IS_DEMO: "true" --var ENVIRONMENT:"production" --var COMMIT_SHA:"$COMMIT_SHA"
+        bunx wrangler@latest deploy \
+          --env=production \
+          --minify=true \
+          --latest=true \
+          --keep-vars=true \
+          --node-compat=true \
+          --config=wrangler.toml \
+          --var IS_DEMO:"true" \
+          --var ENVIRONMENT:"production" \
+          --var COMMIT_SHA:"$COMMIT_SHA"
 
     # deploy to stage
     - name: '[stage] Deploy Cloudflare Workers 🔶'

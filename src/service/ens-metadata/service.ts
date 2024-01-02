@@ -1,3 +1,4 @@
+import { apiLogger } from '#/logger'
 import type { Address } from '#/types'
 import { isAddress, raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
@@ -6,6 +7,8 @@ export interface IENSMetadataService {
   getAddress(ensNameOrAddress: Address | string): Promise<Address>
   getENSProfile(ensNameOrAddress?: Address | string): Promise<ENSProfile>
   batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<Array<ENSProfile>>
+  getENSAvatar(ensNameOrAddress: Address | string): Promise<string>
+  batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
 }
 
 export class ENSMetadataService implements IENSMetadataService {
@@ -39,7 +42,40 @@ export class ENSMetadataService implements IENSMetadataService {
     return ensProfileData as ENSProfile
   }
 
+  /**
+   * TODO: implement this in the ENS metadata service worker
+   * path should be /u/batch
+   */
   batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<Array<ENSProfile>> {
     throw new Error('Not implemented')
+  }
+
+  async getENSAvatar(ensNameOrAddress: Address | string): Promise<string> {
+    if (ensNameOrAddress === undefined) raise('ENS name or address is required')
+    const response = await fetch(`${this.url}/i/${ensNameOrAddress}`, {
+      redirect: 'follow'
+    })
+    if (!response.ok) raise(`invalid ENS name: ${ensNameOrAddress}`)
+    return response.url
+  }
+
+  /**
+   * TODO: implement this in the ENS metadata service worker
+   * path should be /i/batch
+   */
+  async batchGetENSAvatars(
+    ensNameOrAddressArray: Array<Address | string>
+  ): Promise<{ [ensNameOrAddress: string]: string }> {
+    const responses = await Promise.all(
+      ensNameOrAddressArray.map(ensNameOrAddress => fetch(`${this.url}/i/${ensNameOrAddress}`, { redirect: 'follow' }))
+    )
+    return responses.reduce((accumulator, response, index) => {
+      const id = `${ensNameOrAddressArray[index]}`
+      if (!response.ok) {
+        apiLogger.error(`invalid ENS name: ${ensNameOrAddressArray[index]}`)
+        return { ...accumulator, [id]: 'https://app.ethfollow.xyz/assets/gradient-circle.svg' }
+      }
+      return { ...accumulator, [id]: response.url }
+    }, {})
   }
 }
