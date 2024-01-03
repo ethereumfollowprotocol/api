@@ -11,6 +11,7 @@
     "docker:api": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes api",
     "docker:ping": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes ping",
     "test": "vitest --run",
+    "test:typecheck": "vitest --typecheck",
     "lint": "bunx @biomejs/biome check --apply . && bun lint:typecheck",
     "lint:format": "bunx @biomejs/biome format . --write",
     "lint:typecheck": "tsc --project tsconfig.json --noEmit",
@@ -35,7 +36,7 @@
     "pg": "^8.11.3",
     "typescript": "^5.3.3",
     "vitest": "^1.1.1",
-    "wrangler": "^3.22.1"
+    "wrangler": "^3.22.2"
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
