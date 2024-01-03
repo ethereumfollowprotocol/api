@@ -11,7 +11,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
   users.get(
     '/:ensOrAddress/profile',
     validator('query', value => {
-      const allFilters = ['ens', 'primary-list', 'following-list', 'followers-list']
+      const allFilters = ['ens', 'primary-list', 'following', 'followers']
       // if only one include query param, type is string, if 2+ then type is array, if none then undefined
       const { include } = <Record<'include', Array<string> | string | undefined>>value
       // if no include query param, return all data
@@ -20,7 +20,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       if (ensureArray(include).every(filter => allFilters.includes(filter))) return { include }
       return new Response(
         JSON.stringify({
-          message: 'Accepted format: ?include=ens&include=primary-list&include=following-list&include=followers-list'
+          message: 'Accepted format: ?include=ens&include=primary-list&include=following&include=followers'
         }),
         { status: 400 }
       )
@@ -32,11 +32,8 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const { address, ...ens }: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
-        include.includes('followers-list') ? efp.getFollowers(address) : null,
-        /**
-         * TODO: need to implement getFollowing in EFPIndexerService. `null` placeholder for now.
-         */
-        include.includes('following-list') ? efp.getFollowing(address) : null,
+        include.includes('followers') ? efp.getFollowers(address) : null,
+        include.includes('following') ? efp.getFollowing(address) : null,
         include.includes('primary-list') ? efp.getPrimaryList(address) : undefined
       ])
 
