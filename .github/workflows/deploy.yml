@@ -74,13 +74,18 @@ jobs:
       - name: 'Get Commit SHA'
         run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
-      # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
-      - name: 'Deploy Cloudflare Workers 🔶'
-        uses: './.github/actions/deploy'
+        # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
+      - name: '[development] Deploy Cloudflare Workers 🔶'
+        uses: ethereumfollowprotocol/actions/.github/actions/deploy-cloudflare-worker@main
         with:
+          env: "development"
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          development: ${{ github.event.inputs.development || github.event.inputs.all }}
-          production: ${{ github.event.inputs.production || github.event.inputs.all }}
-          stage: ${{ github.event.inputs.stage || github.event.inputs.all }}
-          test: ${{ github.event.inputs.test || github.event.inputs.all }}
+
+        # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
+      - name: '[production] Deploy Cloudflare Workers 🔶'
+        uses: ethereumfollowprotocol/actions/.github/actions/deploy-cloudflare-worker@main
+        with:
+          env: "production"
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
