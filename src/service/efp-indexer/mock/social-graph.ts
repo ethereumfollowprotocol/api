@@ -480,7 +480,7 @@ function makeListNFTRow(line: string): ListNFTRow {
   if (typeof token_idStr !== 'string' || typeof list_user !== 'string') {
     throw new Error('Invalid format in TokenUser CSV')
   }
-  return { tokenId: BigInt(parseInt(token_idStr, 10)), listUser: list_user }
+  return { tokenId: BigInt(Number.parseInt(token_idStr, 10)), listUser: list_user }
 }
 
 function makeListOpRow(line: string): ListOpRow {
@@ -488,7 +488,7 @@ function makeListOpRow(line: string): ListOpRow {
   if (typeof nonceStr !== 'string' || typeof list_op !== 'string') {
     throw new Error('Invalid format in Operation CSV')
   }
-  return { nonce: parseInt(nonceStr, 10), list_op }
+  return { nonce: Number.parseInt(nonceStr, 10), list_op }
 }
 
 export function makeSocialGraph(): SocialGraph {

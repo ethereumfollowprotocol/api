@@ -35,8 +35,8 @@
       "performance": { "noAccumulatingSpread": "off" },
       "nursery": {
         "all": true,
-        "noDefaultExport": "off",
         "noUnusedImports": "off",
+        "noUselessTernary": "off",
         "noEmptyBlockStatements": "off"
       },
       "complexity": {
