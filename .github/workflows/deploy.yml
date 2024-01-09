@@ -72,6 +72,7 @@ jobs:
         run: bun install
 
       - name: 'Get Commit SHA'
+        id: get_commit_sha
         run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
         # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
@@ -81,6 +82,7 @@ jobs:
           env: "development"
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          vars: '{"COMMIT_SHA": "${{ steps.get_commit_sha.outputs.COMMIT_SHA }}"}'
 
         # https://developers.cloudflare.com/workers/wrangler/commands/#deploy
       - name: '[production] Deploy Cloudflare Workers 🔶'
@@ -89,3 +91,4 @@ jobs:
           env: "production"
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          vars: '{"COMMIT_SHA": "${{ steps.get_commit_sha.outputs.COMMIT_SHA }}"}'
