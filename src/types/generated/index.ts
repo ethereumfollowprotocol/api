@@ -70,7 +70,7 @@ export interface ViewEfpListMetadata {
   contract_address: string | null
   key: string | null
   log_index: Numeric | null
-  nonce: Int8 | null
+  slot: Buffer | null
   transaction_index: Numeric | null
   value: string | null
 }
@@ -91,7 +91,7 @@ export interface ViewEfpListNftsWithManagerUser {
   efp_list_storage_location: Buffer | null
   efp_list_storage_location_chain_id: Int8 | null
   efp_list_storage_location_contract_address: string | null
-  efp_list_storage_location_nonce: Int8 | null
+  efp_list_storage_location_slot: Buffer | null
   efp_list_storage_location_type: number | null
   efp_list_storage_location_version: number | null
   efp_list_user: string | null
@@ -104,10 +104,10 @@ export interface ViewEfpListOps {
   data: Buffer | null
   event_name: string | null
   log_index: Numeric | null
-  nonce: Int8 | null
   op: string | null
   op_bytes: Buffer | null
   opcode: number | null
+  slot: Buffer | null
   sort_key: string | null
   transaction_index: Numeric | null
   version: number | null
@@ -119,9 +119,9 @@ export interface ViewEfpListOpsRecordTag {
   contract_address: string | null
   data: Buffer | null
   log_index: Numeric | null
-  nonce: Int8 | null
   opcode: number | null
   record: Buffer | null
+  slot: Buffer | null
   sort_key: string | null
   tag: string | null
   transaction_index: Numeric | null
@@ -132,11 +132,11 @@ export interface ViewEfpListRecords {
   chain_id: Int8 | null
   contract_address: string | null
   log_index: Numeric | null
-  nonce: Int8 | null
   record: Buffer | null
   record_data: Buffer | null
   record_type: number | null
   record_version: number | null
+  slot: Buffer | null
   transaction_index: Numeric | null
 }
 
@@ -145,11 +145,11 @@ export interface ViewEfpListRecordsDeleted {
   chain_id: Int8 | null
   contract_address: string | null
   log_index: Numeric | null
-  nonce: Int8 | null
   record: Buffer | null
   record_data: Buffer | null
   record_type: number | null
   record_version: number | null
+  slot: Buffer | null
   transaction_index: Numeric | null
 }
 
@@ -161,7 +161,7 @@ export interface ViewEfpListRecordsWithNftManagerUserTags {
   efp_list_nft_token_id: Int8 | null
   efp_list_storage_location_chain_id: Int8 | null
   efp_list_storage_location_contract_address: string | null
-  efp_list_storage_location_nonce: Int8 | null
+  efp_list_storage_location_slot: Buffer | null
   efp_list_user: string | null
   has_block_tag: boolean | null
   has_mute_tag: boolean | null
@@ -175,11 +175,11 @@ export interface ViewEfpListRecordsWithNftManagerUserTags {
 export interface ViewEfpListRecordsWithTags {
   chain_id: Int8 | null
   contract_address: string | null
-  nonce: Int8 | null
   record: Buffer | null
   record_data: Buffer | null
   record_type: number | null
   record_version: number | null
+  slot: Buffer | null
   tags: string[] | null
 }
 
@@ -188,11 +188,11 @@ export interface ViewEfpListRecordTags {
   chain_id: Int8 | null
   contract_address: string | null
   log_index: Numeric | null
-  nonce: Int8 | null
   record: Buffer | null
   record_data: Buffer | null
   record_type: number | null
   record_version: number | null
+  slot: Buffer | null
   tag: string | null
   transaction_index: Numeric | null
 }
@@ -202,11 +202,11 @@ export interface ViewEfpListRecordTagsDeleted {
   chain_id: Int8 | null
   contract_address: string | null
   log_index: Numeric | null
-  nonce: Int8 | null
   record: Buffer | null
   record_data: Buffer | null
   record_type: number | null
   record_version: number | null
+  slot: Buffer | null
   tag: string | null
   transaction_index: Numeric | null
 }
@@ -218,7 +218,7 @@ export interface ViewEfpListStorageLocations {
   efp_list_storage_location: Buffer | null
   efp_list_storage_location_chain_id: Int8 | null
   efp_list_storage_location_contract_address: string | null
-  efp_list_storage_location_nonce: Int8 | null
+  efp_list_storage_location_slot: Buffer | null
   efp_list_storage_location_type: number | null
   efp_list_storage_location_version: number | null
 }
@@ -227,8 +227,8 @@ export interface ViewLatestRecordTags {
   chain_id: Int8 | null
   contract_address: string | null
   max_sort_key: string | null
-  nonce: Int8 | null
   record: Buffer | null
+  slot: Buffer | null
   tag: string | null
 }
 
