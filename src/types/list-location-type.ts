@@ -28,7 +28,7 @@ export type EVMListLocationType = {
   locationType: number
   chainId: number
   contractAddress: `0x${string}`
-  nonce: `0x${string}`
+  slot: `0x${string}`
 }
 
 export function decode(listStorageLocation: `0x${string}`): ListLocationType {
@@ -56,7 +56,7 @@ export function decodeListStorageLocation(listStorageLocation: `0x${string}`): E
   }
   const chainId: number = Number(data.subarray(0, 32).reduce((acc, cur) => acc * 256 + cur, 0))
   const contractAddress: `0x${string}` = `0x${data.subarray(32, 32 + 20).toString('hex')}`
-  const nonce: `0x${string}` = `0x${data.subarray(32 + 20, 32 + 20 + 32).toString('hex')}`
+  const slot: `0x${string}` = `0x${data.subarray(32 + 20, 32 + 20 + 32).toString('hex')}`
 
-  return { version, locationType, chainId, contractAddress, nonce }
+  return { version, locationType, chainId, contractAddress, slot }
 }

@@ -280,11 +280,10 @@ export class SocialGraph {
         }
         const follower: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
         if (follower.toLowerCase() === address.toLowerCase()) {
-          followers.push(
-            {
-              follower: listUser
-              , tags: Array.from(tags).sort()
-            }
+          followers.push({
+            follower: listUser,
+            tags: Array.from(tags).sort()
+          })
         }
       }
     }
@@ -466,7 +465,7 @@ type ListNFTRow = {
 }
 
 type ListOpRow = {
-  nonce: number
+  slot: number
   list_op: string
 }
 
@@ -488,11 +487,11 @@ function makeListNFTRow(line: string): ListNFTRow {
 }
 
 function makeListOpRow(line: string): ListOpRow {
-  const [nonceStr, list_op] = line.split(',')
-  if (typeof nonceStr !== 'string' || typeof list_op !== 'string') {
+  const [slotStr, list_op] = line.split(',')
+  if (typeof slotStr !== 'string' || typeof list_op !== 'string') {
     throw new Error('Invalid format in Operation CSV')
   }
-  return { nonce: Number.parseInt(nonceStr, 10), list_op }
+  return { slot: Number.parseInt(slotStr, 10), list_op }
 }
 
 export function makeSocialGraph(): SocialGraph {
@@ -514,11 +513,11 @@ export function makeSocialGraph(): SocialGraph {
   const listOps: ListOpRow[] = parseCSV<ListOpRow>(DEMO_LIST_OPS_CSV, makeListOpRow)
 
   for (const listOp of listOps) {
-    const { nonce, list_op } = listOp
-    if (nonce >= nfts.length) {
-      throw new Error('Invalid nonce')
+    const { slot, list_op } = listOp
+    if (slot >= nfts.length) {
+      throw new Error('Invalid slot')
     }
-    const nft: ListNFTRow = nfts[nonce] as ListNFTRow
+    const nft: ListNFTRow = nfts[slot] as ListNFTRow
     const { tokenId, listUser } = nft
 
     const listOpBytes: Buffer = Buffer.from(list_op.substring(2), 'hex')
