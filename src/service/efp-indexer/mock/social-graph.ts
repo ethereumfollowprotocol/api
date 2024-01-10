@@ -1,4 +1,4 @@
-import { type ListRecord, type TaggedListRecord, serializeListRecord } from '#/types/list-record'
+import { serializeListRecord, type ListRecord, type TaggedListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -267,8 +267,8 @@ export class SocialGraph {
     return this.getBlocks(address).length
   }
 
-  getFollowers(address: `0x${string}`): `0x${string}`[] {
-    const followers: `0x${string}`[] = []
+  getFollowers(address: `0x${string}`): { follower: `0x${string}`; tags: string[] }[] {
+    const followers: { follower: `0x${string}`; tags: string[] }[] = []
     // check every primary list to see if it contains the address
     for (const [listUser, tokenId] of this.#primaryLists.entries()) {
       if (tokenId === undefined) continue
@@ -280,7 +280,11 @@ export class SocialGraph {
         }
         const follower: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
         if (follower.toLowerCase() === address.toLowerCase()) {
-          followers.push(listUser)
+          followers.push(
+            {
+              follower: listUser
+              , tags: Array.from(tags).sort()
+            }
         }
       }
     }

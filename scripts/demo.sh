@@ -41,7 +41,6 @@ function curl_endpoint() {
 
 paths=(
   '/users/:id/ens' '/users/dr3a.eth/ens'
-  '/users/:id/stats' '/users/dr3a.eth/stats'
   '/users/:id/primary-list' '/users/dr3a.eth/primary-list'
   # '/users/:id/primary-list' '/users/0xC480C3FD10d8965EB74B9B53ee65Bea24B2a6A73/primary-list'
   '/users/:id/following' '/users/dr3a.eth/following'
@@ -53,6 +52,7 @@ paths=(
   '/users/:id/followers' '/users/dr3a.eth/followers'
   # '/users/:id/whoblocks' '/users/0x86A41524CB61edd8B115A72Ad9735F8068996688/whoblocks'
   # '/users/:id/whomutes' '/users/0x86A41524CB61edd8B115A72Ad9735F8068996688/whomutes'
+  '/users/:id/stats' '/users/dr3a.eth/stats'
 
   '/leaderboard/followers?limit=:limit' '/leaderboard/followers?limit=3'
   '/leaderboard/following?limit=:limit' '/leaderboard/following?limit=3'

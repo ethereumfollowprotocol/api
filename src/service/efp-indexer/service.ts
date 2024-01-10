@@ -1,4 +1,4 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
@@ -6,7 +6,7 @@ import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
   getFollowersCount(address: Address): Promise<number>
-  getFollowers(address: Address): Promise<Address[]>
+  getFollowers(address: Address): Promise<{ follower: Address; tags: string[] }[]>
   getFollowingCount(address: Address): Promise<number>
   getFollowing(address: Address): Promise<TaggedListRecord[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
@@ -48,7 +48,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return new Set(await this.getFollowers(address)).size
   }
 
-  async getFollowers(address: Address): Promise<Address[]> {
+  async getFollowers(address: Address): Promise<{ follower: Address; tags: string[] }[]> {
     const query = sql<{ efp_list_user: Address }>`SELECT * FROM query.get_unique_followers(${address})`
     const result = await query.execute(this.#db)
 
@@ -56,7 +56,16 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map(row => row.efp_list_user)
+    type Row = {
+      follower: Address
+      efp_list_token_id: bigint
+      tags: string[] | null
+    }
+
+    return result.rows.map((row: unknown) => ({
+      follower: (row as Row).follower as Address,
+      tags: (row as Row).tags?.sort() || []
+    }))
   }
 
   /////////////////////////////////////////////////////////////////////////////

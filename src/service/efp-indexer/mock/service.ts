@@ -2,7 +2,7 @@ import { apiLogger } from '#/logger'
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type { IEFPIndexerService } from '../service'
-import { type SocialGraph, makeSocialGraph } from './social-graph'
+import { makeSocialGraph, type SocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
   readonly #socialGraph: SocialGraph
@@ -18,7 +18,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowers(address: Address): Promise<Address[]> {
+  async getFollowers(address: Address): Promise<{ follower: Address; tags: string[] }[]> {
     return this.#socialGraph.getFollowers(address)
   }
 
