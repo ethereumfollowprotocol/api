@@ -15,6 +15,9 @@ export interface IEFPIndexerService {
   getLeaderboardFollowing(limit: number): Promise<{ rank: number; address: Address; following_count: number }[]>
   getLeaderboardMuted(limit: number): Promise<{ rank: number; address: Address; muted_by_count: number }[]>
   getLeaderboardMutes(limit: number): Promise<{ rank: number; address: Address; mutes_count: number }[]>
+  getDebugNumEvents(): Promise<number>
+  getDebugNumListOps(): Promise<number>
+  getDebugTotalSupply(): Promise<number>
   // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
@@ -209,6 +212,54 @@ export class EFPIndexerService implements IEFPIndexerService {
   //     .executeTakeFirst()
   //   return (result?.list_storage_location as Address) || undefined
   // }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Debug
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getDebugNumEvents(): Promise<number> {
+    const query = sql<Row>`SELECT query.get_debug_num_events() AS num_events;`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return 0
+    }
+
+    type Row = {
+      num_events: number
+    }
+
+    return Number(result.rows[0]?.num_events)
+  }
+
+  async getDebugNumListOps(): Promise<number> {
+    const query = sql<Row>`SELECT query.get_debug_num_list_ops() AS num_list_ops;`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return 0
+    }
+    type Row = {
+      num_list_ops: number
+    }
+
+    return Number(result.rows[0]?.num_list_ops)
+  }
+
+  async getDebugTotalSupply(): Promise<number> {
+    const query = sql<Row>`SELECT query.get_debug_total_supply() AS total_supply;`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return 0
+    }
+
+    type Row = {
+      total_supply: number
+    }
+
+    return Number(result.rows[0]?.total_supply)
+  }
 
   /////////////////////////////////////////////////////////////////////////////
   // List Records
