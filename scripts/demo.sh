@@ -5,8 +5,8 @@
 # In 'time' mode, it times how long each API call takes.
 
 # Usage:
-#   - Run in print mode (default): ./script.sh
-#   - Run in time mode: ./script.sh time
+#   - Run in print mode (default): ./scripts/demo.sh
+#   - Run in time mode: ./scripts/demo.sh time
 
 set -eou pipefail
 
