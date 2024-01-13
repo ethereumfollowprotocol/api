@@ -61,7 +61,7 @@ function time_api_calls() {
       end_time=$(date +%s%3N)
       call_times+=($(($end_time - $start_time)))
     else
-      printf "%-50s %7s\n" "$path_curl" "TIMEOUT (${timeout}s)"
+      printf "%-50s %7s\n" "$path_curl" "   TIMEOUT (${timeout}s)"
       return
     fi
   done
@@ -104,14 +104,14 @@ paths=(
   '/debug/num-list-ops' '/debug/num-list-ops'
   '/debug/num-events' '/debug/num-events'
 
-  '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=false'
-  '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=true'
-
   '/users/:id/ens' '/users/dr3a.eth/ens'
   '/users/:id/primary-list' '/users/dr3a.eth/primary-list'
   '/users/:id/following' '/users/dr3a.eth/following'
   '/users/:id/followers' '/users/dr3a.eth/followers'
   '/users/:id/stats' '/users/dr3a.eth/stats'
+
+  '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=false'
+  '/lists/:token_id/records?includeTags=:includeTags' '/lists/0/records?includeTags=true'
 
   '/leaderboard/blocked?limit=:limit' '/leaderboard/blocked?limit=10'
   '/leaderboard/blocks?limit=:limit' '/leaderboard/blocks?limit=10'

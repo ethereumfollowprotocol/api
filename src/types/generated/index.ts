@@ -41,7 +41,7 @@ export interface SchemaMigrations {
   version: string
 }
 
-export interface ViewEfpAccountMetadata {
+export interface ViewEventsEfpAccountMetadata {
   address: string | null
   block_number: Int8 | null
   chain_id: Int8 | null
@@ -52,19 +52,19 @@ export interface ViewEfpAccountMetadata {
   value: string | null
 }
 
-export interface ViewEfpAccountsWithPrimaryList {
+export interface ViewEventsEfpAccountsWithPrimaryList {
   address: string | null
   primary_list_token_id: Int8 | null
 }
 
-export interface ViewEfpContracts {
+export interface ViewEventsEfpContracts {
   address: string | null
   chain_id: Int8 | null
   name: string | null
   owner: string | null
 }
 
-export interface ViewEfpListMetadata {
+export interface ViewEventsEfpListMetadata {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -75,14 +75,14 @@ export interface ViewEfpListMetadata {
   value: string | null
 }
 
-export interface ViewEfpListNfts {
+export interface ViewEventsEfpListNfts {
   address: string | null
   chain_id: Int8 | null
   owner: string | null
   token_id: Int8 | null
 }
 
-export interface ViewEfpListNftsWithManagerUser {
+export interface ViewEventsEfpListNftsWithManagerUser {
   efp_list_manager: string | null
   efp_list_nft_chain_id: Int8 | null
   efp_list_nft_contract_address: string | null
@@ -97,7 +97,7 @@ export interface ViewEfpListNftsWithManagerUser {
   efp_list_user: string | null
 }
 
-export interface ViewEfpListOps {
+export interface ViewEventsEfpListOps {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -113,7 +113,7 @@ export interface ViewEfpListOps {
   version: number | null
 }
 
-export interface ViewEfpListOpsRecordTag {
+export interface ViewEventsEfpListOpsRecordTag {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -127,7 +127,7 @@ export interface ViewEfpListOpsRecordTag {
   transaction_index: Numeric | null
 }
 
-export interface ViewEfpListRecords {
+export interface ViewEventsEfpListRecords {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -140,7 +140,7 @@ export interface ViewEfpListRecords {
   transaction_index: Numeric | null
 }
 
-export interface ViewEfpListRecordsDeleted {
+export interface ViewEventsEfpListRecordsDeleted {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -153,7 +153,7 @@ export interface ViewEfpListRecordsDeleted {
   transaction_index: Numeric | null
 }
 
-export interface ViewEfpListRecordsWithNftManagerUserTags {
+export interface ViewEventsEfpListRecordsWithNftManagerUserTags {
   efp_list_manager: string | null
   efp_list_nft_chain_id: Int8 | null
   efp_list_nft_contract_address: string | null
@@ -172,7 +172,7 @@ export interface ViewEfpListRecordsWithNftManagerUserTags {
   tags: string[] | null
 }
 
-export interface ViewEfpListRecordsWithTags {
+export interface ViewEventsEfpListRecordsWithTags {
   chain_id: Int8 | null
   contract_address: string | null
   record: Buffer | null
@@ -183,7 +183,7 @@ export interface ViewEfpListRecordsWithTags {
   tags: string[] | null
 }
 
-export interface ViewEfpListRecordTags {
+export interface ViewEventsEfpListRecordTags {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -197,7 +197,7 @@ export interface ViewEfpListRecordTags {
   transaction_index: Numeric | null
 }
 
-export interface ViewEfpListRecordTagsDeleted {
+export interface ViewEventsEfpListRecordTagsDeleted {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -211,7 +211,7 @@ export interface ViewEfpListRecordTagsDeleted {
   transaction_index: Numeric | null
 }
 
-export interface ViewEfpListStorageLocations {
+export interface ViewEventsEfpListStorageLocations {
   efp_list_nft_chain_id: Int8 | null
   efp_list_nft_contract_address: string | null
   efp_list_nft_token_id: Int8 | null
@@ -235,20 +235,20 @@ export interface ViewLatestRecordTags {
 export interface DB {
   events: Events
   schema_migrations: SchemaMigrations
-  view__efp_account_metadata: ViewEfpAccountMetadata
-  view__efp_accounts_with_primary_list: ViewEfpAccountsWithPrimaryList
-  view__efp_contracts: ViewEfpContracts
-  view__efp_list_metadata: ViewEfpListMetadata
-  view__efp_list_nfts: ViewEfpListNfts
-  view__efp_list_nfts_with_manager_user: ViewEfpListNftsWithManagerUser
-  view__efp_list_ops: ViewEfpListOps
-  view__efp_list_ops__record_tag: ViewEfpListOpsRecordTag
-  view__efp_list_record_tags: ViewEfpListRecordTags
-  view__efp_list_record_tags__deleted: ViewEfpListRecordTagsDeleted
-  view__efp_list_records: ViewEfpListRecords
-  view__efp_list_records__deleted: ViewEfpListRecordsDeleted
-  view__efp_list_records_with_nft_manager_user_tags: ViewEfpListRecordsWithNftManagerUserTags
-  view__efp_list_records_with_tags: ViewEfpListRecordsWithTags
-  view__efp_list_storage_locations: ViewEfpListStorageLocations
+  view__events__efp_account_metadata: ViewEventsEfpAccountMetadata
+  view__events__efp_accounts_with_primary_list: ViewEventsEfpAccountsWithPrimaryList
+  view__events__efp_contracts: ViewEventsEfpContracts
+  view__events__efp_list_metadata: ViewEventsEfpListMetadata
+  view__events__efp_list_nfts: ViewEventsEfpListNfts
+  view__events__efp_list_nfts_with_manager_user: ViewEventsEfpListNftsWithManagerUser
+  view__events__efp_list_ops: ViewEventsEfpListOps
+  view__events__efp_list_ops__record_tag: ViewEventsEfpListOpsRecordTag
+  view__events__efp_list_record_tags: ViewEventsEfpListRecordTags
+  view__events__efp_list_record_tags__deleted: ViewEventsEfpListRecordTagsDeleted
+  view__events__efp_list_records: ViewEventsEfpListRecords
+  view__events__efp_list_records__deleted: ViewEventsEfpListRecordsDeleted
+  view__events__efp_list_records_with_nft_manager_user_tags: ViewEventsEfpListRecordsWithNftManagerUserTags
+  view__events__efp_list_records_with_tags: ViewEventsEfpListRecordsWithTags
+  view__events__efp_list_storage_locations: ViewEventsEfpListStorageLocations
   view__latest_record_tags: ViewLatestRecordTags
 }
