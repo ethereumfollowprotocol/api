@@ -9,7 +9,7 @@ export function isAddress(address: string): address is Address {
   return /^0x[a-fA-F0-9]{40}$/.test(address)
 }
 
-export function ensureArray<T>(value: T | Array<T>): Array<T> {
+export function ensureArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value]
 }
 

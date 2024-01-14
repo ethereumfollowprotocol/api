@@ -6,7 +6,7 @@ import type { ENSProfile } from './types'
 export interface IENSMetadataService {
   getAddress(ensNameOrAddress: Address | string): Promise<Address>
   getENSProfile(ensNameOrAddress?: Address | string): Promise<ENSProfile>
-  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<Array<ENSProfile>>
+  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<ENSProfile[]>
   getENSAvatar(ensNameOrAddress: Address | string): Promise<string>
   batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
 }
@@ -46,7 +46,7 @@ export class ENSMetadataService implements IENSMetadataService {
    * TODO: implement this in the ENS metadata service worker
    * path should be /u/batch
    */
-  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<Array<ENSProfile>> {
+  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<ENSProfile[]> {
     throw new Error('Not implemented')
   }
 

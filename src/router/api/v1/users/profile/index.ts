@@ -13,7 +13,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
     validator('query', value => {
       const allFilters = ['ens', 'primary-list', 'following', 'followers']
       // if only one include query param, type is string, if 2+ then type is array, if none then undefined
-      const { include } = <Record<'include', Array<string> | string | undefined>>value
+      const { include } = <Record<'include', string[] | string | undefined>>value
       // if no include query param, return all data
       if (!include) return { include: allFilters }
       // if include query param is an array, ensure all values are valid

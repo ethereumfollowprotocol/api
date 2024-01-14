@@ -20,7 +20,7 @@ export function ens(users: Hono<{ Bindings: Environment }>, services: Services) 
   })
 
   users.post('/ens/avatar/batch', async context => {
-    const ids = await context.req.json<Array<string>>()
+    const ids = await context.req.json<string[]>()
     if (!Array.isArray(ids)) {
       return context.json({ message: 'Expected an array of ens names or addresses' }, 400)
     }
