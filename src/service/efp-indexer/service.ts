@@ -1,4 +1,4 @@
-import { sql, type Kysely, type QueryResult } from 'kysely'
+import { type Kysely, type QueryResult, sql } from 'kysely'
 
 import { database } from '#/database'
 import type { Address, DB } from '#/types'

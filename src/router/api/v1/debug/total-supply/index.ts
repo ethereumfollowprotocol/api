@@ -1,7 +1,7 @@
-import type { Services } from '#/service'
-import type { Environment } from '#/types'
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+import type { Services } from '#/service'
+import type { Environment } from '#/types'
 
 export function totalSupply(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/total-supply', async context => {

@@ -65,12 +65,15 @@ async function bumpDependencies() {
     ...rest
   }
 
-  const write = await bun.write(
+  const numBytesWritten = await bun.write(
     `${import.meta.dir}/../package.json`,
     `${JSON.stringify(updatedPackageJson, undefined, 2)}\n`
   )
 
-  return write ? true : false
+  if (numBytesWritten) {
+    return true
+  }
+  return false
 }
 
 async function fetchPackageLatestVersion(name: string) {

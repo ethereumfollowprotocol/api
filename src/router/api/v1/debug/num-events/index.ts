@@ -1,7 +1,7 @@
-import type { Services } from '#/service'
-import type { Environment } from '#/types'
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+import type { Services } from '#/service'
+import type { Environment } from '#/types'
 
 export function numEvents(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/num-events', async context => {
