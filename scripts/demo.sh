@@ -57,13 +57,21 @@ function time_api_calls() {
   for ((j=0; j<num_calls; j++)); do
     start_time=$(date +%s%3N)
 
-    if curl --silent --max-time $timeout "$API_URL$path_curl" > /dev/null 2>&1; then
-      end_time=$(date +%s%3N)
-      call_times+=($(($end_time - $start_time)))
-    else
-      printf "%-50s %7s\n" "$path_curl" "   TIMEOUT (${timeout}s)"
-      return
+    # Use curl to fetch the response and HTTP status code
+    response=$(curl --silent --max-time $timeout --write-out "HTTPSTATUS:%{http_code}" -X GET "$API_URL$path_curl")
+    end_time=$(date +%s%3N)
+
+    http_status=$(echo $response | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+    response_body=$(echo $response | sed -e 's/HTTPSTATUS\:.*//g')
+
+    # Check for HTTP status code outside the 200-299 range
+    if [[ $http_status -lt 200 || $http_status -gt 299 ]]; then
+      echo "Error on API call to $API_URL$path_curl:"
+      echo $response_body | jq
+      exit 1
     fi
+
+    call_times+=($(($end_time - $start_time)))
   done
 
   local avg_time=$(calculate_average_time "${call_times[@]}")

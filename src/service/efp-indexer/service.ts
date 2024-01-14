@@ -1,4 +1,4 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
@@ -52,7 +52,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getFollowers(address: Address): Promise<{ follower: Address; tags: string[] }[]> {
-    const query = sql<{ efp_list_user: Address }>`SELECT * FROM query.get_unique_followers(${address})`
+    const query = sql`SELECT * FROM query.get_unique_followers(${address})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -377,7 +377,9 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getPrimaryList(address: Address): Promise<bigint | undefined> {
     // Call the enhanced PostgreSQL function
-    const query = sql<{ primary_list: bigint }>`SELECT query.get_primary_list(${address}) AS primary_list`
+    const query = sql<{
+      primary_list: bigint
+    }>`SELECT query.get_primary_list(${address}) AS primary_list`
     const result = await query.execute(this.#db)
     if (!result || result.rows.length === 0) {
       return undefined
