@@ -37,4 +37,5 @@ services:
     networks:
       - default
     environment:
+      - IS_DEMO=${IS_DEMO:-false}
       - DATABASE_URL=${DATABASE_URL:-postgresql://postgres:postgres@efp-database:5432/efp?sslmode=disable}
