@@ -12,7 +12,7 @@ export interface IENSMetadataService {
 }
 
 export class ENSMetadataService implements IENSMetadataService {
-  constructor(private readonly url: string = 'https://ens.ethfollow.xyz') {}
+  constructor(private readonly url: string = 'https://worker.enstate.rs') {}
 
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
@@ -73,7 +73,10 @@ export class ENSMetadataService implements IENSMetadataService {
       const id = `${ensNameOrAddressArray[index]}`
       if (!response.ok) {
         apiLogger.error(`invalid ENS name: ${ensNameOrAddressArray[index]}`)
-        return { ...accumulator, [id]: 'https://app.ethfollow.xyz/assets/gradient-circle.svg' }
+        return {
+          ...accumulator,
+          [id]: 'https://app.ethfollow.xyz/assets/gradient-circle.svg'
+        }
       }
       return { ...accumulator, [id]: response.url }
     }, {})
