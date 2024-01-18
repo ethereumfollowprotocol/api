@@ -1,4 +1,4 @@
-import { type ListRecord, type TaggedListRecord, serializeListRecord } from '#/types/list-record'
+import { serializeListRecord, type ListRecord, type TaggedListRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -121,7 +121,7 @@ export class SocialGraph {
     }
     const node = this.#nodeMap.get(serializeListRecord(record))
     if (!node) {
-      throw new Error('Node should exist')
+      return
     }
     if (!listTags.has(node)) {
       listTags.set(node, new Set<Tag>())
@@ -136,7 +136,7 @@ export class SocialGraph {
   untagRecord(listId: TokenId, record: ListRecord, tag: Tag): void {
     const node = this.#nodeMap.get(serializeListRecord(record))
     if (!node) {
-      throw new Error('Node should exist')
+      return
     }
     const listTags = this.#tags.get(listId)
     const nodeTags = listTags?.get(node)
@@ -165,7 +165,7 @@ export class SocialGraph {
   getTags(listId: TokenId, record: ListRecord): Set<Tag> {
     const node = this.#nodeMap.get(serializeListRecord(record))
     if (!node) {
-      throw new Error('Node should exist')
+      return new Set<Tag>()
     }
     const listTags = this.#tags.get(listId)
     if (listTags?.has(node)) {
@@ -483,7 +483,10 @@ function makeListNFTRow(line: string): ListNFTRow {
   if (typeof token_idStr !== 'string' || typeof list_user !== 'string') {
     throw new Error('Invalid format in TokenUser CSV')
   }
-  return { tokenId: BigInt(Number.parseInt(token_idStr, 10)), listUser: list_user }
+  return {
+    tokenId: BigInt(Number.parseInt(token_idStr, 10)),
+    listUser: list_user
+  }
 }
 
 function makeListOpRow(line: string): ListOpRow {
