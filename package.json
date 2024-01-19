@@ -20,23 +20,23 @@
   },
   "dependencies": {
     "consola": "^3.2.3",
-    "hono": "^3.12.4",
+    "hono": "^3.12.6",
     "kysely": "^0.27.2",
     "kysely-postgres-js": "^2.0.0",
     "postgres": "^3.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.5.2",
-    "@cloudflare/workers-types": "^4.20231218.0",
+    "@cloudflare/workers-types": "^4.20240117.0",
     "@total-typescript/ts-reset": "^0.5.1",
-    "@types/bun": "^1.0.1",
-    "@types/node": "^20.11.3",
-    "bun": "^1.0.22",
+    "@types/bun": "^1.0.2",
+    "@types/node": "^20.11.5",
+    "bun": "^1.0.23",
     "kysely-codegen": "^0.11.0",
     "pg": "^8.11.3",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0",
-    "wrangler": "^3.22.4"
+    "vitest": "^1.2.1",
+    "wrangler": "^3.23.0"
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
