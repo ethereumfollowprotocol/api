@@ -47,8 +47,9 @@ jobs:
       - name: '📦 Install Dependencies'
         run: bun install --frozen-lockfile
 
-      # - name: '🧪 Typecheck'
-        # run: bunx tsc --project tsconfig.json --noEmit
+      - name: '🧪 Typecheck'
+        continue-on-error: true # temp
+        run: bunx tsc --project tsconfig.json --noEmit
 
       - name: '🔧 Build'
         run: bun run build
