@@ -12,7 +12,7 @@ export interface IENSMetadataService {
 }
 
 export class ENSMetadataService implements IENSMetadataService {
-  constructor(private readonly url: string = 'https://worker.enstate.rs') {}
+  constructor(private readonly url: string = 'https://ens.evm.workers.dev') {}
 
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
