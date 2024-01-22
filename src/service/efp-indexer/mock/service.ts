@@ -27,7 +27,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowers(address: Address): Promise<{ follower: Address; tags: string[] }[]> {
+  async getFollowers(address: Address): Promise<{ address: Address; tags: string[] }[]> {
     return this.#socialGraph.getFollowers(address)
   }
 
