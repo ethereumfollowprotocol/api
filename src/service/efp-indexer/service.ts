@@ -6,7 +6,15 @@ import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
   getFollowersCount(address: Address): Promise<number>
-  getFollowers(address: Address): Promise<{ address: Address; tags: string[] }[]>
+  getFollowers(address: Address): Promise<
+    {
+      follower: Address
+      tags: string[]
+      isFollowing: boolean
+      isBlocked: boolean
+      isMuted: boolean
+    }[]
+  >
   getFollowingCount(address: Address): Promise<number>
   getFollowing(address: Address): Promise<TaggedListRecord[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
@@ -51,7 +59,15 @@ export class EFPIndexerService implements IEFPIndexerService {
     return new Set(await this.getFollowers(address)).size
   }
 
-  async getFollowers(address: Address): Promise<{ address: Address; tags: string[] }[]> {
+  async getFollowers(address: Address): Promise<
+    {
+      follower: Address
+      tags: string[]
+      isFollowing: boolean
+      isBlocked: boolean
+      isMuted: boolean
+    }[]
+  > {
     const query = sql`SELECT * FROM query.get_unique_followers(${address})`
     const result = await query.execute(this.#db)
 
@@ -60,14 +76,20 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     type Row = {
-      address: Address
       efp_list_token_id: bigint
+      follower: Address
       tags: string[] | null
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
     }
 
     return result.rows.map((row: unknown) => ({
-      address: (row as Row).address as Address,
-      tags: (row as Row).tags?.sort() || []
+      follower: (row as Row).follower as Address,
+      tags: (row as Row).tags?.sort() || [],
+      isFollowing: (row as Row).is_following,
+      isBlocked: (row as Row).is_blocked,
+      isMuted: (row as Row).is_muted
     }))
   }
 

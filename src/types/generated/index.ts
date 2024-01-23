@@ -22,6 +22,93 @@ export type Numeric = ColumnType<string, number | string, number | string>
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>
 
+export interface Contracts {
+  address: string
+  chain_id: Int8
+  created_at: Generated<Timestamp | null>
+  name: string | null
+  owner: string
+  updated_at: Generated<Timestamp | null>
+}
+
+export interface EfpAccountMetadata {
+  address: string
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  key: string
+  updated_at: Generated<Timestamp | null>
+  value: string
+}
+
+export interface EfpListMetadata {
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  key: string
+  slot: Buffer
+  updated_at: Generated<Timestamp | null>
+  value: string
+}
+
+export interface EfpListNfts {
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  owner: string
+  token_id: Int8
+  updated_at: Generated<Timestamp | null>
+}
+
+export interface EfpListOps {
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  data: string
+  op: string
+  opcode: number
+  slot: Buffer
+  updated_at: Generated<Timestamp | null>
+  version: number
+}
+
+export interface EfpListRecords {
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  record: Buffer
+  record_data: Buffer
+  record_type: number
+  record_version: number
+  slot: Buffer
+  updated_at: Generated<Timestamp | null>
+}
+
+export interface EfpListRecordTags {
+  chain_id: Int8
+  contract_address: string
+  created_at: Generated<Timestamp | null>
+  record: Buffer
+  slot: Buffer
+  tag: string
+  updated_at: Generated<Timestamp | null>
+}
+
+export interface EfpLists {
+  created_at: Generated<Timestamp | null>
+  list_storage_location: Buffer | null
+  list_storage_location_chain_id: Int8 | null
+  list_storage_location_contract_address: string | null
+  list_storage_location_slot: Buffer | null
+  manager: string
+  nft_chain_id: Int8
+  nft_contract_address: string
+  owner: string
+  token_id: Int8
+  updated_at: Generated<Timestamp | null>
+  user: string
+}
+
 export interface Events {
   block_hash: string
   block_number: Int8
@@ -76,25 +163,10 @@ export interface ViewEventsEfpListMetadata {
 }
 
 export interface ViewEventsEfpListNfts {
-  address: string | null
   chain_id: Int8 | null
+  contract_address: string | null
   owner: string | null
   token_id: Int8 | null
-}
-
-export interface ViewEventsEfpListNftsWithManagerUser {
-  efp_list_manager: string | null
-  efp_list_nft_chain_id: Int8 | null
-  efp_list_nft_contract_address: string | null
-  efp_list_nft_owner: string | null
-  efp_list_nft_token_id: Int8 | null
-  efp_list_storage_location: Buffer | null
-  efp_list_storage_location_chain_id: Int8 | null
-  efp_list_storage_location_contract_address: string | null
-  efp_list_storage_location_slot: Buffer | null
-  efp_list_storage_location_type: number | null
-  efp_list_storage_location_version: number | null
-  efp_list_user: string | null
 }
 
 export interface ViewEventsEfpListOps {
@@ -140,64 +212,7 @@ export interface ViewEventsEfpListRecords {
   transaction_index: Numeric | null
 }
 
-export interface ViewEventsEfpListRecordsDeleted {
-  block_number: Int8 | null
-  chain_id: Int8 | null
-  contract_address: string | null
-  log_index: Numeric | null
-  record: Buffer | null
-  record_data: Buffer | null
-  record_type: number | null
-  record_version: number | null
-  slot: Buffer | null
-  transaction_index: Numeric | null
-}
-
-export interface ViewEventsEfpListRecordsWithNftManagerUserTags {
-  efp_list_manager: string | null
-  efp_list_nft_chain_id: Int8 | null
-  efp_list_nft_contract_address: string | null
-  efp_list_nft_owner: string | null
-  efp_list_nft_token_id: Int8 | null
-  efp_list_storage_location_chain_id: Int8 | null
-  efp_list_storage_location_contract_address: string | null
-  efp_list_storage_location_slot: Buffer | null
-  efp_list_user: string | null
-  has_block_tag: boolean | null
-  has_mute_tag: boolean | null
-  record: Buffer | null
-  record_data: Buffer | null
-  record_type: number | null
-  record_version: number | null
-  tags: string[] | null
-}
-
-export interface ViewEventsEfpListRecordsWithTags {
-  chain_id: Int8 | null
-  contract_address: string | null
-  record: Buffer | null
-  record_data: Buffer | null
-  record_type: number | null
-  record_version: number | null
-  slot: Buffer | null
-  tags: string[] | null
-}
-
 export interface ViewEventsEfpListRecordTags {
-  block_number: Int8 | null
-  chain_id: Int8 | null
-  contract_address: string | null
-  log_index: Numeric | null
-  record: Buffer | null
-  record_data: Buffer | null
-  record_type: number | null
-  record_version: number | null
-  slot: Buffer | null
-  tag: string | null
-  transaction_index: Numeric | null
-}
-
-export interface ViewEventsEfpListRecordTagsDeleted {
   block_number: Int8 | null
   chain_id: Int8 | null
   contract_address: string | null
@@ -223,7 +238,7 @@ export interface ViewEventsEfpListStorageLocations {
   efp_list_storage_location_version: number | null
 }
 
-export interface ViewLatestRecordTags {
+export interface ViewEventsLatestRecordTags {
   chain_id: Int8 | null
   contract_address: string | null
   max_sort_key: string | null
@@ -232,7 +247,45 @@ export interface ViewLatestRecordTags {
   tag: string | null
 }
 
+export interface ViewJoinEfpListRecordsWithNftManagerUserTags {
+  has_block_tag: boolean | null
+  has_mute_tag: boolean | null
+  list_storage_location_chain_id: Int8 | null
+  list_storage_location_contract_address: string | null
+  list_storage_location_slot: Buffer | null
+  manager: string | null
+  nft_chain_id: Int8 | null
+  nft_contract_address: string | null
+  owner: string | null
+  record: Buffer | null
+  record_data: Buffer | null
+  record_type: number | null
+  record_version: number | null
+  tags: string[] | null
+  token_id: Int8 | null
+  user: string | null
+}
+
+export interface ViewJoinEfpListRecordsWithTags {
+  chain_id: Int8 | null
+  contract_address: string | null
+  record: Buffer | null
+  record_data: Buffer | null
+  record_type: number | null
+  record_version: number | null
+  slot: Buffer | null
+  tags: string[] | null
+}
+
 export interface DB {
+  contracts: Contracts
+  efp_account_metadata: EfpAccountMetadata
+  efp_list_metadata: EfpListMetadata
+  efp_list_nfts: EfpListNfts
+  efp_list_ops: EfpListOps
+  efp_list_record_tags: EfpListRecordTags
+  efp_list_records: EfpListRecords
+  efp_lists: EfpLists
   events: Events
   schema_migrations: SchemaMigrations
   view__events__efp_account_metadata: ViewEventsEfpAccountMetadata
@@ -240,15 +293,12 @@ export interface DB {
   view__events__efp_contracts: ViewEventsEfpContracts
   view__events__efp_list_metadata: ViewEventsEfpListMetadata
   view__events__efp_list_nfts: ViewEventsEfpListNfts
-  view__events__efp_list_nfts_with_manager_user: ViewEventsEfpListNftsWithManagerUser
   view__events__efp_list_ops: ViewEventsEfpListOps
   view__events__efp_list_ops__record_tag: ViewEventsEfpListOpsRecordTag
   view__events__efp_list_record_tags: ViewEventsEfpListRecordTags
-  view__events__efp_list_record_tags__deleted: ViewEventsEfpListRecordTagsDeleted
   view__events__efp_list_records: ViewEventsEfpListRecords
-  view__events__efp_list_records__deleted: ViewEventsEfpListRecordsDeleted
-  view__events__efp_list_records_with_nft_manager_user_tags: ViewEventsEfpListRecordsWithNftManagerUserTags
-  view__events__efp_list_records_with_tags: ViewEventsEfpListRecordsWithTags
   view__events__efp_list_storage_locations: ViewEventsEfpListStorageLocations
-  view__latest_record_tags: ViewLatestRecordTags
+  view__events__latest_record_tags: ViewEventsLatestRecordTags
+  view__join__efp_list_records_with_nft_manager_user_tags: ViewJoinEfpListRecordsWithNftManagerUserTags
+  view__join__efp_list_records_with_tags: ViewJoinEfpListRecordsWithTags
 }

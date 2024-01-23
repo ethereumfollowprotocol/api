@@ -9,6 +9,17 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
 
     const address: Address = await services.ens().getAddress(ensOrAddress)
     const followers = await services.efp(env(context)).getFollowers(address)
-    return context.json({ followers }, 200)
+    return context.json(
+      {
+        followers: followers.map(({ follower, tags, isFollowing, isBlocked, isMuted }) => ({
+          follower,
+          tags,
+          is_following: isFollowing,
+          is_blocked: isBlocked,
+          is_muted: isMuted
+        }))
+      },
+      200
+    )
   })
 }

@@ -267,8 +267,20 @@ export class SocialGraph {
     return this.getBlocks(address).length
   }
 
-  getFollowers(address: `0x${string}`): { address: `0x${string}`; tags: string[] }[] {
-    const followers: { address: `0x${string}`; tags: string[] }[] = []
+  getFollowers(address: `0x${string}`): {
+    follower: `0x${string}`
+    tags: string[]
+    isFollowing: boolean
+    isBlocked: boolean
+    isMuted: boolean
+  }[] {
+    const followers: {
+      follower: `0x${string}`
+      tags: string[]
+      isFollowing: boolean
+      isBlocked: boolean
+      isMuted: boolean
+    }[] = []
     // check every primary list to see if it contains the address
     for (const [listUser, tokenId] of this.#primaryLists.entries()) {
       if (tokenId === undefined) continue
@@ -281,8 +293,11 @@ export class SocialGraph {
         const follower: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
         if (follower.toLowerCase() === address.toLowerCase()) {
           followers.push({
-            address: listUser,
-            tags: Array.from(tags).sort()
+            follower: listUser,
+            tags: Array.from(tags).sort(),
+            isFollowing: true,
+            isBlocked: false,
+            isMuted: false
           })
         }
       }
