@@ -5,6 +5,7 @@ import type { Environment } from '#/types'
 import { ens } from './ens'
 import { followers } from './followers'
 import { following } from './following'
+import { listRecords } from './list-records'
 import { primaryList } from './primary-list'
 import { profile } from './profile'
 import { relationships } from './relationships'
@@ -17,6 +18,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   ens(users, services)
   followers(users, services)
   following(users, services)
+  listRecords(users, services)
   primaryList(users, services)
   profile(users, services)
   relationships(users, services)

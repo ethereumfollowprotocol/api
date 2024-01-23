@@ -2,7 +2,7 @@ import { apiLogger } from '#/logger'
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type { IEFPIndexerService } from '../service'
-import { type SocialGraph, makeSocialGraph } from './social-graph'
+import { makeSocialGraph, type SocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
   readonly #socialGraph: SocialGraph
@@ -37,6 +37,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     }[]
   > {
     return this.#socialGraph.getFollowers(address)
+  }
+
+  async getUserListRecords(address: Address): Promise<TaggedListRecord[]> {
+    const primaryList = await this.getUserPrimaryList(address)
+    if (!primaryList) return []
+    return this.getListRecordsWithTags(primaryList)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>

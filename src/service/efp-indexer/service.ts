@@ -1,4 +1,4 @@
-import { type Kysely, type QueryResult, sql } from 'kysely'
+import { sql, type Kysely, type QueryResult } from 'kysely'
 
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
@@ -37,6 +37,7 @@ export interface IEFPIndexerService {
   >
   getUserFollowingCount(address: Address): Promise<number>
   getUserFollowing(address: Address): Promise<TaggedListRecord[]>
+  getUserListRecords(address: Address): Promise<TaggedListRecord[]>
   getUserPrimaryList(address: Address): Promise<bigint | undefined>
 }
 
@@ -121,6 +122,34 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      tags: row.tags.sort()
+    }))
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // /user list records
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getUserListRecords(address: Address): Promise<TaggedListRecord[]> {
+    const query = sql<Row>`SELECT * FROM query.get_list_records__record_type_001(${address})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    type Row = {
+      efp_list_nft_token_id: bigint
+      record_version: number
+      record_type: number
+      address: `0x${string}`
+      tags: string[]
+    }
+
+    return result.rows.map((row: Row) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.address),
       tags: row.tags.sort()
     }))
   }
