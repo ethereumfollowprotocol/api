@@ -32,9 +32,9 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const { address, ...ens }: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
-        include.includes('followers') ? efp.getFollowers(address) : null,
-        include.includes('following') ? efp.getFollowing(address) : null,
-        include.includes('primary-list') ? efp.getPrimaryList(address) : undefined
+        include.includes('followers') ? efp.getUserFollowers(address) : null,
+        include.includes('following') ? efp.getUserFollowing(address) : null,
+        include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
 
       const listRecordsLabeled: {

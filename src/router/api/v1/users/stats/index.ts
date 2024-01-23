@@ -12,13 +12,13 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
     const ens: IENSMetadataService = services.ens()
     const efp: IEFPIndexerService = services.efp(env(context))
     const address: Address = await ens.getAddress(ensOrAddress)
-    const followersCount: number = await efp.getFollowersCount(address)
+    const followersCount: number = await efp.getUserFollowersCount(address)
     const stats = {
       followers_count: followersCount,
       following_count: 0
     }
 
-    const primaryList: bigint | undefined = await efp.getPrimaryList(address)
+    const primaryList: bigint | undefined = await efp.getUserPrimaryList(address)
     if (primaryList === undefined) {
       return context.json(stats, 200)
     }

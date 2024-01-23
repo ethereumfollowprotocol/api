@@ -5,18 +5,6 @@ import type { Address, DB } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export interface IEFPIndexerService {
-  getFollowersCount(address: Address): Promise<number>
-  getFollowers(address: Address): Promise<
-    {
-      follower: Address
-      tags: string[]
-      isFollowing: boolean
-      isBlocked: boolean
-      isMuted: boolean
-    }[]
-  >
-  getFollowingCount(address: Address): Promise<number>
-  getFollowing(address: Address): Promise<TaggedListRecord[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
   getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: Address; blocks_count: number }[]>
   getLeaderboardFollowers(limit: number): Promise<{ rank: number; address: Address; followers_count: number }[]>
@@ -30,7 +18,6 @@ export interface IEFPIndexerService {
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
-  getPrimaryList(address: Address): Promise<bigint | undefined>
   // incoming relationship means another list has the given address tagged with the given tag
   getIncomingRelationships(
     address: Address,
@@ -38,6 +25,19 @@ export interface IEFPIndexerService {
   ): Promise<{ token_id: bigint; list_user: Address; tags: string[] }[]>
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
+  getUserFollowersCount(address: Address): Promise<number>
+  getUserFollowers(address: Address): Promise<
+    {
+      follower: Address
+      tags: string[]
+      isFollowing: boolean
+      isBlocked: boolean
+      isMuted: boolean
+    }[]
+  >
+  getUserFollowingCount(address: Address): Promise<number>
+  getUserFollowing(address: Address): Promise<TaggedListRecord[]>
+  getUserPrimaryList(address: Address): Promise<bigint | undefined>
 }
 
 function bufferize(data: Uint8Array | string): Buffer {
@@ -55,11 +55,11 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Followers
   /////////////////////////////////////////////////////////////////////////////
 
-  async getFollowersCount(address: Address): Promise<number> {
-    return new Set(await this.getFollowers(address)).size
+  async getUserFollowersCount(address: Address): Promise<number> {
+    return new Set(await this.getUserFollowers(address)).size
   }
 
-  async getFollowers(address: Address): Promise<
+  async getUserFollowers(address: Address): Promise<
     {
       follower: Address
       tags: string[]
@@ -97,11 +97,11 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Following
   /////////////////////////////////////////////////////////////////////////////
 
-  async getFollowingCount(address: Address): Promise<number> {
-    return new Set(await this.getFollowing(address)).size
+  async getUserFollowingCount(address: Address): Promise<number> {
+    return new Set(await this.getUserFollowing(address)).size
   }
 
-  async getFollowing(address: Address): Promise<TaggedListRecord[]> {
+  async getUserFollowing(address: Address): Promise<TaggedListRecord[]> {
     const query = sql<Row>`SELECT * FROM query.get_following__record_type_001(${address})`
     const result = await query.execute(this.#db)
 
@@ -397,7 +397,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Primary List
   /////////////////////////////////////////////////////////////////////////////
 
-  async getPrimaryList(address: Address): Promise<bigint | undefined> {
+  async getUserPrimaryList(address: Address): Promise<bigint | undefined> {
     // Call the enhanced PostgreSQL function
     const query = sql<{
       primary_list: bigint

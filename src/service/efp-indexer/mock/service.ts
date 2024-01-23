@@ -22,12 +22,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowersCount(address: Address): Promise<number> {
+  async getUserFollowersCount(address: Address): Promise<number> {
     return this.#socialGraph.getFollowersCount(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowers(address: Address): Promise<
+  async getUserFollowers(address: Address): Promise<
     {
       follower: Address
       tags: string[]
@@ -40,12 +40,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowingCount(address: Address): Promise<number> {
+  async getUserFollowingCount(address: Address): Promise<number> {
     return this.#socialGraph.getFollowingCount(address)
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getFollowing(address: Address): Promise<TaggedListRecord[]> {
+  async getUserFollowing(address: Address): Promise<TaggedListRecord[]> {
     return this.#socialGraph.getFollowing(address)
   }
 
@@ -98,7 +98,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/nursery/useAwait: <explanation>
-  async getPrimaryList(address: Address): Promise<bigint | undefined> {
+  async getUserPrimaryList(address: Address): Promise<bigint | undefined> {
     return this.#socialGraph.getPrimaryList(address)
   }
 
@@ -111,7 +111,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   async getOutgoingRelationships(address: `0x${string}`, tag: string): Promise<TaggedListRecord[]> {
-    const primaryList = await this.getPrimaryList(address)
+    const primaryList = await this.getUserPrimaryList(address)
     if (!primaryList) return []
     return (await this.getListRecordsWithTags(primaryList)).filter(r => r.tags.includes(tag))
   }

@@ -12,7 +12,7 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
     const address: Address = await services.ens().getAddress(ensOrAddress)
 
     const efp: IEFPIndexerService = services.efp(env(context))
-    const followingListRecords: TaggedListRecord[] = await efp.getFollowing(address)
+    const followingListRecords: TaggedListRecord[] = await efp.getUserFollowing(address)
     const prettyFollowingListRecords: {
       version: number
       record_type: string

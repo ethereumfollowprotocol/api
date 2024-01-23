@@ -8,7 +8,7 @@ export function primaryList(users: Hono<{ Bindings: Environment }>, services: Se
     const { ensOrAddress } = context.req.param()
 
     const address = await services.ens().getAddress(ensOrAddress)
-    const primaryList: bigint | undefined = await services.efp(env(context)).getPrimaryList(address)
+    const primaryList: bigint | undefined = await services.efp(env(context)).getUserPrimaryList(address)
     return context.json(
       {
         primary_list: primaryList !== undefined ? primaryList.toString() : null
