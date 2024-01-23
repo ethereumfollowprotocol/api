@@ -1,15 +1,15 @@
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
 import type { TaggedListRecord } from '#/types/list-record'
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 
 export function following(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:ensOrAddress/following', async context => {
-    const { ensOrAddress } = context.req.param()
+  users.get('/:addressOrENS/following', async context => {
+    const { addressOrENS } = context.req.param()
 
-    const address: Address = await services.ens().getAddress(ensOrAddress)
+    const address: Address = await services.ens().getAddress(addressOrENS)
 
     const efp: IEFPIndexerService = services.efp(env(context))
     const followingListRecords: TaggedListRecord[] = await efp.getUserFollowing(address)

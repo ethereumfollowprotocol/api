@@ -1,13 +1,13 @@
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
-import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
+import { validator } from 'hono/validator'
 
 export function relationships(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
-    '/:ensOrAddress/relationships',
+    '/:addressOrENS/relationships',
     validator('query', value => {
       const { tag, direction } = <Record<'tag' | 'direction', string | undefined>>value
 
@@ -29,13 +29,13 @@ export function relationships(users: Hono<{ Bindings: Environment }>, services: 
       return value
     }),
     async context => {
-      const ensOrAddress = context.req.param().ensOrAddress
+      const addressOrENS = context.req.param().addressOrENS
       let { tag, direction } = context.req.query()
 
       if (direction === 'in') direction = 'incoming'
       if (direction === 'out') direction = 'outgoing'
 
-      const address: Address = await services.ens().getAddress(ensOrAddress)
+      const address: Address = await services.ens().getAddress(addressOrENS)
 
       const efp: IEFPIndexerService = services.efp(env(context))
       let relationships: any[] = []

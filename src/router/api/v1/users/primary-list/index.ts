@@ -1,13 +1,13 @@
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 
 export function primaryList(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:ensOrAddress/primary-list', async context => {
-    const { ensOrAddress } = context.req.param()
+  users.get('/:addressOrENS/primary-list', async context => {
+    const { addressOrENS } = context.req.param()
 
-    const address = await services.ens().getAddress(ensOrAddress)
+    const address = await services.ens().getAddress(addressOrENS)
     const primaryList: bigint | undefined = await services.efp(env(context)).getUserPrimaryList(address)
     return context.json(
       {

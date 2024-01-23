@@ -16,10 +16,10 @@ export function followers(
    * If include=ens, also returns ens profile of each user.
    * If include=muted, also returns how many users each user has muted.
    * If include=blocked, also returns how many users each user has blocked.
-   * If ensOrAddress path param is provided AND include=mutuals query param is provided, returns mutuals between ensOrAddress and each user.
+   * If addressOrENS path param is provided AND include=mutuals query param is provided, returns mutuals between addressOrENS and each user.
    */
-  leaderboard.get('/followers/:ensOrAddress?', limitValidator, includeValidator, async context => {
-    const { ensOrAddress } = context.req.param()
+  leaderboard.get('/followers/:addressOrENS?', limitValidator, includeValidator, async context => {
+    const { addressOrENS } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     let mostFollowers: { address: string; followers_count: number }[] = await services

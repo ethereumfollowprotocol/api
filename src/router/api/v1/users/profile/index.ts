@@ -1,15 +1,15 @@
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
-import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
+import { validator } from 'hono/validator'
 
 export function profile(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
-    '/:ensOrAddress/profile',
+    '/:addressOrENS/profile',
     validator('query', value => {
       const allFilters = ['ens', 'primary-list', 'following', 'followers']
       // if only one include query param, type is string, if 2+ then type is array, if none then undefined
@@ -26,10 +26,10 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       )
     }),
     async context => {
-      const { ensOrAddress } = context.req.param()
+      const { addressOrENS } = context.req.param()
       const { include } = context.req.valid('query')
 
-      const { address, ...ens }: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
+      const { address, ...ens }: ENSProfile = await services.ens().getENSProfile(addressOrENS)
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
         include.includes('followers') ? efp.getUserFollowers(address) : null,

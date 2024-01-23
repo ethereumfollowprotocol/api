@@ -1,17 +1,17 @@
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { IENSMetadataService } from '#/service/ens-metadata/service'
 import type { Address, Environment } from '#/types'
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 
 export function stats(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:ensOrAddress/stats', async context => {
-    const { ensOrAddress } = context.req.param()
+  users.get('/:addressOrENS/stats', async context => {
+    const { addressOrENS } = context.req.param()
 
     const ens: IENSMetadataService = services.ens()
     const efp: IEFPIndexerService = services.efp(env(context))
-    const address: Address = await ens.getAddress(ensOrAddress)
+    const address: Address = await ens.getAddress(addressOrENS)
     const followersCount: number = await efp.getUserFollowersCount(address)
     const stats = {
       followers_count: followersCount,

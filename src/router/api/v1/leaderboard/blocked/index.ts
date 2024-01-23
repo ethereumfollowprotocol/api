@@ -14,8 +14,8 @@ export function blocked(
   /**
    * Same as /followers, but for blocked.
    */
-  leaderboard.get('/blocked/:ensOrAddress?', limitValidator, includeValidator, async context => {
-    const { ensOrAddress } = context.req.param()
+  leaderboard.get('/blocked/:addressOrENS?', limitValidator, includeValidator, async context => {
+    const { addressOrENS } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     let mostBlocked: { address: string; blocked_by_count: number }[] = await services

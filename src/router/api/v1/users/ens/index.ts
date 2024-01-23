@@ -5,17 +5,17 @@ import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
 
 export function ens(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:ensOrAddress/ens', async context => {
-    const { ensOrAddress } = context.req.param()
+  users.get('/:addressOrENS/ens', async context => {
+    const { addressOrENS } = context.req.param()
 
-    const ensProfile: ENSProfile = await services.ens().getENSProfile(ensOrAddress)
+    const ensProfile: ENSProfile = await services.ens().getENSProfile(addressOrENS)
     return context.json({ ens: ensProfile }, 200)
   })
 
-  users.get('/:ensOrAddress/ens/avatar', async context => {
-    const { ensOrAddress } = context.req.param()
+  users.get('/:addressOrENS/ens/avatar', async context => {
+    const { addressOrENS } = context.req.param()
 
-    const imageUrl = await services.ens().getENSAvatar(ensOrAddress)
+    const imageUrl = await services.ens().getENSAvatar(addressOrENS)
     return context.redirect(imageUrl, 302)
   })
 

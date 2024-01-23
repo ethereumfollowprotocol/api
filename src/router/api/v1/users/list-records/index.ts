@@ -6,10 +6,10 @@ import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
 
 export function listRecords(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:ensOrAddress/list-records', async context => {
-    const { ensOrAddress } = context.req.param()
+  users.get('/:addressOrENS/list-records', async context => {
+    const { addressOrENS } = context.req.param()
 
-    const address: Address = await services.ens().getAddress(ensOrAddress)
+    const address: Address = await services.ens().getAddress(addressOrENS)
 
     const efp: IEFPIndexerService = services.efp(env(context))
     const listRecords: TaggedListRecord[] = await efp.getUserListRecords(address)

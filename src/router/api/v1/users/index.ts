@@ -24,7 +24,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   relationships(users, services)
   stats(users, services)
 
-  users.get('/:ensOrAddress', context =>
+  users.get('/:addressOrENS', context =>
     context.json(
       {
         message: `Not a valid endpoint. Available subpaths: ${[
@@ -43,19 +43,19 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
 
   // Blocked by user
   // biome-ignore lint/nursery/useAwait: <explanation>
-  users.get('/:ensOrAddress/blocks', async context => {
+  users.get('/:addressOrENS/blocks', async context => {
     return context.text('Not implemented', 501)
   })
 
   // Muted by user
   // biome-ignore lint/nursery/useAwait: <explanation>
-  users.get('/:ensOrAddress/mutes', async context => {
+  users.get('/:addressOrENS/mutes', async context => {
     return context.text('Not implemented', 501)
   })
 
   // Mutuals with users
   // biome-ignore lint/nursery/useAwait: <explanation>
-  users.get('/:ensOrAddress/mutuals', async context => {
+  users.get('/:addressOrENS/mutuals', async context => {
     return context.text('Not implemented', 501)
   })
 
