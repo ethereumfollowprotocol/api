@@ -268,18 +268,18 @@ export class SocialGraph {
   }
 
   getFollowers(address: `0x${string}`): {
-    follower: `0x${string}`
+    address: `0x${string}`
     tags: string[]
-    isFollowing: boolean
-    isBlocked: boolean
-    isMuted: boolean
+    is_following: boolean
+    is_blocked: boolean
+    is_muted: boolean
   }[] {
     const followers: {
-      follower: `0x${string}`
+      address: `0x${string}`
       tags: string[]
-      isFollowing: boolean
-      isBlocked: boolean
-      isMuted: boolean
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
     }[] = []
     // check every primary list to see if it contains the address
     for (const [listUser, tokenId] of this.#primaryLists.entries()) {
@@ -293,11 +293,11 @@ export class SocialGraph {
         const follower: `0x${string}` = `0x${data.toString('hex')}` as `0x${string}`
         if (follower.toLowerCase() === address.toLowerCase()) {
           followers.push({
-            follower: listUser,
+            address: listUser,
             tags: Array.from(tags).sort(),
-            isFollowing: true,
-            isBlocked: false,
-            isMuted: false
+            is_following: true,
+            is_blocked: false,
+            is_muted: false
           })
         }
       }

@@ -29,11 +29,11 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   // biome-ignore lint/nursery/useAwait: <explanation>
   async getUserFollowers(address: Address): Promise<
     {
-      follower: Address
+      address: Address
       tags: string[]
-      isFollowing: boolean
-      isBlocked: boolean
-      isMuted: boolean
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
     }[]
   > {
     return this.#socialGraph.getFollowers(address)
