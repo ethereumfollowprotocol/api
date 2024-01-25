@@ -1,9 +1,9 @@
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { IENSMetadataService } from '#/service/ens-metadata/service'
 import type { Address, Environment } from '#/types'
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
 
 export function stats(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/stats', async context => {

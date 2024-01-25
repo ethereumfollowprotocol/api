@@ -2,7 +2,7 @@ import { apiLogger } from '#/logger'
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type { IEFPIndexerService } from '../service'
-import { makeSocialGraph, type SocialGraph } from './social-graph'
+import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
   readonly #socialGraph: SocialGraph

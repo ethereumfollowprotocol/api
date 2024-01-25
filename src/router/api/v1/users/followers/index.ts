@@ -1,7 +1,7 @@
-import type { Services } from '#/service'
-import type { Address, Environment } from '#/types'
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+import type { Services } from '#/service'
+import type { Address, Environment } from '#/types'
 
 export function followers(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/followers', async context => {

@@ -1,5 +1,5 @@
-import type { Environment } from '#/types'
 import { Hono } from 'hono'
+import type { Environment } from '#/types'
 
 const DEMO_NAME = 'dr3a.eth'
 const DEMO_ADDRESS = '0xeb6b293E9bB1d71240953c8306aD2c8aC523516a'

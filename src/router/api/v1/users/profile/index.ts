@@ -1,11 +1,11 @@
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
+import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
-import { validator } from 'hono/validator'
 
 export function profile(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(

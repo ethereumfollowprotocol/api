@@ -1,9 +1,9 @@
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
 import type { TaggedListRecord } from '#/types/list-record'
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
 
 export function listRecords(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/list-records', async context => {
