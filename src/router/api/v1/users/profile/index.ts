@@ -7,6 +7,9 @@ import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
 
+/**
+ * TODO: Add ens support for following list
+ */
 export function profile(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
     '/:addressOrENS/profile',
@@ -27,6 +30,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
     }),
     async context => {
       const { addressOrENS } = context.req.param()
+
       const { include } = context.req.valid('query')
       const ensService = services.ens()
 
@@ -37,6 +41,14 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         include.includes('following') ? efp.getUserFollowing(address) : null,
         include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
+
+      // const followingENS =
+      //   following !== null ? await ensService.batchGetENSProfiles(following.map(follow => follow.data)) : null
+
+      // const followingWithENS =
+      //   following !== null
+      //     ? following.map((follow, index) => ({ ...follow, ens: followingENS !== null ? followingENS[index] : null }))
+      //     : null
 
       const followersENS =
         followers !== null ? await ensService.batchGetENSProfiles(followers.map(follower => follower.address)) : null

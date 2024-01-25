@@ -5,6 +5,9 @@ import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
 import type { TaggedListRecord } from '#/types/list-record'
 
+/**
+ * TODO: add ENS support
+ */
 export function following(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/following', async context => {
     const { addressOrENS } = context.req.param()
@@ -24,6 +27,6 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
       data: `0x${Buffer.from(data).toString('hex')}` as `0x${string}`,
       tags
     }))
-    return context.json({ following: prettyFollowingListRecords }, 200)
+    return context.json({ data: prettyFollowingListRecords }, 200)
   })
 }
