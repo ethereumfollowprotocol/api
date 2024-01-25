@@ -5,6 +5,9 @@ import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import type { IncludeValidator, LimitValidator } from '../validators'
 
+/**
+ * TODO: add support for whether :addressOrENS is followed, is following, is muting, is blocking, is blocked by
+ */
 export function muted(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
