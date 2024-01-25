@@ -13,6 +13,14 @@ export function ensureArray<T>(value: T | T[]): T[] {
   return Array.isArray(value) ? value : [value]
 }
 
+export function arrayToChunks<T>(array: T[], chunkSize: number): Array<Array<T>> {
+  const chunks = []
+  for (let index = 0; index < array.length; index += chunkSize) {
+    chunks.push(array.slice(index, index + chunkSize))
+  }
+  return chunks
+}
+
 // removed properties with undefined values from object
 export function removeUndefined<T>(object: T): T {
   return JSON.parse(JSON.stringify(object)) as T

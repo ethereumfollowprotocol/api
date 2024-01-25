@@ -1,12 +1,14 @@
 import { apiLogger } from '#/logger'
 import type { Address } from '#/types'
-import { isAddress, raise } from '#/utilities.ts'
+import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
 
 export interface IENSMetadataService {
   getAddress(ensNameOrAddress: Address | string): Promise<Address>
   getENSProfile(ensNameOrAddress?: Address | string): Promise<ENSProfile>
-  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<ENSProfile[]>
+  batchGetENSProfiles(
+    ensNameOrAddressArray: Array<Address | string>
+  ): Promise<({ type: 'success' | 'error' } & ENSProfile)[]>
   getENSAvatar(ensNameOrAddress: Address | string): Promise<string>
   batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
 }
@@ -32,6 +34,7 @@ export class ENSMetadataService implements IENSMetadataService {
     if (ensNameOrAddress === undefined) {
       raise('ENS name or address is required')
     }
+    console.log(`${this.url}/u/${ensNameOrAddress}`)
     const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
 
     if (!response.ok) {
@@ -39,15 +42,35 @@ export class ENSMetadataService implements IENSMetadataService {
     }
 
     const ensProfileData = await response.json()
+
     return ensProfileData as ENSProfile
   }
 
   /**
-   * TODO: implement this in the ENS metadata service worker
+   * TODO: break into batches of 10
    * path should be /u/batch
    */
-  batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<ENSProfile[]> {
-    throw new Error('Not implemented')
+  async batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<
+    ({
+      type: 'success' | 'error'
+    } & ENSProfile)[]
+  > {
+    if (ensNameOrAddressArray.length > 10) {
+      apiLogger.warn('more than 10 ids provided, this will be broken into batches of 10')
+    }
+    const formattedBatches = arrayToChunks(ensNameOrAddressArray, 10).map(batch =>
+      batch.map(id => `queries[]=${id}`).join('&')
+    )
+    const response = await Promise.all(formattedBatches.map(batch => fetch(`${this.url}/bulk/u?${batch}`)))
+
+    if (response.some(response => !response.ok)) {
+      raise(`contains invalid ENS name: ${JSON.stringify(ensNameOrAddressArray)}`)
+    }
+    const data = (await Promise.all(response.map(response => response.json()))) as {
+      response_length: number
+      response: Array<{ type: 'success' | 'error' } & ENSProfile>
+    }[]
+    return data.flatMap(datum => datum.response)
   }
 
   async getENSAvatar(ensNameOrAddress: Address | string): Promise<string> {

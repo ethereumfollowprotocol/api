@@ -36,7 +36,8 @@
       "nursery": {
         "all": true,
         "noUnusedImports": "off",
-        "noEmptyBlockStatements": "off"
+        "noEmptyBlockStatements": "off",
+        "useConsistentArrayType": "off"
       },
       "complexity": {
         "noBannedTypes": "off",

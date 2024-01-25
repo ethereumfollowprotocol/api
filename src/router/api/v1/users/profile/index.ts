@@ -28,14 +28,26 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
     async context => {
       const { addressOrENS } = context.req.param()
       const { include } = context.req.valid('query')
+      const ensService = services.ens()
 
-      const { address, ...ens }: ENSProfile = await services.ens().getENSProfile(addressOrENS)
+      const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS)
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
         include.includes('followers') ? efp.getUserFollowers(address) : null,
         include.includes('following') ? efp.getUserFollowing(address) : null,
         include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
+
+      const followersENS =
+        followers !== null ? await ensService.batchGetENSProfiles(followers.map(follower => follower.address)) : null
+
+      const followersWithENS =
+        followers !== null
+          ? followers.map((follower, index) => ({
+              ...follower,
+              ens: followersENS !== null ? followersENS[index] : null
+            }))
+          : null
 
       const listRecordsLabeled: {
         version: number
@@ -53,7 +65,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
           ens,
           primary_list: primaryList !== undefined ? primaryList.toString() : null,
           following: listRecordsLabeled,
-          followers
+          followers: followersWithENS
         },
         200
       )
