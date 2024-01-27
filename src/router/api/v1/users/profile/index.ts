@@ -1,11 +1,11 @@
-import type { Hono } from 'hono'
-import { env } from 'hono/adapter'
-import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Environment } from '#/types'
 import { ensureArray } from '#/utilities'
+import type { Hono } from 'hono'
+import { env } from 'hono/adapter'
+import { validator } from 'hono/validator'
 
 /**
  * TODO: Add ens support for following list
@@ -42,13 +42,16 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
 
-      // const followingENS =
-      //   following !== null ? await ensService.batchGetENSProfiles(following.map(follow => follow.data)) : null
+      console.log('following', following)
+      const followingENS =
+        following !== null
+          ? await ensService.batchGetENSProfiles(following.map(follow => `0x${follow.data.toString('hex')}`))
+          : null
 
-      // const followingWithENS =
-      //   following !== null
-      //     ? following.map((follow, index) => ({ ...follow, ens: followingENS !== null ? followingENS[index] : null }))
-      //     : null
+      const followingWithENS =
+        following !== null
+          ? following.map((follow, index) => ({ ...follow, ens: followingENS !== null ? followingENS[index] : null }))
+          : null
 
       const followersENS =
         followers !== null ? await ensService.batchGetENSProfiles(followers.map(follower => follower.address)) : null
@@ -65,11 +68,12 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         version: number
         record_type: string
         data: `0x${string}`
-      }[] = (following !== null ? following : []).map(({ version, recordType, data, tags }) => ({
+      }[] = (followingWithENS !== null ? followingWithENS : []).map(({ version, recordType, data, tags, ens }) => ({
         version,
         record_type: recordType === 1 ? 'address' : `${recordType}`,
-        data: `0x${Buffer.from(data).toString('hex')}` as `0x${string}`,
-        tags
+        data: `0x${data.toString('hex')}` as `0x${string}`,
+        tags,
+        ens
       }))
       return context.json(
         {
