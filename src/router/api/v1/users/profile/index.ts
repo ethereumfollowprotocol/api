@@ -42,7 +42,6 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
 
-      console.log('following', following)
       const followingENS =
         following !== null
           ? await ensService.batchGetENSProfiles(following.map(follow => `0x${follow.data.toString('hex')}`))
@@ -75,11 +74,17 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         tags,
         ens
       }))
+
+      const stats = {
+        followers_count: followersWithENS !== null ? followersWithENS.length : 0,
+        following_count: listRecordsLabeled.length || 0
+      }
       return context.json(
         {
           address,
           ens,
           primary_list: primaryList !== undefined ? primaryList.toString() : null,
+          stats,
           following: listRecordsLabeled,
           followers: followersWithENS
         },
