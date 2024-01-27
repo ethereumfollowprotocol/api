@@ -1,4 +1,4 @@
-import { type ListRecord, type TaggedListRecord, serializeListRecord } from '#/types/list-record'
+import { type ListRecord, type TaggedListRecord, hashRecord } from '#/types/list-record'
 import { DEMO_LIST_NFTS_CSV, DEMO_LIST_OPS_CSV } from './data'
 
 type TokenId = bigint
@@ -99,15 +99,15 @@ export class SocialGraph {
       throw new Error('List should exist')
     }
     const node = list.add(record)
-    this.#nodeMap.set(serializeListRecord(record), node)
+    this.#nodeMap.set(hashRecord(listId, record), node)
   }
 
   removeRecord(listId: TokenId, record: ListRecord): void {
     const list = this.#listRecords.get(listId)
-    const node = this.#nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(hashRecord(listId, record))
     if (list !== undefined && node !== undefined) {
       list.remove(node)
-      this.#nodeMap.delete(serializeListRecord(record))
+      this.#nodeMap.delete(hashRecord(listId, record))
     }
   }
 
@@ -119,7 +119,7 @@ export class SocialGraph {
     if (!listTags) {
       throw new Error('Tags should exist')
     }
-    const node = this.#nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(hashRecord(listId, record))
     if (!node) {
       return
     }
@@ -134,7 +134,7 @@ export class SocialGraph {
   }
 
   untagRecord(listId: TokenId, record: ListRecord, tag: Tag): void {
-    const node = this.#nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(hashRecord(listId, record))
     if (!node) {
       return
     }
@@ -163,14 +163,14 @@ export class SocialGraph {
 
   // O(1) time
   getTags(listId: TokenId, record: ListRecord): Set<Tag> {
-    const node = this.#nodeMap.get(serializeListRecord(record))
+    const node = this.#nodeMap.get(hashRecord(listId, record))
     if (!node) {
       return new Set<Tag>()
     }
     const listTags = this.#tags.get(listId)
     if (listTags?.has(node)) {
       const tags = listTags.get(node)
-      if (tags) {
+      if (tags !== undefined) {
         return tags
       }
     }
@@ -313,15 +313,15 @@ export class SocialGraph {
     const primaryList: TokenId | undefined = this.getPrimaryList(address)
     if (primaryList === undefined) return []
 
-    const listRecordTags: TaggedListRecord[] = this.getListRecordTags(primaryList)
+    const taggedListRecords: TaggedListRecord[] = this.getListRecordTags(primaryList)
     // filter all the ones with "block" or "mute" in the tags
     const following: TaggedListRecord[] = []
-    for (const listRecordTag of listRecordTags) {
-      const { version, recordType, data, tags } = listRecordTag
+    for (const taggedListRecord of taggedListRecords) {
+      const { version, recordType, data, tags } = taggedListRecord
       if (!SocialGraph.isFollow({ version, recordType, data }, tags)) {
         continue
       }
-      following.push({ version, recordType, data, tags: tags })
+      following.push({ version, recordType, data, tags })
     }
     return following
   }
@@ -561,7 +561,7 @@ export function makeSocialGraph(): SocialGraph {
         recordType: listRecordType,
         data: listRecordBytes
       }
-      console.log(`${tokenId} Add record ${serializeListRecord(listRecord)}`)
+      console.log(`${tokenId} Add record ${hashRecord(tokenId, listRecord)}`)
       socialGraph.addRecord(tokenId, listRecord)
     } else if (listOpcode === 2) {
       // delete record operation
@@ -574,7 +574,7 @@ export function makeSocialGraph(): SocialGraph {
         recordType: listRecordType,
         data: listRecordBytes
       }
-      console.log(`${tokenId} Delete record ${serializeListRecord(listRecord)}`)
+      console.log(`${tokenId} Delete record ${hashRecord(tokenId, listRecord)}`)
       socialGraph.removeRecord(tokenId, listRecord)
     } else if (listOpcode === 3) {
       // add record tag operation
@@ -589,7 +589,7 @@ export function makeSocialGraph(): SocialGraph {
       }
       const listTagBytes: Buffer = listOpBytes.subarray(24)
       const tag: string = listTagBytes.toString('utf-8')
-      console.log(`${tokenId} Tag record ${serializeListRecord(listRecord)} "${tag}"`)
+      console.log(`${tokenId} Tag record ${hashRecord(tokenId, listRecord)} "${tag}"`)
       socialGraph.tagRecord(tokenId, listRecord, tag)
     } else if (listOpcode === 4) {
       // delete record tag operation
@@ -604,7 +604,7 @@ export function makeSocialGraph(): SocialGraph {
       }
       const listTagBytes: Buffer = listOpBytes.subarray(24)
       const tag: string = listTagBytes.toString('utf-8')
-      console.log(`${tokenId} Untag record ${serializeListRecord(listRecord)} "${tag}"`)
+      console.log(`${tokenId} Untag record ${hashRecord(tokenId, listRecord)} "${tag}"`)
       socialGraph.untagRecord(tokenId, listRecord, tag)
     } else {
       throw new Error(`Invalid list opcode: ${listOpcode}`)
