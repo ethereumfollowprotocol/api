@@ -1,4 +1,3 @@
-import { apiLogger } from '#/logger'
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type { IEFPIndexerService } from '../service'
@@ -8,7 +7,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   readonly #socialGraph: SocialGraph
 
   constructor() {
-    apiLogger.info('Using MockEFPIndexerService')
+    // apiLogger.info('Using MockEFPIndexerService')
     this.#socialGraph = makeSocialGraph()
   }
   getDebugNumEvents(): Promise<number> {

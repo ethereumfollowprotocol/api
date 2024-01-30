@@ -513,7 +513,7 @@ function makeListOpRow(line: string): ListOpRow {
 }
 
 export function makeSocialGraph(): SocialGraph {
-  console.log('Building social graph...')
+  // console.log('Building social graph...')
   const socialGraph: SocialGraph = new SocialGraph()
   const nfts: ListNFTRow[] = parseCSV<ListNFTRow>(DEMO_LIST_NFTS_CSV, makeListNFTRow)
   for (const nft of nfts) {
@@ -524,7 +524,7 @@ export function makeSocialGraph(): SocialGraph {
     if (typeof listUser !== 'string' || !listUser.startsWith('0x')) {
       throw new Error('Invalid list user')
     }
-    console.log(`Setting primary list for ${listUser} to ${tokenId}`)
+    // console.log(`Setting primary list for ${listUser} to ${tokenId}`)
     socialGraph.setPrimaryList(listUser as `0x${string}`, tokenId)
   }
 
@@ -561,7 +561,7 @@ export function makeSocialGraph(): SocialGraph {
         recordType: listRecordType,
         data: listRecordBytes
       }
-      console.log(`${tokenId} Add record ${hashRecord(tokenId, listRecord)}`)
+      // console.log(`${tokenId} Add record ${hashRecord(tokenId, listRecord)}`)
       socialGraph.addRecord(tokenId, listRecord)
     } else if (listOpcode === 2) {
       // delete record operation
@@ -574,7 +574,7 @@ export function makeSocialGraph(): SocialGraph {
         recordType: listRecordType,
         data: listRecordBytes
       }
-      console.log(`${tokenId} Delete record ${hashRecord(tokenId, listRecord)}`)
+      // console.log(`${tokenId} Delete record ${hashRecord(tokenId, listRecord)}`)
       socialGraph.removeRecord(tokenId, listRecord)
     } else if (listOpcode === 3) {
       // add record tag operation
@@ -589,7 +589,7 @@ export function makeSocialGraph(): SocialGraph {
       }
       const listTagBytes: Buffer = listOpBytes.subarray(24)
       const tag: string = listTagBytes.toString('utf-8')
-      console.log(`${tokenId} Tag record ${hashRecord(tokenId, listRecord)} "${tag}"`)
+      // console.log(`${tokenId} Tag record ${hashRecord(tokenId, listRecord)} "${tag}"`)
       socialGraph.tagRecord(tokenId, listRecord, tag)
     } else if (listOpcode === 4) {
       // delete record tag operation
@@ -604,7 +604,7 @@ export function makeSocialGraph(): SocialGraph {
       }
       const listTagBytes: Buffer = listOpBytes.subarray(24)
       const tag: string = listTagBytes.toString('utf-8')
-      console.log(`${tokenId} Untag record ${hashRecord(tokenId, listRecord)} "${tag}"`)
+      // console.log(`${tokenId} Untag record ${hashRecord(tokenId, listRecord)} "${tag}"`)
       socialGraph.untagRecord(tokenId, listRecord, tag)
     } else {
       throw new Error(`Invalid list opcode: ${listOpcode}`)

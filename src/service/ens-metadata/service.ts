@@ -34,7 +34,7 @@ export class ENSMetadataService implements IENSMetadataService {
     if (ensNameOrAddress === undefined) {
       raise('ENS name or address is required')
     }
-    console.log(`${this.url}/u/${ensNameOrAddress}`)
+
     const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
 
     if (!response.ok) {
@@ -56,7 +56,7 @@ export class ENSMetadataService implements IENSMetadataService {
     } & ENSProfile)[]
   > {
     if (ensNameOrAddressArray.length > 10) {
-      apiLogger.warn('more than 10 ids provided, this will be broken into batches of 10')
+      // apiLogger.warn('more than 10 ids provided, this will be broken into batches of 10')
     }
     const formattedBatches = arrayToChunks(ensNameOrAddressArray, 10).map(batch =>
       batch.map(id => `queries[]=${id}`).join('&')
