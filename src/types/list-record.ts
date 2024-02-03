@@ -23,3 +23,23 @@ export function hashRecord(tokenId: bigint, listRecord: ListRecord): `0x${string
 
   return `0x${tokenId.toString()}-${versionHex}${typeHex}${dataHex}`
 }
+
+export type PrettyTaggedListRecord = {
+  version: number
+  record_type: string
+  data: `0x${string}`
+  tags: string[]
+}
+
+export function hexlify(data: Buffer): `0x${string}` {
+  return `0x${data.toString('hex')}`
+}
+
+export function prettifyListRecord(record: TaggedListRecord): PrettyTaggedListRecord {
+  return {
+    version: record.version,
+    record_type: record.recordType === 1 ? 'address' : `${record.recordType}`,
+    data: hexlify(record.data),
+    tags: record.tags
+  }
+}

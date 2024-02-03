@@ -3,22 +3,25 @@ import { env } from 'hono/adapter'
 import { validator } from 'hono/validator'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
+import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
-import type { Environment } from '#/types'
+import type { Address, Environment } from '#/types'
+import { hexlify, prettifyListRecord } from '#/types/list-record'
 import { ensureArray } from '#/utilities'
+import type { ENSFollowerResponse } from '../followers'
+import type { ENSFollowingResponse } from '../following'
 
-/**
- * TODO: Add ens support for following list
- */
 export function profile(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get(
     '/:addressOrENS/profile',
     validator('query', value => {
-      const allFilters = ['ens', 'primary-list', 'following', 'followers']
+      const allFilters = ['ens', 'primary-list', 'following', 'followers', 'stats']
       // if only one include query param, type is string, if 2+ then type is array, if none then undefined
       const { include } = <Record<'include', string[] | string | undefined>>value
       // if no include query param, return all data
       if (!include) return { include: allFilters }
+      // if "include=ens" is the only query param, then also return all data
+      if (include === 'ens') return { include: allFilters }
       // if include query param is an array, ensure all values are valid
       if (ensureArray(include).every(filter => allFilters.includes(filter))) return { include }
       return new Response(
@@ -37,59 +40,65 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS)
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
-        include.includes('followers') ? efp.getUserFollowers(address) : null,
-        include.includes('following') ? efp.getUserFollowing(address) : null,
+        include.includes('followers') || include.includes('stats') ? efp.getUserFollowers(address) : undefined,
+        include.includes('following') || include.includes('stats') ? efp.getUserFollowing(address) : undefined,
         include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
 
-      const followingENS =
-        following !== null
-          ? await ensService.batchGetENSProfiles(following.map(follow => `0x${follow.data.toString('hex')}`))
-          : null
-
-      const followingWithENS =
-        following !== null
-          ? following.map((follow, index) => ({ ...follow, ens: followingENS !== null ? followingENS[index] : null }))
-          : null
-
-      const followersENS =
-        followers !== null ? await ensService.batchGetENSProfiles(followers.map(follower => follower.address)) : null
-
-      const followersWithENS =
-        followers !== null
-          ? followers.map((follower, index) => ({
-              ...follower,
-              ens: followersENS !== null ? followersENS[index] : null
-            }))
-          : null
-
-      const listRecordsLabeled: {
-        version: number
-        record_type: string
-        data: `0x${string}`
-      }[] = (followingWithENS !== null ? followingWithENS : []).map(({ version, recordType, data, tags, ens }) => ({
-        version,
-        record_type: recordType === 1 ? 'address' : `${recordType}`,
-        data: `0x${data.toString('hex')}` as `0x${string}`,
-        tags,
-        ens
-      }))
-
       const stats = {
-        followers_count: followersWithENS !== null ? followersWithENS.length : 0,
-        following_count: listRecordsLabeled.length || 0
+        followers_count: followers !== undefined ? followers.length : 0,
+        following_count: following !== undefined ? following.length : 0
       }
-      return context.json(
-        {
-          address,
-          ens,
-          primary_list: primaryList !== undefined ? primaryList.toString() : null,
-          stats,
-          following: listRecordsLabeled,
-          followers: followersWithENS
-        },
-        200
-      )
+
+      // prettify list records
+      const followingReponse: ENSFollowingResponse[] | undefined = following?.map(prettifyListRecord)
+      let followersResponse: ENSFollowerResponse[] | undefined = followers
+
+      if (include.includes('ens')) {
+        // collect address for followers and following so we can batch fetch ENS profiles
+        const addressesToFetchENS: Address[] = [
+          ...(followers?.map(follower => follower.address) ?? []),
+          ...(following?.filter(follow => follow.recordType === 1).map(follow => hexlify(follow.data)) ?? [])
+        ]
+
+        const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addressesToFetchENS)
+        const ensProfilesByAddress: Map<Address, ENSProfileResponse> = new Map(
+          addressesToFetchENS.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
+        )
+
+        // attach ENS profiles to followers
+        followersResponse = followersResponse?.map(
+          (follower, index) =>
+            ({
+              ...follower,
+              ens: ensProfilesByAddress.get(follower.address) as ENSProfileResponse
+            }) as ENSFollowerResponse
+        )
+        followingReponse?.forEach((record, index) => {
+          if (record.record_type === 'address') {
+            record.ens = ensProfilesByAddress.get(record.data) as ENSProfileResponse
+          }
+        })
+      }
+
+      let response = { address } as Record<string, unknown>
+      if (include.includes('ens')) {
+        response = { ...response, ens }
+      }
+      if (include.includes('followers')) {
+        response = { ...response, followers: followersResponse }
+      }
+      if (include.includes('following')) {
+        response = { ...response, following: followingReponse }
+      }
+      if (include.includes('primary-list')) {
+        response = { ...response, primary_list: primaryList?.toString() ?? null }
+      }
+      if (include.includes('stats')) {
+        response = { ...response, stats }
+      }
+
+      return context.json(response, 200)
     }
   )
 }
