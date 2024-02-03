@@ -12,6 +12,7 @@
     "docker:api": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes api",
     "docker:ping": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes ping",
     "format": "bunx @biomejs/biome format . --write",
+    "fix": "bun lint && bun format",
     "lint": "bunx @biomejs/biome check --apply . && bun typecheck",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "vitest --run",
