@@ -2,25 +2,37 @@ import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
 import { includeValidator } from '#/router/api/v1/leaderboard/validators'
 import type { Services } from '#/service'
+import type { FollowerResponse } from '#/service/efp-indexer/service'
+import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { Address, Environment } from '#/types'
+
+export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse }
 
 export function followers(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/followers', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
     const { include } = context.req.valid('query')
-    const includeENS = include?.includes('ens')
     const ensService = services.ens()
     const address: Address = await ensService.getAddress(addressOrENS)
-    const followers = await services.efp(env(context)).getUserFollowers(address)
-    const followersENS = includeENS
-      ? await ensService.batchGetENSProfiles(followers.map(follower => follower.address))
-      : null
+    const followers: FollowerResponse[] = await services.efp(env(context)).getUserFollowers(address)
 
-    const followersWithENS =
-      followers !== null
-        ? followers.map((follower, index) => ({ ...follower, ens: followersENS !== null ? followersENS[index] : null }))
-        : null
+    let response: ENSFollowerResponse[] = followers
 
-    return context.json({ data: followersWithENS || followers }, 200)
+    if (include?.includes('ens')) {
+      const ensProfilesForFollowers: ENSProfileResponse[] = await ensService.batchGetENSProfiles(
+        followers.map(follower => follower.address)
+      )
+
+      response = followers.map((follower, index) => {
+        const ens: ENSProfileResponse = ensProfilesForFollowers[index] as ENSProfileResponse
+        const ensFollowerResponse: ENSFollowerResponse = {
+          ...follower,
+          ens
+        }
+        return ensFollowerResponse
+      })
+    }
+
+    return context.json({ followers: response }, 200)
   })
 }

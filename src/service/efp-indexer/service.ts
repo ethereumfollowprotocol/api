@@ -4,6 +4,16 @@ import { database } from '#/database'
 import type { Address, DB } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
+export type FollowerResponse = {
+  address: `0x${string}`
+  tags: string[]
+  is_following: boolean
+  is_blocked: boolean
+  is_muted: boolean
+}
+
+export type FollowingResponse = TaggedListRecord
+
 export interface IEFPIndexerService {
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
   getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: Address; blocks_count: number }[]>
@@ -26,17 +36,9 @@ export interface IEFPIndexerService {
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
   getUserFollowersCount(address: Address): Promise<number>
-  getUserFollowers(address: Address): Promise<
-    {
-      address: Address
-      tags: string[]
-      is_following: boolean
-      is_blocked: boolean
-      is_muted: boolean
-    }[]
-  >
+  getUserFollowers(address: Address): Promise<FollowerResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
-  getUserFollowing(address: Address): Promise<TaggedListRecord[]>
+  getUserFollowing(address: Address): Promise<FollowingResponse[]>
   getUserListRecords(address: Address): Promise<TaggedListRecord[]>
   getUserPrimaryList(address: Address): Promise<bigint | undefined>
 }
