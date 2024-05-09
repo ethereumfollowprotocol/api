@@ -34,7 +34,7 @@
         "useConsistentArrayType": "off"
       },
       "performance": { "noAccumulatingSpread": "off" },
-      "nursery": {},
+      "nursery": { "all": true },
       "complexity": {
         "noBannedTypes": "off",
         "noUselessFragments": "off",
