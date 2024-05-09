@@ -30,22 +30,21 @@
       "style": {
         "useBlockStatements": "off",
         "useSelfClosingElements": "off",
-        "noUnusedTemplateLiteral": "off"
-      },
-      "performance": { "noAccumulatingSpread": "off" },
-      "nursery": {
-        "all": true,
-        "noUnusedImports": "off",
-        "noEmptyBlockStatements": "off",
+        "noUnusedTemplateLiteral": "off",
         "useConsistentArrayType": "off"
       },
+      "performance": { "noAccumulatingSpread": "off" },
+      "nursery": {},
       "complexity": {
         "noBannedTypes": "off",
         "noUselessFragments": "off",
         "useLiteralKeys": "off"
       },
-      "correctness": {},
+      "correctness": {
+        "noUnusedImports": "off"
+      },
       "suspicious": {
+        "noEmptyBlockStatements": "off",
         "noEmptyInterface": "off",
         "noExplicitAny": "off"
       }

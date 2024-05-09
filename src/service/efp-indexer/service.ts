@@ -72,8 +72,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     }[]
   > {
     type Row = {
-	  efp_list_nft_token_id: bigint
-      address: Address
+      efp_list_nft_token_id: bigint
+      follower: Address
       tags: string[] | null
       is_following: boolean
       is_blocked: boolean
@@ -87,7 +87,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     return result.rows.map(row => ({
-	  efp_list_nft_token_id: row.efp_list_nft_token_id,
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
       address: row.follower,
       tags: row.tags?.sort() || [],
       is_following: row.is_following,
