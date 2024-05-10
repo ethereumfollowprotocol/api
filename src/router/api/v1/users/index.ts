@@ -42,19 +42,19 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   )
 
   // Blocked by user
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   users.get('/:addressOrENS/blocks', async context => {
     return context.text('Not implemented', 501)
   })
 
   // Muted by user
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   users.get('/:addressOrENS/mutes', async context => {
     return context.text('Not implemented', 501)
   })
 
   // Mutuals with users
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   users.get('/:addressOrENS/mutuals', async context => {
     return context.text('Not implemented', 501)
   })

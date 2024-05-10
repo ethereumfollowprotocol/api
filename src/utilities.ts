@@ -14,6 +14,8 @@ export function ensureArray<T>(value: T | T[]): T[] {
 }
 
 export function arrayToChunks<T>(array: T[], chunkSize: number): Array<Array<T>> {
+  // Muted by user
+  // biome-ignore lint/nursery/noEvolvingAny: <explanation>
   const chunks = []
   for (let index = 0; index < array.length; index += chunkSize) {
     chunks.push(array.slice(index, index + chunkSize))

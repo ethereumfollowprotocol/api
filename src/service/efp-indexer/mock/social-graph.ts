@@ -29,15 +29,15 @@ class LinkedList {
   // O(1) time
   add(record: ListRecord) {
     const newNode = new LinkedListNode(record)
-    if (!this.head) {
-      this.head = newNode
-      this.tail = newNode
-    } else {
+    if (this.head) {
       if (this.tail) {
         this.tail.next = newNode
         newNode.prev = this.tail
         this.tail = newNode
       }
+    } else {
+      this.head = newNode
+      this.tail = newNode
     }
     return newNode // Return the node for external reference
   }

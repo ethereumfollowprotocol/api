@@ -30,24 +30,31 @@
       "style": {
         "useBlockStatements": "off",
         "useSelfClosingElements": "off",
-        "noUnusedTemplateLiteral": "off"
+        "noUnusedTemplateLiteral": "off",
+        "useConsistentArrayType": "off",
+        "noDefaultExport": "off",
+        "useNamingConvention": "off",
+        "noNamespaceImport": "off"
       },
       "performance": { "noAccumulatingSpread": "off" },
       "nursery": {
         "all": true,
-        "noUnusedImports": "off",
-        "noEmptyBlockStatements": "off",
-        "useConsistentArrayType": "off"
+        "noConsole": "off",
+        "noUndeclaredDependencies": "off"
       },
       "complexity": {
         "noBannedTypes": "off",
         "noUselessFragments": "off",
         "useLiteralKeys": "off"
       },
-      "correctness": {},
+      "correctness": {
+        "noUnusedImports": "off"
+      },
       "suspicious": {
+        "noEmptyBlockStatements": "off",
         "noEmptyInterface": "off",
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noConsoleLog": "off"
       }
     }
   },
