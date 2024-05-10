@@ -10,8 +10,8 @@ demoRouter.get('/following/:addressOrENS', async context => {
   const id = context.req.param('addressOrENS')
   if (id !== DEMO_NAME && id !== DEMO_ADDRESS) return context.json({ data: [] }, 200)
 
-  const demoKV = context.env.EFP_DEMO_KV
-  const data = await demoKV.get('following', 'json')
+  const demoKv = context.env.EFP_DEMO_KV
+  const data = await demoKv.get('following', 'json')
   return context.json({ data }, 200)
 })
 
@@ -19,8 +19,8 @@ demoRouter.get('/followers/:addressOrENS', async context => {
   const id = context.req.param('addressOrENS')
   if (id !== DEMO_NAME && id !== DEMO_ADDRESS) return context.json({ data: [] }, 200)
 
-  const demoKV = context.env.EFP_DEMO_KV
-  const data = await demoKV.get('followers', 'json')
+  const demoKv = context.env.EFP_DEMO_KV
+  const data = await demoKv.get('followers', 'json')
   return context.json({ data }, 200)
 })
 
@@ -30,7 +30,7 @@ demoRouter.get('/stats/:addressOrENS', async context => {
     return context.json({ data: { followersCount: 0, followingCount: 0 } }, 200)
   }
 
-  const demoKV = context.env.EFP_DEMO_KV
-  const data = await demoKV.get('stats', 'json')
+  const demoKv = context.env.EFP_DEMO_KV
+  const data = await demoKv.get('stats', 'json')
   return context.json({ data }, 200)
 })

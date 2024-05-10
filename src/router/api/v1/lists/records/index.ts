@@ -16,13 +16,13 @@ export function records(users: Hono<{ Bindings: Environment }>, services: Servic
       return value
     }),
     async context => {
-      const token_id = BigInt(context.req.param().token_id)
+      const tokenId = BigInt(context.req.param().token_id)
       const includeTags = context.req.query('includeTags')
 
       const records: ListRecord[] =
         includeTags === 'false'
-          ? await services.efp(env(context)).getListRecords(token_id)
-          : await services.efp(env(context)).getListRecordsWithTags(token_id)
+          ? await services.efp(env(context)).getListRecords(tokenId)
+          : await services.efp(env(context)).getListRecordsWithTags(tokenId)
 
       const formattedRecords = records.map((record: ListRecord) => ({
         version: record.version,

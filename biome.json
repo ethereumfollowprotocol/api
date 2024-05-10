@@ -31,10 +31,17 @@
         "useBlockStatements": "off",
         "useSelfClosingElements": "off",
         "noUnusedTemplateLiteral": "off",
-        "useConsistentArrayType": "off"
+        "useConsistentArrayType": "off",
+        "noDefaultExport": "off",
+        "useNamingConvention": "off",
+        "noNamespaceImport": "off"
       },
       "performance": { "noAccumulatingSpread": "off" },
-      "nursery": { "all": true },
+      "nursery": {
+        "all": true,
+        "noConsole": "off",
+        "noUndeclaredDependencies": "off"
+      },
       "complexity": {
         "noBannedTypes": "off",
         "noUselessFragments": "off",
@@ -46,7 +53,8 @@
       "suspicious": {
         "noEmptyBlockStatements": "off",
         "noEmptyInterface": "off",
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noConsoleLog": "off"
       }
     }
   },

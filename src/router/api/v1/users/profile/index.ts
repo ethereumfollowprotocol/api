@@ -56,14 +56,14 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
 
       if (include.includes('ens')) {
         // collect address for followers and following so we can batch fetch ENS profiles
-        const addressesToFetchENS: Address[] = [
+        const addressesToFetchEns: Address[] = [
           ...(followers?.map(follower => follower.address) ?? []),
           ...(following?.filter(follow => follow.recordType === 1).map(follow => hexlify(follow.data)) ?? [])
         ]
 
-        const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addressesToFetchENS)
+        const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addressesToFetchEns)
         const ensProfilesByAddress: Map<Address, ENSProfileResponse> = new Map(
-          addressesToFetchENS.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
+          addressesToFetchEns.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
         )
 
         // attach ENS profiles to followers

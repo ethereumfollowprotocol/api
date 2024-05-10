@@ -22,6 +22,6 @@ interface Env extends EnvironmentVariables {
 }
 
 // Node.js
-declare namespace NodeJS {
+declare namespace nodeJs {
   interface ProcessEnv extends EnvironmentVariables {}
 }

@@ -29,13 +29,13 @@ export function relationships(users: Hono<{ Bindings: Environment }>, services: 
       return value
     }),
     async context => {
-      const addressOrENS = context.req.param().addressOrENS
+      const addressOrEns = context.req.param().addressOrENS
       let { tag, direction } = context.req.query()
 
       if (direction === 'in') direction = 'incoming'
       if (direction === 'out') direction = 'outgoing'
 
-      const address: Address = await services.ens().getAddress(addressOrENS)
+      const address: Address = await services.ens().getAddress(addressOrEns)
 
       const efp: IEFPIndexerService = services.efp(env(context))
       let relationships: any[] = []

@@ -29,15 +29,15 @@ class LinkedList {
   // O(1) time
   add(record: ListRecord) {
     const newNode = new LinkedListNode(record)
-    if (!this.head) {
-      this.head = newNode
-      this.tail = newNode
-    } else {
+    if (this.head) {
       if (this.tail) {
         this.tail.next = newNode
         newNode.prev = this.tail
         this.tail = newNode
       }
+    } else {
+      this.head = newNode
+      this.tail = newNode
     }
     return newNode // Return the node for external reference
   }
@@ -474,7 +474,7 @@ export class SocialGraph {
   }
 }
 
-type ListNFTRow = {
+type ListNftRow = {
   tokenId: TokenId
   listUser: string
 }
@@ -485,7 +485,7 @@ type ListOpRow = {
 }
 
 // Generic function to parse a CSV file
-function parseCSV<T>(fileContent: string, mapFn: (line: string) => T): T[] {
+function parseCsv<T>(fileContent: string, mapFn: (line: string) => T): T[] {
   const lines = fileContent.split('\n')
   return lines
     .slice(1)
@@ -493,14 +493,14 @@ function parseCSV<T>(fileContent: string, mapFn: (line: string) => T): T[] {
     .map(mapFn)
 }
 
-function makeListNFTRow(line: string): ListNFTRow {
-  const [token_idStr, list_user] = line.split(',')
-  if (typeof token_idStr !== 'string' || typeof list_user !== 'string') {
+function makeListNftRow(line: string): ListNftRow {
+  const [tokenIdStr, listUser] = line.split(',')
+  if (typeof tokenIdStr !== 'string' || typeof listUser !== 'string') {
     throw new Error('Invalid format in TokenUser CSV')
   }
   return {
-    tokenId: BigInt(Number.parseInt(token_idStr, 10)),
-    listUser: list_user
+    tokenId: BigInt(Number.parseInt(tokenIdStr, 10)),
+    listUser: listUser
   }
 }
 
@@ -515,7 +515,7 @@ function makeListOpRow(line: string): ListOpRow {
 export function makeSocialGraph(): SocialGraph {
   // console.log('Building social graph...')
   const socialGraph: SocialGraph = new SocialGraph()
-  const nfts: ListNFTRow[] = parseCSV<ListNFTRow>(DEMO_LIST_NFTS_CSV, makeListNFTRow)
+  const nfts: ListNftRow[] = parseCsv<ListNftRow>(DEMO_LIST_NFTS_CSV, makeListNftRow)
   for (const nft of nfts) {
     const { tokenId, listUser } = nft
     if (typeof tokenId !== 'bigint') {
@@ -528,14 +528,14 @@ export function makeSocialGraph(): SocialGraph {
     socialGraph.setPrimaryList(listUser as `0x${string}`, tokenId)
   }
 
-  const listOps: ListOpRow[] = parseCSV<ListOpRow>(DEMO_LIST_OPS_CSV, makeListOpRow)
+  const listOps: ListOpRow[] = parseCsv<ListOpRow>(DEMO_LIST_OPS_CSV, makeListOpRow)
 
   for (const listOp of listOps) {
     const { slot, list_op } = listOp
     if (slot >= nfts.length) {
       throw new Error('Invalid slot')
     }
-    const nft: ListNFTRow = nfts[slot] as ListNFTRow
+    const nft: ListNftRow = nfts[slot] as ListNftRow
     const { tokenId, listUser } = nft
 
     const listOpBytes: Buffer = Buffer.from(list_op.substring(2), 'hex')
