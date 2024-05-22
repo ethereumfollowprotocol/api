@@ -101,7 +101,6 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       if (include.includes('stats')) {
         response = { ...response, stats }
       }
-      console.log('RESPONSE', response)
       return context.json(response, 200)
     }
   )
