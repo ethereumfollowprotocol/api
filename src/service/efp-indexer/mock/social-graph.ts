@@ -57,10 +57,6 @@ class LinkedList {
   }
 }
 
-function stringify(listRecord: ListRecord): string {
-  return `${listRecord.version}/${listRecord.recordType}/${listRecord.data.toString()}`
-}
-
 // Social Graph supports:
 // O(1) add/remove records via doubly-linked list to maintain order
 // O(1) add/remove tags via set
@@ -224,7 +220,7 @@ export class SocialGraph {
   getBlockedBy(address: `0x${string}`): `0x${string}`[] {
     const blockedBy: `0x${string}`[] = []
     // check every primary list to see if it contains the address
-    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+    for (const [_listUser, tokenId] of this.#primaryLists.entries()) {
       if (tokenId === undefined) continue
       const listRecordTags: TaggedListRecord[] = this.getListRecordTags(tokenId)
       for (const listRecordTag of listRecordTags) {
@@ -333,7 +329,7 @@ export class SocialGraph {
   getMutedBy(address: `0x${string}`): `0x${string}`[] {
     const mutedBy: `0x${string}`[] = []
     // check every primary list to see if it contains the address
-    for (const [listUser, tokenId] of this.#primaryLists.entries()) {
+    for (const [_listUser, tokenId] of this.#primaryLists.entries()) {
       if (tokenId === undefined) continue
       const listRecordTags: TaggedListRecord[] = this.getListRecordTags(tokenId)
       for (const listRecordTag of listRecordTags) {
@@ -512,6 +508,7 @@ function makeListOpRow(line: string): ListOpRow {
   return { slot: Number.parseInt(slotStr, 10), list_op }
 }
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
 export function makeSocialGraph(): SocialGraph {
   // console.log('Building social graph...')
   const socialGraph: SocialGraph = new SocialGraph()
@@ -536,7 +533,7 @@ export function makeSocialGraph(): SocialGraph {
       throw new Error('Invalid slot')
     }
     const nft: ListNFTRow = nfts[slot] as ListNFTRow
-    const { tokenId, listUser } = nft
+    const { tokenId } = nft
 
     const listOpBytes: Buffer = Buffer.from(list_op.substring(2), 'hex')
     const listOpVersion: number = Number(listOpBytes[0])

@@ -18,7 +18,6 @@ export function blocks(
    * Same as /followers, but for following.
    */
   leaderboard.get('/blocks/:addressOrENS?', limitValidator, includeValidator, async context => {
-    const { addressOrENS } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit as string, 10)
     let mostBlocks: { address: string; blocks_count: number }[] = await services

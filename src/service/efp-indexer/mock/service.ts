@@ -83,7 +83,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>
-  async getListStorageLocation(tokenId: bigint): Promise<Address | undefined> {
+  async getListStorageLocation(_tokenId: bigint): Promise<Address | undefined> {
     throw new Error('MockEFPIndexerService::getListStorageLocation not implemented.')
   }
 
@@ -109,8 +109,8 @@ export class MockEFPIndexerService implements IEFPIndexerService {
 
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getIncomingRelationships(
-    address: `0x${string}`,
-    tag: string
+    _address: `0x${string}`,
+    _tag: string
   ): Promise<{ token_id: bigint; list_user: `0x${string}`; tags: string[] }[]> {
     throw new Error('Method not implemented.')
   }

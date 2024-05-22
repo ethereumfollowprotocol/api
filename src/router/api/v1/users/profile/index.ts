@@ -31,6 +31,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         { status: 400 }
       )
     }),
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
     async context => {
       const { addressOrENS } = context.req.param()
 
@@ -68,20 +69,23 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
 
         // attach ENS profiles to followers
         followersResponse = followersResponse?.map(
-          (follower, index) =>
+          follower =>
             ({
               ...follower,
               ens: ensProfilesByAddress.get(follower.address) as ENSProfileResponse
             }) as ENSFollowerResponse
         )
-        followingReponse?.forEach((record, index) => {
-          if (record.record_type === 'address') {
-            record.ens = ensProfilesByAddress.get(record.data) as ENSProfileResponse
+        if (followingReponse) {
+          for (const record of followingReponse) {
+            if (record.record_type === 'address') {
+              record.ens = ensProfilesByAddress.get(record.data) as ENSProfileResponse
+            }
           }
-        })
+        }
       }
 
       let response = { address } as Record<string, unknown>
+
       if (include.includes('ens')) {
         response = { ...response, ens }
       }
@@ -97,7 +101,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       if (include.includes('stats')) {
         response = { ...response, stats }
       }
-
+      console.log('RESPONSE', response)
       return context.json(response, 200)
     }
   )

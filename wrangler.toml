@@ -20,7 +20,7 @@ services = [{ binding = "ens", service = "ens" }]
 [env.development]
 name = "development"
 workers_dev = true
-vars = { ENVIRONMENT = "development" }
+vars = { ENVIRONMENT = "development", IS_DEMO = "false"  }
 routes = [
   { pattern = "development.api.ethfollow.xyz", custom_domain = true, zone_id = "0bb17a76c05f664a7c6cfd16721216cf" },
 ]
@@ -29,7 +29,7 @@ services = [{ binding = "ens", service = "ens" }]
 [env.production]
 name = "production"
 workers_dev = true
-vars = { ENVIRONMENT = "production", IS_DEMO = "true" }
+vars = { ENVIRONMENT = "production", IS_DEMO = "false" }
 routes = [
   { pattern = "api.ethfollow.xyz", custom_domain = true, zone_id = "0bb17a76c05f664a7c6cfd16721216cf" },
   { pattern = "production.api.ethfollow.xyz", custom_domain = true, zone_id = "0bb17a76c05f664a7c6cfd16721216cf" },

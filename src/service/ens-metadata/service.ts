@@ -14,8 +14,8 @@ export interface IENSMetadataService {
 }
 
 export class ENSMetadataService implements IENSMetadataService {
-  constructor(private readonly url: string = 'https://ens.evm.workers.dev') {}
-
+  //   constructor() {}
+  url = 'https://ens.efp.workers.dev'
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
     if (isAddress(ensNameOrAddress)) {

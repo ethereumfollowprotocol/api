@@ -50,6 +50,7 @@ function bufferize(data: Uint8Array | string): Buffer {
 export class EFPIndexerService implements IEFPIndexerService {
   readonly #db: Kysely<DB>
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#db = database(env)
   }

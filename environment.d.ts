@@ -16,12 +16,14 @@ interface Env extends EnvironmentVariables {
   // ens is a binded service in wrangler.toml
   readonly ens: Record<string, unknown>
   // EFP_DEMO_KV is a binded production service in wrangler.toml
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   readonly EFP_DEMO_KV: KVNamespace
   // generated in ci during deployment
   readonly COMMIT_SHA: string
 }
 
 // Node.js
+// biome-ignore lint/style/noNamespace: <explanation>
 declare namespace NodeJS {
   interface ProcessEnv extends EnvironmentVariables {}
 }
