@@ -12,7 +12,7 @@ export function relationships(users: Hono<{ Bindings: Environment }>, services: 
       const { tag, direction } = <Record<'tag' | 'direction', string | undefined>>value
 
       // Check if both tag and direction are present
-      if (!tag || !direction) {
+      if (!(tag && direction)) {
         throw new Error('Both "tag" and "direction" query parameters are required')
       }
 

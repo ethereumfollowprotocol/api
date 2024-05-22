@@ -22,7 +22,6 @@ export function followers(
    * If addressOrENS path param is provided AND include=mutuals query param is provided, returns mutuals between addressOrENS and each user.
    */
   leaderboard.get('/followers/:addressOrENS?', limitValidator, includeValidator, async context => {
-    const { addressOrENS } = context.req.param()
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     let mostFollowers: { address: string; followers_count: number }[] = await services

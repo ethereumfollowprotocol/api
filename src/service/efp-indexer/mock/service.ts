@@ -20,12 +20,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserFollowersCount(address: Address): Promise<number> {
     return this.#socialGraph.getFollowersCount(address)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserFollowers(address: Address): Promise<
     {
       address: Address
@@ -44,12 +44,12 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.getListRecordsWithTags(primaryList)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserFollowingCount(address: Address): Promise<number> {
     return this.#socialGraph.getFollowingCount(address)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserFollowing(address: Address): Promise<TaggedListRecord[]> {
     return this.#socialGraph.getFollowing(address)
   }
@@ -82,35 +82,35 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return (await this.#socialGraph.getLeaderboardFollowing(limit)).map((item, index) => ({ rank: index + 1, ...item }))
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
-  async getListStorageLocation(tokenId: bigint): Promise<Address | undefined> {
+  // biome-ignore lint/suspicious/useAwait: <explanation>
+  async getListStorageLocation(_tokenId: bigint): Promise<Address | undefined> {
     throw new Error('MockEFPIndexerService::getListStorageLocation not implemented.')
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListRecordCount(tokenId: bigint): Promise<number> {
     return this.#socialGraph.getListRecords(tokenId).length
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListRecords(tokenId: bigint): Promise<ListRecord[]> {
     return this.#socialGraph.getListRecords(tokenId)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
     return this.#socialGraph.getListRecordTags(tokenId)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserPrimaryList(address: Address): Promise<bigint | undefined> {
     return this.#socialGraph.getPrimaryList(address)
   }
 
-  // biome-ignore lint/nursery/useAwait: <explanation>
+  // biome-ignore lint/suspicious/useAwait: <explanation>
   async getIncomingRelationships(
-    address: `0x${string}`,
-    tag: string
+    _address: `0x${string}`,
+    _tag: string
   ): Promise<{ token_id: bigint; list_user: `0x${string}`; tags: string[] }[]> {
     throw new Error('Method not implemented.')
   }

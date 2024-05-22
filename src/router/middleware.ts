@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from 'hono'
 
 import { apiLogger } from '#/logger'
 
-export const errorLogger: MiddlewareHandler = async (c, next) => {
+export const errorLogger: MiddlewareHandler = async (_c, next) => {
   try {
     await next()
   } catch (error) {
@@ -14,7 +14,7 @@ export const errorLogger: MiddlewareHandler = async (c, next) => {
 export const errorHandler: MiddlewareHandler = async (c, next) => {
   try {
     await next()
-  } catch (error) {
+  } catch (_error) {
     return c.text('Internal server error', 500)
   }
 }

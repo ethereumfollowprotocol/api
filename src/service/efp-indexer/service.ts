@@ -50,6 +50,7 @@ function bufferize(data: Uint8Array | string): Buffer {
 export class EFPIndexerService implements IEFPIndexerService {
   readonly #db: Kysely<DB>
 
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#db = database(env)
   }
@@ -72,8 +73,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     }[]
   > {
     type Row = {
-      efp_list_token_id: bigint
-      address: Address
+      efp_list_nft_token_id: bigint
+      follower: Address
       tags: string[] | null
       is_following: boolean
       is_blocked: boolean
@@ -87,7 +88,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     return result.rows.map(row => ({
-      address: row.address,
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      address: row.follower,
       tags: row.tags?.sort() || [],
       is_following: row.is_following,
       is_blocked: row.is_blocked,
@@ -123,7 +125,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
-      tags: row.tags.sort()
+      tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
 
@@ -151,7 +153,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.address),
-      tags: row.tags.sort()
+      tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
 
@@ -361,7 +363,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.record_data),
-      tags: row.tags.sort()
+      tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
 
@@ -394,7 +396,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result.rows.map((row: Row) => ({
       token_id: row.token_id,
       list_user: row.list_user,
-      tags: row.tags.sort()
+      tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
 
@@ -419,7 +421,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.version,
       recordType: row.record_type,
       data: bufferize(row.data),
-      tags: row.tags.sort()
+      tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
 

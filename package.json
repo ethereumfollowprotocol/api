@@ -27,7 +27,7 @@
     "postgres": "^3.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.5.3",
+    "@biomejs/biome": "^1.7.3",
     "@cloudflare/workers-types": "^4.20240117.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.0.4",
@@ -41,9 +41,6 @@
   },
   "repository": "github:ethereumfollowprotocol/api",
   "homepage": "github:ethereumfollowprotocol/api/README.md",
-  "contributors": [
-    "Omar Aziz <omar@ethfollow.xyz> esm.eth",
-    "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"
-  ],
+  "contributors": ["Omar Aziz <omar@ethfollow.xyz> esm.eth", "Cory Gabrielsen <cory@ethfollow.xyz> cory.eth"],
   "sideEffects": false
 }
