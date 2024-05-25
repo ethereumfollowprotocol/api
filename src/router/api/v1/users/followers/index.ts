@@ -12,7 +12,7 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
   users.get('/:addressOrENS/followers', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
     const { include } = context.req.valid('query')
-    const ensService = services.ens()
+    const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     const followers: FollowerResponse[] = await services.efp(env(context)).getUserFollowers(address)
 

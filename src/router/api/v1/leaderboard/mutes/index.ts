@@ -24,7 +24,7 @@ export function mutes(
       .efp(env(context))
       .getLeaderboardMutes(parsedLimit)
     if (include?.includes('ens')) {
-      const ens = services.ens()
+      const ens = services.ens(env(context))
       const ensProfiles = await Promise.all(mostMutes.map(user => ens.getENSProfile(user.address)))
       mostMutes = mostMutes.map((user, index) => ({
         ...user,

@@ -24,7 +24,7 @@ export function blocked(
       .efp(env(context))
       .getLeaderboardBlocked(parsedLimit)
     if (include?.includes('ens')) {
-      const ens = services.ens()
+      const ens = services.ens(env(context))
       const ensProfiles = await Promise.all(mostBlocked.map(user => ens.getENSProfile(user.address)))
       mostBlocked = mostBlocked.map((user, index) => ({
         ...user,

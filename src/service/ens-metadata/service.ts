@@ -1,7 +1,11 @@
 import { apiLogger } from '#/logger'
-import type { Address } from '#/types'
 import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
+
+import { type Kysely, type QueryResult, sql } from 'kysely'
+
+import { database } from '#/database'
+import type { Address, DB } from '#/types'
 
 export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }
 
@@ -13,8 +17,20 @@ export interface IENSMetadataService {
   batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
 }
 
+type Row = {
+  name: string
+  address: `0x${string}`
+  avatar: string
+}
+
 export class ENSMetadataService implements IENSMetadataService {
-  //   constructor() {}
+  readonly #db: Kysely<DB>
+
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+  constructor(env: Env) {
+    this.#db = database(env)
+  }
+
   url = 'https://ens.efp.workers.dev'
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
@@ -23,6 +39,17 @@ export class ENSMetadataService implements IENSMetadataService {
     }
 
     return (await this.getENSProfile(ensNameOrAddress)).address.toLowerCase() as Address
+  }
+
+  async checkCache(ensNameOrAddress: Address | string): Promise<ENSProfile | boolean> {
+    const address = await this.getAddress(ensNameOrAddress)
+    const query = sql<Row>`SELECT * FROM query.get_ens_metadata(${address})`
+    const result = await query.execute(this.#db)
+    if (result.rows.length === 0) {
+      return false
+    }
+
+    return result.rows[0] as ENSProfile
   }
 
   /**
@@ -35,15 +62,27 @@ export class ENSMetadataService implements IENSMetadataService {
       raise('ENS name or address is required')
     }
 
-    const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+    const cachedProfile = await this.checkCache(ensNameOrAddress)
+    if (!cachedProfile) {
+      //silently cache fetched profile without waiting ->
 
-    if (!response.ok) {
-      raise(`invalid ENS name: ${ensNameOrAddress}`)
+      const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+
+      if (!response.ok) {
+        raise(`invalid ENS name: ${ensNameOrAddress}`)
+      }
+
+      const ensProfileData = (await response.json()) as ENSProfile
+      const nameData = ENSMetadataService.#toTableRow(ensProfileData)
+      const result = await this.#db.insertInto('ens_metadata').values(nameData).executeTakeFirst()
+      if (result.numInsertedOrUpdatedRows === BigInt(0)) {
+        raise(`Failed to cache ens metadata`)
+      }
+
+      return ensProfileData as ENSProfile
     }
-
-    const ensProfileData = await response.json()
-
-    return ensProfileData as ENSProfile
+    
+    return cachedProfile as ENSProfile
   }
 
   /**
@@ -74,7 +113,7 @@ export class ENSMetadataService implements IENSMetadataService {
       response_length: number
       response: ENSProfileResponse
     }[]
-
+    console.log('batchGetENSProfiles request', data)
     // Returns the combined results from all batches.
     return data.flatMap(datum => datum.response)
   }
@@ -109,5 +148,17 @@ export class ENSMetadataService implements IENSMetadataService {
       }
       return { ...accumulator, [id]: response.url }
     }, {})
+  }
+
+  static #toTableRow(namedata: ENSProfile): {
+    name: string
+    address: string
+    avatar: string
+  } {
+    return {
+      name: namedata.name,
+      address: namedata.address.toLowerCase(),
+      avatar: namedata.avatar
+    }
   }
 }

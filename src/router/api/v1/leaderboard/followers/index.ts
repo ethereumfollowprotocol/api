@@ -28,7 +28,7 @@ export function followers(
       .efp(env(context))
       .getLeaderboardFollowers(parsedLimit)
     if (include?.includes('ens')) {
-      const ens = services.ens()
+      const ens = services.ens(env(context))
       const ensProfiles = await Promise.all(mostFollowers.map(user => ens.getENSProfile(user.address)))
       mostFollowers = mostFollowers.map((user, index) => ({
         ...user,
