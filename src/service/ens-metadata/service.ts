@@ -81,7 +81,6 @@ export class ENSMetadataService implements IENSMetadataService {
 
       return ensProfileData as ENSProfile
     }
-    
     return cachedProfile as ENSProfile
   }
 
