@@ -9,7 +9,7 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
   users.get('/:addressOrENS/stats', async context => {
     const { addressOrENS } = context.req.param()
 
-    const ens: IENSMetadataService = services.ens()
+    const ens: IENSMetadataService = services.ens(env(context))
     const efp: IEFPIndexerService = services.efp(env(context))
     const address: Address = await ens.getAddress(addressOrENS)
     const followersCount: number = await efp.getUserFollowersCount(address)

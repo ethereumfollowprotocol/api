@@ -17,7 +17,7 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
   users.get('/:addressOrENS/following', async context => {
     const { addressOrENS } = context.req.param()
 
-    const ensService = services.ens()
+    const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
 
     const efp: IEFPIndexerService = services.efp(env(context))

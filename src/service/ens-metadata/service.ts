@@ -1,7 +1,15 @@
 import { apiLogger } from '#/logger'
-import type { Address } from '#/types'
 import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
 import type { ENSProfile } from './types'
+
+import { type Kysely, type QueryResult, sql } from 'kysely'
+
+import { database } from '#/database'
+
+import type { Address, DB } from '#/types'
+import type { Environment } from '#/types/index'
+import { S3Cache } from './s3-cache'
+// import { truncate } from 'fs'
 
 export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }
 
@@ -13,8 +21,22 @@ export interface IENSMetadataService {
   batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
 }
 
+type Row = {
+  name: string
+  address: `0x${string}`
+  avatar: string
+}
+
 export class ENSMetadataService implements IENSMetadataService {
-  //   constructor() {}
+  readonly #db: Kysely<DB>
+  readonly #env: Environment
+
+  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
+  constructor(env: Env) {
+    this.#db = database(env)
+    this.#env = env
+  }
+
   url = 'https://ens.efp.workers.dev'
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
@@ -23,6 +45,33 @@ export class ENSMetadataService implements IENSMetadataService {
     }
 
     return (await this.getENSProfile(ensNameOrAddress)).address.toLowerCase() as Address
+  }
+
+  async checkCache(ensNameOrAddress: Address | string): Promise<ENSProfile | boolean> {
+    const address = await this.getAddress(ensNameOrAddress)
+    const query = sql<Row>`SELECT * FROM query.get_ens_metadata(${address})`
+    const result = await query.execute(this.#db)
+    if (result.rows.length === 0) {
+      return false
+    }
+
+    return result.rows[0] as ENSProfile
+  }
+
+  async cacheRecord(profile: ENSProfile): Promise<boolean> {
+    //if profile.records.avatar then set profile.avatar to value
+    const cacheService = new S3Cache(this.#env)
+    let newAvatar = '' as string
+    if (profile.avatar) {
+      newAvatar = await cacheService.cacheImage(profile.avatar, profile.address)
+      if (newAvatar !== '') profile.avatar = newAvatar
+    }
+    const nameData = ENSMetadataService.#toTableRow(profile)
+    const result = await this.#db.insertInto('ens_metadata').values(nameData).executeTakeFirst()
+    if (result.numInsertedOrUpdatedRows === BigInt(0)) {
+      return false
+    }
+    return true
   }
 
   /**
@@ -35,15 +84,19 @@ export class ENSMetadataService implements IENSMetadataService {
       raise('ENS name or address is required')
     }
 
-    const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+    const cachedProfile = await this.checkCache(ensNameOrAddress)
+    if (!cachedProfile) {
+      //silently cache fetched profile without waiting ->
+      const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+      if (!response.ok) {
+        raise(`invalid ENS name: ${ensNameOrAddress}`)
+      }
+      const ensProfileData = (await response.json()) as ENSProfile
+      await this.cacheRecord(ensProfileData)
 
-    if (!response.ok) {
-      raise(`invalid ENS name: ${ensNameOrAddress}`)
+      return ensProfileData as ENSProfile
     }
-
-    const ensProfileData = await response.json()
-
-    return ensProfileData as ENSProfile
+    return cachedProfile as ENSProfile
   }
 
   /**
@@ -55,14 +108,39 @@ export class ENSMetadataService implements IENSMetadataService {
       // apiLogger.warn('more than 10 ids provided, this will be broken into batches of 10')
     }
 
+    const addressArrayWithCache = await ensNameOrAddressArray.reduce(async (accumulator, address) => {
+      const cacheRecord = await this.checkCache(address)
+      if (!cacheRecord) {
+        return { ...(await accumulator), [address]: null }
+      }
+      return { ...(await accumulator), [address]: cacheRecord }
+    }, {})
+
+    const cacheArray = Object.values(addressArrayWithCache) as ENSProfileResponse[]
+    const filteredCache = cacheArray.filter(address => address !== null)
+    console.log('lengths', ensNameOrAddressArray.length, filteredCache.length)
+
+    if (ensNameOrAddressArray.length === filteredCache.length) return cacheArray
+
     // Splits the input array into chunks of 10 for batch processing.
     // Each batch is then formatted into a string query parameter.
     const formattedBatches = arrayToChunks(ensNameOrAddressArray, 10).map(batch =>
-      batch.map(id => `queries[]=${id}`).join('&')
+      batch
+        .map(id => {
+          if (!Object.values(addressArrayWithCache).includes(id)) {
+            return `queries[]=${id}`
+          }
+          return ''
+        })
+        .join('&')
     )
 
     // Performs parallel fetch requests for each batch and waits for all to complete.
-    const response = await Promise.all(formattedBatches.map(batch => fetch(`${this.url}/bulk/u?${batch}`)))
+    const response = await Promise.all(
+      formattedBatches.map(batch => {
+        return fetch(`${this.url}/bulk/u?${batch}`)
+      })
+    )
 
     // Checks if any response is not OK (indicating a fetch failure), and if so, raises an exception.
     if (response.some(response => !response.ok)) {
@@ -76,7 +154,12 @@ export class ENSMetadataService implements IENSMetadataService {
     }[]
 
     // Returns the combined results from all batches.
-    return data.flatMap(datum => datum.response)
+    const fetchedRecords = data.flatMap(datum => datum.response)
+    for (const record of fetchedRecords) {
+      await this.cacheRecord(record)
+    }
+
+    return [...fetchedRecords, ...filteredCache]
   }
 
   async getENSAvatar(ensNameOrAddress: Address | string): Promise<string> {
@@ -109,5 +192,17 @@ export class ENSMetadataService implements IENSMetadataService {
       }
       return { ...accumulator, [id]: response.url }
     }, {})
+  }
+
+  static #toTableRow(namedata: ENSProfile): {
+    name: string
+    address: string
+    avatar: string | undefined
+  } {
+    return {
+      name: namedata.name,
+      address: namedata.address.toLowerCase(),
+      avatar: namedata?.avatar
+    }
   }
 }

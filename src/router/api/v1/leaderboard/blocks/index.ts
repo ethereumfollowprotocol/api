@@ -24,7 +24,7 @@ export function blocks(
       .efp(env(context))
       .getLeaderboardBlocks(parsedLimit)
     if (include?.includes('ens')) {
-      const ens = services.ens()
+      const ens = services.ens(env(context))
       const ensProfiles = await Promise.all(mostBlocks.map(user => ens.getENSProfile(user.address)))
       mostBlocks = mostBlocks.map((user, index) => ({
         ...user,

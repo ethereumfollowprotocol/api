@@ -36,7 +36,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const { addressOrENS } = context.req.param()
 
       const { include } = context.req.valid('query')
-      const ensService = services.ens()
+      const ensService = services.ens(env(context))
 
       const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS)
       const efp: IEFPIndexerService = services.efp(env(context))

@@ -277,6 +277,12 @@ export interface ViewJoinEfpListRecordsWithTags {
   tags: string[] | null
 }
 
+export interface EnsCacheData {
+  username: string | null
+  address: string | null
+  avatar: string | null
+}
+
 export interface DB {
   contracts: Contracts
   efp_account_metadata: EfpAccountMetadata
@@ -286,6 +292,7 @@ export interface DB {
   efp_list_record_tags: EfpListRecordTags
   efp_list_records: EfpListRecords
   efp_lists: EfpLists
+  ens_metadata: EnsCacheData
   events: Events
   schema_migrations: SchemaMigrations
   view__events__efp_account_metadata: ViewEventsEfpAccountMetadata

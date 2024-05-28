@@ -88,7 +88,7 @@ app.get('/routes', async context => {
 })
 
 const services: Services = {
-  ens: () => new ENSMetadataService(),
+  ens: (env: Environment) => new ENSMetadataService(env),
   efp: (env: Environment) => (env.IS_DEMO === 'true' ? new MockEFPIndexerService() : new EFPIndexerService(env))
 }
 app.route('/', api(services))

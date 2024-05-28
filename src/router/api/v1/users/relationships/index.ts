@@ -35,7 +35,7 @@ export function relationships(users: Hono<{ Bindings: Environment }>, services: 
       if (direction === 'in') direction = 'incoming'
       if (direction === 'out') direction = 'outgoing'
 
-      const address: Address = await services.ens().getAddress(addressOrENS)
+      const address: Address = await services.ens(env(context)).getAddress(addressOrENS)
 
       const efp: IEFPIndexerService = services.efp(env(context))
       let relationships: any[] = []

@@ -7,7 +7,7 @@ export function primaryList(users: Hono<{ Bindings: Environment }>, services: Se
   users.get('/:addressOrENS/primary-list', async context => {
     const { addressOrENS } = context.req.param()
 
-    const address = await services.ens().getAddress(addressOrENS)
+    const address = await services.ens(env(context)).getAddress(addressOrENS)
     const primaryList: bigint | undefined = await services.efp(env(context)).getUserPrimaryList(address)
     return context.json(
       {

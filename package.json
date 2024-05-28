@@ -20,6 +20,8 @@
     "update-dependencies": "bun ./scripts/update-dependencies.ts"
   },
   "dependencies": {
+    "@cf-wasm/photon": "^0.1.20",
+    "aws4fetch": "^1.0.18",
     "consola": "^3.2.3",
     "hono": "^3.12.7",
     "kysely": "^0.27.2",
