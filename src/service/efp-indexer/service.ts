@@ -12,6 +12,12 @@ export type FollowerResponse = {
   is_muted: boolean
 }
 
+export type ENSProfile = {
+  name: string
+  address: `0x${string}`
+  avatar: string
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -35,6 +41,7 @@ export interface IEFPIndexerService {
   ): Promise<{ token_id: bigint; list_user: Address; tags: string[] }[]>
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
+  getRecommended(address: Address): Promise<Address[]>
   getUserFollowersCount(address: Address): Promise<number>
   getUserFollowers(address: Address): Promise<FollowerResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
@@ -49,10 +56,12 @@ function bufferize(data: Uint8Array | string): Buffer {
 
 export class EFPIndexerService implements IEFPIndexerService {
   readonly #db: Kysely<DB>
+  readonly env: Env
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#db = database(env)
+    this.env = env;
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -423,6 +432,125 @@ export class EFPIndexerService implements IEFPIndexerService {
       data: bufferize(row.data),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Recommendations
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getRecommended(address: Address): Promise<Address[]> {
+
+    interface QueryResponse {
+      data: Data;
+    }
+    
+    interface Data {
+    //   Wallet: Wallet;
+      ethereum: Ethereum
+    }
+    
+    interface Ethereum {
+        TokenBalance: TokenBalance
+        TokenNft: TokenNFT
+    }
+
+    interface TokenNFT {
+        tokenBalances: Owner[]
+    }
+
+    interface Owner {
+
+    }
+
+    interface TokenBalance {
+        tokenAddress: Address
+    }
+
+    interface Error {
+      message: string;
+    }
+    
+    const AIRSTACK_API_URL = "https://api.airstack.xyz/graphql";
+    const AIRSTACK_API_KEY = this.env.AIRSTACK_API_KEY;
+    if (!AIRSTACK_API_KEY) throw new Error("AIRSTACK_API_KEY not set");
+
+    let query = `query GetNFTs {
+        ethereum: TokenBalances(
+          input: {
+            filter: {
+              owner: { _in: ["${address}"] }
+              tokenType: { _in: [ ERC721] }
+            }
+            blockchain: ethereum
+            limit: 200
+          }
+        ) {
+          TokenBalance {
+            tokenAddress
+          }
+        }
+      }`;
+
+    const res = await fetch(AIRSTACK_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: AIRSTACK_API_KEY,
+      },
+      body: JSON.stringify({ query }),
+    });
+       
+    const json = (await res?.json()) as QueryResponse;
+    const data = json?.data;
+
+    const formatted = data?.ethereum?.TokenBalance.map(({tokenAddress})=> tokenAddress)
+    const queryFormattedTokens = formatted.filter( (address, index) => formatted.indexOf(address) === index );
+
+    query = `query GetNFTHoldersAndImages($queryFormattedTokens: [Address!]!) {
+        ethereum: TokenNfts(
+          input: {
+            filter: {
+              address: {
+                _in: $queryFormattedTokens
+              }
+            }
+            blockchain: ethereum
+          }
+        ) {
+          TokenNft {
+            tokenBalances {
+              owner {
+                identity
+                socials(input: { filter: { dappName: { _eq: farcaster } } }) {
+                  profileName
+                  userId
+                }
+              }
+            }
+          }
+        }
+      }`;
+    const holderRes = await fetch(AIRSTACK_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: AIRSTACK_API_KEY,
+      },
+      body: JSON.stringify({ query, variables: {queryFormattedTokens: queryFormattedTokens}}),
+    });
+       
+    const holderJson = (await holderRes?.json()) as QueryResponse;
+    const holderData = holderJson?.data;
+
+    const holders = holderData.ethereum.TokenNft.map(
+        data => data.tokenBalances.map(
+            data => data.owner.identity
+        )
+    ).flat();
+    const dedupedHolders = holders.filter( (address, index) => holders.indexOf(address) === index );
+    const accountList = dedupedHolders.slice(0,10);
+
+    return accountList
   }
 
   /////////////////////////////////////////////////////////////////////////////
