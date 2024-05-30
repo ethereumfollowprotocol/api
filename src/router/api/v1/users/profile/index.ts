@@ -64,7 +64,12 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
 
         const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addressesToFetchENS)
         const ensProfilesByAddress: Map<Address, ENSProfileResponse> = new Map(
-          addressesToFetchENS.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
+          addressesToFetchENS.map((address, index) => {
+            if (!ensProfiles[index]?.name) {
+              return [address, { name: '', address: address, avatar: null } as unknown as ENSProfileResponse]
+            }
+            return [address, ensProfiles[index] as ENSProfileResponse]
+          })
         )
 
         // attach ENS profiles to followers

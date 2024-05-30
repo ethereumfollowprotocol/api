@@ -115,25 +115,24 @@ export class ENSMetadataService implements IENSMetadataService {
       // apiLogger.warn('more than 10 ids provided, this will be broken into batches of 10')
     }
 
-    const addressArrayWithCache = await ensNameOrAddressArray.reduce(async (accumulator, address) => {
+    const addressArrayWithCache: any = await ensNameOrAddressArray.reduce(async (accumulator, address) => {
       const cacheRecord = await this.checkCache(address)
       if (!cacheRecord) {
         return { ...(await accumulator), [address]: null }
       }
       return { ...(await accumulator), [address]: cacheRecord }
     }, {})
-
+    console.log('address array', addressArrayWithCache)
     const cacheArray = Object.values(addressArrayWithCache) as ENSProfileResponse[]
     const filteredCache = cacheArray.filter(address => address !== null)
 
     if (ensNameOrAddressArray.length === filteredCache.length) return cacheArray
-
     // Splits the input array into chunks of 10 for batch processing.
     // Each batch is then formatted into a string query parameter.
     const formattedBatches = arrayToChunks(ensNameOrAddressArray, 10).map(batch =>
       batch
         .map(id => {
-          if (!Object.values(addressArrayWithCache).includes(id)) {
+          if (addressArrayWithCache[id] === null) {
             return `queries[]=${id}`
           }
           return ''
@@ -148,11 +147,6 @@ export class ENSMetadataService implements IENSMetadataService {
       })
     )
 
-    // Checks if any response is not OK (indicating a fetch failure), and if so, raises an exception.
-    if (response.some(response => !response.ok)) {
-      raise(`contains invalid ENS name: ${JSON.stringify(ensNameOrAddressArray)}`)
-    }
-
     // Processes each response as JSON and flattens the result into a single array.
     const data = (await Promise.all(response.map(response => response.json()))) as {
       response_length: number
@@ -162,7 +156,9 @@ export class ENSMetadataService implements IENSMetadataService {
     // Returns the combined results from all batches.
     const fetchedRecords = data.flatMap(datum => datum.response)
     for (const record of fetchedRecords) {
-      await this.cacheRecord(record)
+      if (record.name) {
+        await this.cacheRecord(record)
+      }
     }
 
     return [...fetchedRecords, ...filteredCache]
