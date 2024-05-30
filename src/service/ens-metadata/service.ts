@@ -98,10 +98,10 @@ export class ENSMetadataService implements IENSMetadataService {
         return ensProfileData as ENSProfile
       }
       return {
-        name: "",
+        name: '',
         address: ensNameOrAddress,
         avatar: null
-      } as unknown as ENSProfile;
+      } as unknown as ENSProfile
     }
     return cachedProfile as ENSProfile
   }

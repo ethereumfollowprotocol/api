@@ -97,6 +97,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.#socialGraph.getListRecords(tokenId)
   }
 
+  async getRecommended(_address: Address): Promise<Address[]> {
+    return (await []) as Address[]
+  }
+
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
     return this.#socialGraph.getListRecordTags(tokenId)
