@@ -24,6 +24,7 @@ export interface IEFPIndexerService {
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
   getDebugTotalSupply(): Promise<number>
+  getDiscoverAccounts(): Promise<Address[]>
   // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
@@ -271,6 +272,16 @@ export class EFPIndexerService implements IEFPIndexerService {
   //   return (result?.list_storage_location as Address) || undefined
   // }
 
+  async getDiscoverAccounts(): Promise<Address[]> {
+    type Row = {
+      address: Address
+    }
+    const query = sql<Row>`SELECT * FROM public.view__latest_follows;`
+    const result = await query.execute(this.#db)
+    const addresses: Address[] = result.rows.map(record => record.address)
+    return addresses
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Debug
   /////////////////////////////////////////////////////////////////////////////
@@ -444,7 +455,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     interface Ethereum {
-      TokenBalance: string[]
+      TokenBalance: TokenBalance[]
       TokenNft: TokenNFT[]
     }
 
@@ -457,14 +468,14 @@ export class EFPIndexerService implements IEFPIndexerService {
       identity: string
     }
 
+    interface TokenBalance {
+      tokenAddress: string
+    }
+
     interface TokenBalances {
       owner: Owner
       tokenAddress: string[]
     }
-
-    // // interface Error {
-    // //   message: string
-    // // }
 
     const AIRSTACK_API_URL = 'https://api.airstack.xyz/graphql'
     const AIRSTACK_API_KEY = this.env.AIRSTACK_API_KEY
@@ -498,9 +509,8 @@ export class EFPIndexerService implements IEFPIndexerService {
 
     const json = (await res?.json()) as QueryResponse
     const data = json?.data
-
-    const formatted = data?.ethereum?.TokenBalance.map((tokenAddress: string) => tokenAddress)
-    const queryFormattedTokens = formatted.filter(
+    const formatted = data?.ethereum?.TokenBalance?.map((value: TokenBalance) => value.tokenAddress)
+    const queryFormattedTokens = formatted?.filter(
       (address: string, index: Number) => formatted.indexOf(address) === index
     )
 
@@ -539,10 +549,9 @@ export class EFPIndexerService implements IEFPIndexerService {
 
     const holderJson = (await holderRes?.json()) as QueryResponse
     const holderData = holderJson?.data
-
-    const holders = holderData.ethereum.TokenNft.flatMap(data => data.tokenBalances.map(data => data.owner.identity))
-    const dedupedHolders = holders.filter((address: string, index: number) => holders.indexOf(address) === index)
-    const accountList = dedupedHolders.slice(0, 10)
+    const holders = holderData.ethereum?.TokenNft?.flatMap(data => data.tokenBalances?.map(data => data.owner.identity))
+    const dedupedHolders = holders?.filter((address: string, index: number) => holders.indexOf(address) === index)
+    const accountList = dedupedHolders?.slice(0, 10)
 
     return accountList as Address[]
   }

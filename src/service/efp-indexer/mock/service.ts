@@ -20,6 +20,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  async getDiscoverAccounts(): Promise<Address[]> {
+    return (await []) as Address[]
+  }
+
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserFollowersCount(address: Address): Promise<number> {
     return this.#socialGraph.getFollowersCount(address)
@@ -97,13 +101,13 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.#socialGraph.getListRecords(tokenId)
   }
 
-  async getRecommended(_address: Address): Promise<Address[]> {
-    return (await []) as Address[]
-  }
-
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
     return this.#socialGraph.getListRecordTags(tokenId)
+  }
+
+  async getRecommended(_address: Address): Promise<Address[]> {
+    return (await []) as Address[]
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>
