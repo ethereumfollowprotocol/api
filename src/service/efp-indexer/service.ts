@@ -2,6 +2,7 @@ import { type Kysely, type QueryResult, sql } from 'kysely'
 
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
+import type { Environment } from '#/types/index'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 
 export type FollowerResponse = {
@@ -51,13 +52,12 @@ function bufferize(data: Uint8Array | string): Buffer {
 
 export class EFPIndexerService implements IEFPIndexerService {
   readonly #db: Kysely<DB>
-  // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
-  readonly env: Env
+  readonly #env: Environment
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#db = database(env)
-    this.env = env
+    this.#env = env
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -478,7 +478,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     const AIRSTACK_API_URL = 'https://api.airstack.xyz/graphql'
-    const AIRSTACK_API_KEY = this.env.AIRSTACK_API_KEY
+    const AIRSTACK_API_KEY = this.#env.AIRSTACK_API_KEY
     if (!AIRSTACK_API_KEY) throw new Error('AIRSTACK_API_KEY not set')
 
     let query = `query GetNFTs {
