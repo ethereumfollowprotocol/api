@@ -66,7 +66,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
         const ensProfilesByAddress: Map<Address, ENSProfileResponse> = new Map(
           addressesToFetchENS.map((address, index) => {
             if (!ensProfiles[index]?.name) {
-              return [address, { name: '', address: address, avatar: null } as unknown as ENSProfileResponse]
+              return [address, { name: '', address: address, avatar: '' } as ENSProfileResponse]
             }
             return [address, ensProfiles[index] as ENSProfileResponse]
           })

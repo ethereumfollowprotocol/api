@@ -122,7 +122,7 @@ export class ENSMetadataService implements IENSMetadataService {
       }
       return { ...(await accumulator), [address]: cacheRecord }
     }, {})
-    console.log('address array', addressArrayWithCache)
+
     const cacheArray = Object.values(addressArrayWithCache) as ENSProfileResponse[]
     const filteredCache = cacheArray.filter(address => address !== null)
 
@@ -154,7 +154,16 @@ export class ENSMetadataService implements IENSMetadataService {
     }[]
 
     // Returns the combined results from all batches.
-    const fetchedRecords = data.flatMap(datum => datum.response)
+    const fetchedRecords = data.flatMap(datum => {
+      if (datum.response.name) {
+        return datum.response
+      }
+      return {
+        name: null,
+        address: '',
+        avatar: null
+      } as unknown as ENSProfileResponse
+    })
     for (const record of fetchedRecords) {
       if (record.name) {
         await this.cacheRecord(record)
