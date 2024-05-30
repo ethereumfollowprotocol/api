@@ -25,6 +25,7 @@ type Row = {
   name: string
   address: `0x${string}`
   avatar: string
+  updated_at: string
 }
 
 export class ENSMetadataService implements IENSMetadataService {
@@ -100,7 +101,8 @@ export class ENSMetadataService implements IENSMetadataService {
       return {
         name: '',
         address: ensNameOrAddress,
-        avatar: null
+        avatar: null,
+        updated_at: ''
       } as unknown as ENSProfile
     }
     return cachedProfile as ENSProfile
@@ -159,10 +161,12 @@ export class ENSMetadataService implements IENSMetadataService {
         return datum.response
       }
       return {
-        name: null,
-        address: '',
-        avatar: null
-      } as unknown as ENSProfileResponse
+        name: '',
+        address: '0x',
+        avatar: '',
+        updated_at: '',
+        type: 'error'
+      } as ENSProfileResponse
     })
     for (const record of fetchedRecords) {
       if (record.name) {
@@ -209,11 +213,13 @@ export class ENSMetadataService implements IENSMetadataService {
     name: string
     address: string
     avatar: string | undefined
+    updated_at: string | undefined
   } {
     return {
       name: namedata.name,
       address: namedata.address.toLowerCase(),
-      avatar: namedata?.avatar
+      avatar: namedata?.avatar,
+      updated_at: namedata?.updated_at
     }
   }
 }
