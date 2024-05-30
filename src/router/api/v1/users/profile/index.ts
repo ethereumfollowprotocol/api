@@ -38,7 +38,8 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const { include } = context.req.valid('query')
       const ensService = services.ens(env(context))
 
-      const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS)
+      const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase())
+
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
         include.includes('followers') || include.includes('stats') ? efp.getUserFollowers(address) : undefined,
@@ -64,12 +65,7 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
 
         const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addressesToFetchENS)
         const ensProfilesByAddress: Map<Address, ENSProfileResponse> = new Map(
-          addressesToFetchENS.map((address, index) => {
-            if (!ensProfiles[index]?.name) {
-              return [address, { name: '', address: address, avatar: '' } as ENSProfileResponse]
-            }
-            return [address, ensProfiles[index] as ENSProfileResponse]
-          })
+          addressesToFetchENS.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
         )
 
         // attach ENS profiles to followers
