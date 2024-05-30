@@ -161,7 +161,7 @@ export class ENSMetadataService implements IENSMetadataService {
       }
     }
 
-    return [...fetchedRecords, ...filteredCache]
+    return [...filteredCache, ...fetchedRecords]
   }
 
   async getENSAvatar(ensNameOrAddress: Address | string): Promise<string> {

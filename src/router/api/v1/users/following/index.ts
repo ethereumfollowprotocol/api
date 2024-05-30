@@ -33,10 +33,15 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
       // Fetch ENS profiles in batch
       const addresses: Address[] = addressRecords.map(record => hexlify(record.data))
       const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addresses)
-
+      console.log('ensprofiles', ensProfiles)
       // Collect ENS profiles into a lookup map by address
       const ensMap: Map<Address, ENSProfileResponse> = new Map(
-        addresses.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
+        addresses.map((address, index) => {
+          if (!ensProfiles[index]?.name) {
+            return [address, { name: '', address: address, avatar: null } as unknown as ENSProfileResponse]
+          }
+          return [address, ensProfiles[index] as ENSProfileResponse]
+        })
       )
 
       // Aggregate ENS profiles back into the full list
