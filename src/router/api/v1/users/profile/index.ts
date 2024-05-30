@@ -63,7 +63,12 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
           ...(following?.filter(follow => follow.recordType === 1).map(follow => hexlify(follow.data)) ?? [])
         ]
 
-        const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addressesToFetchENS)
+        const ensProfiles: ENSProfile[] = []
+        for (const address of addressesToFetchENS) {
+          const profile = await ensService.getENSProfile(address)
+          ensProfiles.push(profile)
+        }
+
         const ensProfilesByAddress: Map<Address, ENSProfileResponse> = new Map(
           addressesToFetchENS.map((address, index) => [address, ensProfiles[index] as ENSProfileResponse])
         )
