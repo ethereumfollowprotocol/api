@@ -91,13 +91,17 @@ export class ENSMetadataService implements IENSMetadataService {
     if (!cachedProfile) {
       //silently cache fetched profile without waiting ->
       const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
-      if (!response.ok) {
-        raise(`invalid ENS name: ${ensNameOrAddress}`)
+      if (response.ok) {
+        // raise(`invalid ENS name: ${ensNameOrAddress}`)
+        const ensProfileData = (await response.json()) as ENSProfile
+        await this.cacheRecord(ensProfileData)
+        return ensProfileData as ENSProfile
       }
-      const ensProfileData = (await response.json()) as ENSProfile
-      await this.cacheRecord(ensProfileData)
-
-      return ensProfileData as ENSProfile
+      return {
+        name: '',
+        address: ensNameOrAddress,
+        avatar: null
+      } as unknown as ENSProfile
     }
     return cachedProfile as ENSProfile
   }
@@ -121,7 +125,6 @@ export class ENSMetadataService implements IENSMetadataService {
 
     const cacheArray = Object.values(addressArrayWithCache) as ENSProfileResponse[]
     const filteredCache = cacheArray.filter(address => address !== null)
-    console.log('lengths', ensNameOrAddressArray.length, filteredCache.length)
 
     if (ensNameOrAddressArray.length === filteredCache.length) return cacheArray
 
