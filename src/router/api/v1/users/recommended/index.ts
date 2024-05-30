@@ -1,7 +1,7 @@
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
 import type { Services } from '#/service'
-import type { FollowingResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
+import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
@@ -24,10 +24,12 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
     const efp: IEFPIndexerService = services.efp(env(context))
     const addresses: Address[] = await efp.getRecommended(address)
 
-    const profiles: ENSProfile[] = await Promise.all(
-      addresses.map(async address => await ensService.getENSProfile(address))
-    )
-    console.log('profiles', profiles)
+    const profiles: ENSProfile[] = []
+    for (const address of addresses) {
+      const profile = await ensService.getENSProfile(address)
+      profiles.push(profile)
+    }
+
     return context.json({ recommended: profiles }, 200)
   })
 }

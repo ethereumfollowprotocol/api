@@ -14,11 +14,13 @@ export function discover(services: Services): Hono<{ Bindings: Environment }> {
     const latestFollows: Address[] = await efp.getDiscoverAccounts()
 
     const ensService = services.ens(env(context))
-    const latestProfiles: ENSProfile[] = await Promise.all(
-      latestFollows.map(async address => await ensService.getENSProfile(address))
-    )
+    const profiles: ENSProfile[] = []
+    for (const address of latestFollows) {
+      const profile = await ensService.getENSProfile(address)
+      profiles.push(profile)
+    }
 
-    return context.json({ discover: latestProfiles }, 200)
+    return context.json({ discover: profiles }, 200)
   })
   return discover
 }
