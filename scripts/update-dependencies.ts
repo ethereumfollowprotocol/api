@@ -81,9 +81,9 @@ async function fetchPackageLatestVersion(name: string) {
   const { version } = (await response.json()) as { version: string }
   return version
 }
-
+const betaRegexPattern = /beta/
 function getUnstableDependencies(dependencies: Record<string, string>) {
   return Object.entries(dependencies)
-    .filter(([, version]) => /beta/.test(version))
+    .filter(([, version]) => betaRegexPattern.test(version))
     .reduce((acc, [name, version]) => ({ ...acc, [name]: version }), {}) as Record<string, string>
 }
