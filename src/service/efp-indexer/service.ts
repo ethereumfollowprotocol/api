@@ -39,9 +39,17 @@ export interface IEFPIndexerService {
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
   getRecommended(address: Address): Promise<Address[]>
   getUserFollowersCount(address: Address): Promise<number>
-  getUserFollowers(address: Address): Promise<FollowerResponse[]>
+  getUserFollowers(
+    address: Address,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined
+  ): Promise<FollowerResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
-  getUserFollowing(address: Address): Promise<FollowingResponse[]>
+  getUserFollowing(
+    address: Address,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined
+  ): Promise<FollowingResponse[]>
   getUserListRecords(address: Address): Promise<TaggedListRecord[]>
   getUserPrimaryList(address: Address): Promise<bigint | undefined>
 }
@@ -65,10 +73,26 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getUserFollowersCount(address: Address): Promise<number> {
-    return new Set(await this.getUserFollowers(address)).size
+    // return new Set(await this.getUserFollowers(address)).size
+    type Row = {
+      efp_list_nft_token_id: bigint
+      follower: Address
+      tags: string[] | null
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }
+    const query = sql<Row>`SELECT * FROM query.get_unique_followers(${address})`
+    const result = await query.execute(this.#db)
+
+    return result?.rows.length
   }
 
-  async getUserFollowers(address: Address): Promise<
+  async getUserFollowers(
+    address: Address,
+    limit: string,
+    offset: string
+  ): Promise<
     {
       address: Address
       tags: string[]
@@ -85,7 +109,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       is_blocked: boolean
       is_muted: boolean
     }
-    const query = sql<Row>`SELECT * FROM query.get_unique_followers(${address})`
+    const query = sql<Row>`SELECT * FROM query.get_unique_followers_page(${address}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -107,11 +131,21 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getUserFollowingCount(address: Address): Promise<number> {
-    return new Set(await this.getUserFollowing(address)).size
+    type Row = {
+      efp_list_nft_token_id: bigint
+      record_version: number
+      record_type: number
+      following_address: `0x${string}`
+      tags: string[]
+    }
+    const query = sql<Row>`SELECT * FROM query.get_following__record_type_001(${address})`
+    const result = await query.execute(this.#db)
+
+    return result?.rows.length
   }
 
-  async getUserFollowing(address: Address): Promise<TaggedListRecord[]> {
-    const query = sql<Row>`SELECT * FROM query.get_following__record_type_001(${address})`
+  async getUserFollowing(address: Address, limit: string, offset: string): Promise<TaggedListRecord[]> {
+    const query = sql<Row>`SELECT * FROM query.get_following__record_type_page(${address}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
