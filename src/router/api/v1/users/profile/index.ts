@@ -17,11 +17,13 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
     validator('query', value => {
       const allFilters = ['ens', 'primary-list', 'following', 'followers', 'stats']
       // if only one include query param, type is string, if 2+ then type is array, if none then undefined
-      const { include } = <Record<'include', string[] | string | undefined>>value
+      let { include, offset, limit } = <Record<'include' | 'offset' | 'limit', string[] | string | undefined>>value
+      if (!limit) limit = '10'
+      if (!offset) offset = '0'
       // if no include query param, return all data
-      if (!include) return { include: allFilters }
+      if (!include) return { include: allFilters, offset, limit }
       // if "include=ens" is the only query param, then also return all data
-      if (include === 'ens') return { include: allFilters }
+      if (include === 'ens') return { include: allFilters, offset, limit }
       // if include query param is an array, ensure all values are valid
       if (ensureArray(include).every(filter => allFilters.includes(filter))) return { include }
       return new Response(
@@ -35,15 +37,19 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
     async context => {
       const { addressOrENS } = context.req.param()
 
-      const { include } = context.req.valid('query')
+      const { include, offset, limit } = context.req.valid('query')
       const ensService = services.ens(env(context))
 
       const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase())
 
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
-        include.includes('followers') || include.includes('stats') ? efp.getUserFollowers(address) : undefined,
-        include.includes('following') || include.includes('stats') ? efp.getUserFollowing(address) : undefined,
+        include.includes('followers') || include.includes('stats')
+          ? efp.getUserFollowers(address, limit, offset)
+          : undefined,
+        include.includes('following') || include.includes('stats')
+          ? efp.getUserFollowing(address, limit, offset)
+          : undefined,
         include.includes('primary-list') ? efp.getUserPrimaryList(address) : undefined
       ])
 

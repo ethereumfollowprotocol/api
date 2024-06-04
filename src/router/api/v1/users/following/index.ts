@@ -1,5 +1,7 @@
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+import { validator } from 'hono/validator'
+import { includeValidator } from '#/router/api/v1/leaderboard/validators'
 import type { Services } from '#/service'
 import type { FollowingResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
@@ -14,14 +16,16 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
  * Enhanced to add ENS support
  */
 export function following(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:addressOrENS/following', async context => {
+  users.get('/:addressOrENS/following', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
-
+    let { offset, limit } = context.req.valid('query')
+    if (!limit) limit = '10'
+    if (!offset) offset = '0'
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
 
     const efp: IEFPIndexerService = services.efp(env(context))
-    const followingListRecords: FollowingResponse[] = await efp.getUserFollowing(address)
+    const followingListRecords: FollowingResponse[] = await efp.getUserFollowing(address, limit, offset)
 
     let response: ENSFollowingResponse[]
 
@@ -33,7 +37,7 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
       // Fetch ENS profiles in batch
       const addresses: Address[] = addressRecords.map(record => hexlify(record.data))
       const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addresses)
-      console.log('ensprofiles', ensProfiles)
+
       // Collect ENS profiles into a lookup map by address
       const ensMap: Map<Address, ENSProfileResponse> = new Map(
         addresses.map((address, index) => {

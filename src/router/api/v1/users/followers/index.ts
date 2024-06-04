@@ -11,10 +11,12 @@ export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse 
 export function followers(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/followers', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
-    const { include } = context.req.valid('query')
+    let { include, offset, limit } = context.req.valid('query')
+    if (!limit) limit = '10'
+    if (!offset) offset = '0'
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
-    const followers: FollowerResponse[] = await services.efp(env(context)).getUserFollowers(address)
+    const followers: FollowerResponse[] = await services.efp(env(context)).getUserFollowers(address, limit, offset)
 
     let response: ENSFollowerResponse[] = followers
 
