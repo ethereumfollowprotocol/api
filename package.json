@@ -13,7 +13,7 @@
     "docker:ping": "docker compose --file='compose.yml' --project-name='efp-api' up --build --force-recreate --remove-orphans --always-recreate-deps --renew-anon-volumes ping",
     "format": "bunx @biomejs/biome format . --write",
     "fix": "bun lint && bun format",
-    "lint": "bunx @biomejs/biome check --apply . && bun typecheck",
+    "lint": "bunx @biomejs/biome check --write . && bun typecheck",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "vitest --run",
     "test:typecheck": "vitest --typecheck",
@@ -29,7 +29,7 @@
     "postgres": "^3.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.7.3",
+    "@biomejs/biome": "^1.8.0",
     "@cloudflare/workers-types": "^4.20240117.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.0.4",

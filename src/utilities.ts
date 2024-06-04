@@ -4,9 +4,9 @@ import type { Address } from '#/types'
 export function raise(error: unknown): never {
   throw typeof error === 'string' ? new Error(error) : error
 }
-
+const regexPattern = /^0x[a-fA-F0-9]{40}$/
 export function isAddress(address: string): address is Address {
-  return /^0x[a-fA-F0-9]{40}$/.test(address)
+  return regexPattern.test(address)
 }
 
 export function ensureArray<T>(value: T | T[]): T[] {
@@ -15,7 +15,7 @@ export function ensureArray<T>(value: T | T[]): T[] {
 
 export function arrayToChunks<T>(array: T[], chunkSize: number): T[][] {
   // Muted by user
-  // biome-ignore lint/nursery/noEvolvingAny: <explanation>
+  // biome-ignore lint/nursery/noEvolvingTypes: <explanation>
   const chunks = []
   for (let index = 0; index < array.length; index += chunkSize) {
     chunks.push(array.slice(index, index + chunkSize))
