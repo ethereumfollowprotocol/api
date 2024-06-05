@@ -7,7 +7,7 @@ import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
 import { hexlify, prettifyListRecord } from '#/types/list-record'
-import { ensureArray } from '#/utilities'
+import { ensureArray, isAddress } from '#/utilities'
 import type { ENSFollowerResponse } from '../followers'
 import type { ENSFollowingResponse } from '../following'
 
@@ -41,7 +41,10 @@ export function profile(users: Hono<{ Bindings: Environment }>, services: Servic
       const ensService = services.ens(env(context))
 
       const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase())
-
+      // if address is not an address, that means lookup for ens name came back null
+      if (!isAddress(address)) {
+        return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+      }
       const efp: IEFPIndexerService = services.efp(env(context))
       const [followers, following, primaryList] = await Promise.all([
         include.includes('followers') || include.includes('stats')

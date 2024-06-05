@@ -6,6 +6,7 @@ import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
 import { type PrettyTaggedListRecord, hexlify, prettifyListRecord } from '#/types/list-record'
+import { isAddress } from '#/utilities'
 
 export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
@@ -20,7 +21,9 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
 
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
-
+    if (!isAddress(address)) {
+      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+    }
     const efp: IEFPIndexerService = services.efp(env(context))
     const addresses: Address[] = await efp.getRecommended(address)
 

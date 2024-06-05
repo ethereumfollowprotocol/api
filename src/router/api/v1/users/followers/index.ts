@@ -5,6 +5,7 @@ import type { Services } from '#/service'
 import type { FollowerResponse } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { Address, Environment } from '#/types'
+import { isAddress } from '#/utilities'
 
 export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse }
 
@@ -16,6 +17,9 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
     if (!offset) offset = '0'
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
+    if (!isAddress(address)) {
+      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+    }
     const followers: FollowerResponse[] = await services.efp(env(context)).getUserFollowers(address, limit, offset)
 
     let response: ENSFollowerResponse[] = followers
