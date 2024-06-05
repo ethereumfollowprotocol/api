@@ -1,6 +1,5 @@
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
-import { validator } from 'hono/validator'
 import { includeValidator } from '#/router/api/v1/leaderboard/validators'
 import type { Services } from '#/service'
 import type { FollowingResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
@@ -8,6 +7,7 @@ import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
 import { type PrettyTaggedListRecord, hexlify, prettifyListRecord } from '#/types/list-record'
+import { isAddress } from '#/utilities'
 
 export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
@@ -24,7 +24,9 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
     if (!offset) offset = '0'
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
-
+    if (!isAddress(address)) {
+      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+    }
     const efp: IEFPIndexerService = services.efp(env(context))
     const followingListRecords: FollowingResponse[] = await efp.getUserFollowing(address, limit, offset)
 
