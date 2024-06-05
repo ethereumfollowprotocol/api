@@ -49,16 +49,19 @@ export class ENSMetadataService implements IENSMetadataService {
   }
 
   async checkCache(ensNameOrAddress: Address | string): Promise<ENSProfile | boolean> {
+    if (isAddress(ensNameOrAddress)) {
+      const query = sql<Row>`SELECT * FROM query.get_ens_metadata_by_address(${ensNameOrAddress.toLowerCase()})`
+      const result = await query.execute(this.#db)
+      if (result.rows.length > 0) {
+        return result.rows[0] as ENSProfile
+      }
+    }
     const nameQuery = sql<Row>`SELECT * FROM query.get_ens_metadata_by_name(${ensNameOrAddress.toLowerCase()})`
     const nameResult = await nameQuery.execute(this.#db)
     if (nameResult.rows.length > 0) {
       return nameResult.rows[0] as ENSProfile
     }
-    const query = sql<Row>`SELECT * FROM query.get_ens_metadata_by_address(${ensNameOrAddress.toLowerCase()})`
-    const result = await query.execute(this.#db)
-    if (result.rows.length > 0) {
-      return result.rows[0] as ENSProfile
-    }
+
     return false
   }
 

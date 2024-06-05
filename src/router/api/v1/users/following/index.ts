@@ -5,6 +5,7 @@ import { includeValidator } from '#/router/api/v1/leaderboard/validators'
 import type { Services } from '#/service'
 import type { FollowingResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
+import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
 import { type PrettyTaggedListRecord, hexlify, prettifyListRecord } from '#/types/list-record'
 
@@ -36,8 +37,11 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
 
       // Fetch ENS profiles in batch
       const addresses: Address[] = addressRecords.map(record => hexlify(record.data))
-      const ensProfiles: ENSProfileResponse[] = await ensService.batchGetENSProfiles(addresses)
-
+      const ensProfiles: ENSProfile[] = []
+      for (const address of addresses) {
+        const profile = await ensService.getENSProfile(address)
+        ensProfiles.push(profile)
+      }
       // Collect ENS profiles into a lookup map by address
       const ensMap: Map<Address, ENSProfileResponse> = new Map(
         addresses.map((address, index) => {
