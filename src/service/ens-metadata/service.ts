@@ -98,7 +98,12 @@ export class ENSMetadataService implements IENSMetadataService {
       if (response.ok) {
         // raise(`invalid ENS name: ${ensNameOrAddress}`)
         const ensProfileData = (await response.json()) as ENSProfile
-        await this.cacheRecord(ensProfileData)
+        try {
+          await this.cacheRecord(ensProfileData)
+        } catch (error) {
+          console.log('cache failed', error)
+        }
+
         return ensProfileData as ENSProfile
       }
       return {
