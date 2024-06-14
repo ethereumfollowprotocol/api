@@ -20,6 +20,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getAddressByList(_token_id: string): Promise<Address | undefined> {
+    throw new Error('Method not implemented.')
+  }
+
   async getDiscoverAccounts(): Promise<Address[]> {
     return (await []) as Address[]
   }
@@ -40,6 +44,34 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     }[]
   > {
     return this.#socialGraph.getFollowers(address)
+  }
+
+  getUserFollowersCountByList(_token_id: string): Promise<number> {
+    throw new Error('Method not implemented.')
+  }
+
+  getUserFollowersByList(
+    _token_id: string,
+    _limit: string,
+    _offset: string
+  ): Promise<
+    {
+      address: Address
+      tags: string[]
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }[]
+  > {
+    throw new Error('Method not implemented.')
+  }
+
+  getUserFollowingCountByList(_token_id: string): Promise<number> {
+    throw new Error('Method not implemented.')
+  }
+
+  getUserFollowingByList(_token_id: string, _limit: string, _offset: string): Promise<TaggedListRecord[]> {
+    throw new Error('Method not implemented.')
   }
 
   async getUserListRecords(address: Address): Promise<TaggedListRecord[]> {
@@ -113,6 +145,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserPrimaryList(address: Address): Promise<bigint | undefined> {
     return this.#socialGraph.getPrimaryList(address)
+  }
+
+  async getUserLists(_address: Address): Promise<number[]> {
+    return (await []) as number[]
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>

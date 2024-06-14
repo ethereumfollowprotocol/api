@@ -109,6 +109,20 @@ export interface EfpLists {
   user: string
 }
 
+export interface EnsMetadata {
+  address: string
+  avatar: string | null
+  chains: string[] | null
+  created_at: Generated<Timestamp | null>
+  display: string | null
+  errors: string | null
+  fresh: Int8 | null
+  name: string
+  records: string[] | null
+  resolver: string | null
+  updated_at: Generated<Timestamp | null>
+}
+
 export interface Events {
   block_hash: string
   block_number: Int8
@@ -277,10 +291,8 @@ export interface ViewJoinEfpListRecordsWithTags {
   tags: string[] | null
 }
 
-export interface EnsCacheData {
-  username: string | null
+export interface ViewLatestFollows {
   address: string | null
-  avatar: string | null
 }
 
 export interface DB {
@@ -292,7 +304,7 @@ export interface DB {
   efp_list_record_tags: EfpListRecordTags
   efp_list_records: EfpListRecords
   efp_lists: EfpLists
-  ens_metadata: EnsCacheData
+  ens_metadata: EnsMetadata
   events: Events
   schema_migrations: SchemaMigrations
   view__events__efp_account_metadata: ViewEventsEfpAccountMetadata
@@ -308,4 +320,5 @@ export interface DB {
   view__events__latest_record_tags: ViewEventsLatestRecordTags
   view__join__efp_list_records_with_nft_manager_user_tags: ViewJoinEfpListRecordsWithNftManagerUserTags
   view__join__efp_list_records_with_tags: ViewJoinEfpListRecordsWithTags
+  view__latest_follows: ViewLatestFollows
 }
