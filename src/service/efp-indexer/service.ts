@@ -16,6 +16,7 @@ export type FollowerResponse = {
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
+  getAddressByList(token_id: string): Promise<Address | undefined>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
   getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: Address; blocks_count: number }[]>
   getLeaderboardFollowers(limit: number): Promise<{ rank: number; address: Address; followers_count: number }[]>
@@ -39,18 +40,31 @@ export interface IEFPIndexerService {
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
   getRecommended(address: Address): Promise<Address[]>
   getUserFollowersCount(address: Address): Promise<number>
+  getUserFollowersCountByList(token_id: string): Promise<number>
   getUserFollowers(
     address: Address,
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowerResponse[]>
+  getUserFollowersByList(
+    token_id: string,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined
+  ): Promise<FollowerResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
+  getUserFollowingCountByList(token_id: string): Promise<number>
   getUserFollowing(
     address: Address,
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowingResponse[]>
+  getUserFollowingByList(
+    token_id: string,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined
+  ): Promise<FollowingResponse[]>
   getUserListRecords(address: Address): Promise<TaggedListRecord[]>
+  getUserLists(address: Address): Promise<number[]>
   getUserPrimaryList(address: Address): Promise<bigint | undefined>
 }
 
@@ -126,6 +140,58 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
+  async getUserFollowersCountByList(token_id: string): Promise<number> {
+    type Row = {
+      efp_list_nft_token_id: bigint
+      follower: Address
+      tags: string[] | null
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }
+    const query = sql<Row>`SELECT * FROM query.get_unique_followers_by_list(${token_id})`
+    const result = await query.execute(this.#db)
+
+    return result?.rows.length
+  }
+
+  async getUserFollowersByList(
+    token_id: string,
+    limit: string,
+    offset: string
+  ): Promise<
+    {
+      address: Address
+      tags: string[]
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }[]
+  > {
+    type Row = {
+      efp_list_nft_token_id: bigint
+      follower: Address
+      tags: string[] | null
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }
+    const query = sql<Row>`SELECT * FROM query.get_unique_followers_page_by_list(${token_id}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map(row => ({
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      address: row.follower,
+      tags: row.tags?.sort() || [],
+      is_following: row.is_following,
+      is_blocked: row.is_blocked,
+      is_muted: row.is_muted
+    }))
+  }
   /////////////////////////////////////////////////////////////////////////////
   // Following
   /////////////////////////////////////////////////////////////////////////////
@@ -146,6 +212,44 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getUserFollowing(address: Address, limit: string, offset: string): Promise<TaggedListRecord[]> {
     const query = sql<Row>`SELECT * FROM query.get_following__record_type_page(${address}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    type Row = {
+      efp_list_nft_token_id: bigint
+      record_version: number
+      record_type: number
+      following_address: `0x${string}`
+      tags: string[]
+    }
+
+    return result.rows.map((row: Row) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async getUserFollowingCountByList(token_id: string): Promise<number> {
+    type Row = {
+      efp_list_nft_token_id: bigint
+      record_version: number
+      record_type: number
+      following_address: `0x${string}`
+      tags: string[]
+    }
+    const query = sql<Row>`SELECT * FROM query.get_following_by_list(${token_id})`
+    const result = await query.execute(this.#db)
+
+    return result?.rows.length
+  }
+
+  async getUserFollowingByList(token_id: string, limit: string, offset: string): Promise<TaggedListRecord[]> {
+    const query = sql<Row>`SELECT * FROM query.get_following_page_by_list(${token_id}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -590,6 +694,16 @@ export class EFPIndexerService implements IEFPIndexerService {
     return accountList as Address[]
   }
 
+  async getUserLists(address: Address): Promise<number[]> {
+    type Row = {
+      efp_list_nft_token_id: number
+    }
+    const query = sql<Row>`SELECT * FROM query.get_user_lists(${address});`
+    const result = await query.execute(this.#db)
+    const lists: number[] = result.rows.map(record => record.efp_list_nft_token_id)
+    return lists
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // Primary List
   /////////////////////////////////////////////////////////////////////////////
@@ -605,5 +719,17 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     return result.rows[0]?.primary_list
+  }
+
+  async getAddressByList(token_id: string): Promise<Address | undefined> {
+    const query = sql<{
+      primary_list_address: Address
+    }>`SELECT query.get_address_by_list(${token_id}) AS primary_list_address`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return undefined
+    }
+
+    return result.rows[0]?.primary_list_address
   }
 }

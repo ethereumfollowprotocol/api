@@ -7,6 +7,7 @@ import { ens } from './ens'
 import { followers } from './followers'
 import { following } from './following'
 import { listRecords } from './list-records'
+import { lists } from './lists'
 import { primaryList } from './primary-list'
 import { profile } from './profile'
 import { recommended } from './recommended'
@@ -22,6 +23,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   followers(users, services)
   following(users, services)
   listRecords(users, services)
+  lists(users, services)
   primaryList(users, services)
   profile(users, services)
   recommended(users, services)
@@ -36,6 +38,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
           '/ens',
           '/followers',
           '/following',
+          '/lists',
           '/primary-list',
           '/profile',
           '/recommended',
