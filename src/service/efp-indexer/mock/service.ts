@@ -1,6 +1,6 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import type { IEFPIndexerService } from '../service'
+import type { IEFPIndexerService, StateResponse } from '../service'
 import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
@@ -136,6 +136,14 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]> {
     return this.#socialGraph.getListRecordTags(tokenId)
+  }
+
+  async getListFollowingState(_tokenId: string, _address: Address): Promise<StateResponse> {
+    return await {
+      is_following: false,
+      is_blocked: false,
+      is_muted: false
+    }
   }
 
   async getRecommended(_address: Address): Promise<Address[]> {
