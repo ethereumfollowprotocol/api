@@ -17,7 +17,6 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
     const { address, ...ens }: ENSProfile = await ensService.getENSProfile(listUser.toLowerCase())
     const primaryList = await efp.getUserPrimaryList(address)
 
-
     const stats = {
       followers_count: await efp.getUserFollowersCountByList(token_id),
       following_count: await efp.getUserFollowingCountByList(token_id)
