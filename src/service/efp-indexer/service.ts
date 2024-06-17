@@ -13,6 +13,12 @@ export type FollowerResponse = {
   is_muted: boolean
 }
 
+export type StateResponse = {
+  is_following: boolean
+  is_blocked: boolean
+  is_muted: boolean
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -31,6 +37,7 @@ export interface IEFPIndexerService {
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
+  getListFollowingState(tokenId: string, address: Address): Promise<StateResponse>
   // incoming relationship means another list has the given address tagged with the given tag
   getIncomingRelationships(
     address: Address,
@@ -523,6 +530,31 @@ export class EFPIndexerService implements IEFPIndexerService {
   async getListRecordsFilterByTags(tokenId: bigint, tag: string): Promise<ListRecord[]> {
     const all: TaggedListRecord[] = await this.getListRecordsWithTags(tokenId)
     return all.filter(record => record.tags.includes(tag))
+  }
+
+  async getListFollowingState(tokenId: string, address: Address): Promise<StateResponse> {
+    const query = sql<Row>`SELECT * FROM query.get_list_following_state(${tokenId}, ${address})`
+    const result = await query.execute(this.#db)
+
+    type Row = {
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }
+
+    if (!result || result.rows.length === 0) {
+      return {
+        is_following: false,
+        is_blocked: false,
+        is_muted: false
+      }
+    }
+
+    return {
+      is_following: result.rows[0]?.is_following ?? false,
+      is_blocked: result.rows[0]?.is_blocked ?? false,
+      is_muted: result.rows[0]?.is_muted ?? false
+    }
   }
 
   /////////////////////////////////////////////////////////////////////////////
