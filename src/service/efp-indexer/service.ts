@@ -59,6 +59,7 @@ export interface IEFPIndexerService {
     offset: string[] | string | undefined
   ): Promise<FollowerResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
+  getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]>
   getUserFollowingCountByList(token_id: string): Promise<number>
   getUserFollowing(
     address: Address,
@@ -270,6 +271,25 @@ export class EFPIndexerService implements IEFPIndexerService {
       following_address: `0x${string}`
       tags: string[]
     }
+
+    return result.rows.map((row: Row) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]> {
+    type Row = {
+      efp_list_nft_token_id: bigint
+      record_version: number
+      record_type: number
+      following_address: `0x${string}`
+      tags: string[]
+    }
+    const query = sql<Row>`SELECT * FROM query.get_following_by_list(${token_id})`
+    const result = await query.execute(this.#db)
 
     return result.rows.map((row: Row) => ({
       version: row.record_version,
