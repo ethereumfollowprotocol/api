@@ -1,6 +1,6 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import type { IEFPIndexerService, StateResponse } from '../service'
+import type { FollowerStateResponse, FollowingStateResponse, IEFPIndexerService } from '../service'
 import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
@@ -138,7 +138,15 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.#socialGraph.getListRecordTags(tokenId)
   }
 
-  async getListFollowingState(_tokenId: string, _address: Address): Promise<StateResponse> {
+  async getListFollowerState(_tokenId: string, _address: Address): Promise<FollowerStateResponse> {
+    return await {
+      is_follower: false,
+      is_blocking: false,
+      is_muting: false
+    }
+  }
+
+  async getListFollowingState(_tokenId: string, _address: Address): Promise<FollowingStateResponse> {
     return await {
       is_following: false,
       is_blocked: false,

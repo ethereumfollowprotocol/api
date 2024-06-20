@@ -13,10 +13,16 @@ export type FollowerResponse = {
   is_muted: boolean
 }
 
-export type StateResponse = {
+export type FollowingStateResponse = {
   is_following: boolean
   is_blocked: boolean
   is_muted: boolean
+}
+
+export type FollowerStateResponse = {
+  is_follower: boolean
+  is_blocking: boolean
+  is_muting: boolean
 }
 
 export type FollowingResponse = TaggedListRecord
@@ -37,7 +43,8 @@ export interface IEFPIndexerService {
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
-  getListFollowingState(tokenId: string, address: Address): Promise<StateResponse>
+  getListFollowerState(tokenId: string, address: Address): Promise<FollowerStateResponse>
+  getListFollowingState(tokenId: string, address: Address): Promise<FollowingStateResponse>
   // incoming relationship means another list has the given address tagged with the given tag
   getIncomingRelationships(
     address: Address,
@@ -552,7 +559,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     return all.filter(record => record.tags.includes(tag))
   }
 
-  async getListFollowingState(tokenId: string, address: Address): Promise<StateResponse> {
+  async getListFollowingState(tokenId: string, address: Address): Promise<FollowingStateResponse> {
     const query = sql<Row>`SELECT * FROM query.get_list_following_state(${tokenId}, ${address})`
     const result = await query.execute(this.#db)
 
@@ -574,6 +581,31 @@ export class EFPIndexerService implements IEFPIndexerService {
       is_following: result.rows[0]?.is_following ?? false,
       is_blocked: result.rows[0]?.is_blocked ?? false,
       is_muted: result.rows[0]?.is_muted ?? false
+    }
+  }
+
+  async getListFollowerState(tokenId: string, address: Address): Promise<FollowerStateResponse> {
+    const query = sql<Row>`SELECT * FROM query.get_list_follower_state(${tokenId}, ${address})`
+    const result = await query.execute(this.#db)
+
+    type Row = {
+      is_follower: boolean
+      is_blocking: boolean
+      is_muting: boolean
+    }
+
+    if (!result || result.rows.length === 0) {
+      return {
+        is_follower: false,
+        is_blocking: false,
+        is_muting: false
+      }
+    }
+
+    return {
+      is_follower: result.rows[0]?.is_follower ?? false,
+      is_blocking: result.rows[0]?.is_blocking ?? false,
+      is_muting: result.rows[0]?.is_muting ?? false
     }
   }
 

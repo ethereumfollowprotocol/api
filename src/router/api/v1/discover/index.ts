@@ -14,13 +14,22 @@ export function discover(services: Services): Hono<{ Bindings: Environment }> {
     const latestFollows: Address[] = await efp.getDiscoverAccounts()
 
     const ensService = services.ens(env(context))
-    const profiles: ENSProfile[] = []
-    for (const address of latestFollows) {
-      const profile = await ensService.getENSProfile(address)
-      profiles.push(profile)
+    if (context.req.query('include')?.includes('ens')) {
+      const profiles: ENSProfile[] = []
+      for (const address of latestFollows) {
+        const profile = await ensService.getENSProfile(address)
+        profiles.push(profile)
+      }
+      return context.json({ discover: profiles }, 200)
     }
-
-    return context.json({ discover: profiles }, 200)
+    return context.json(
+      {
+        discover: latestFollows.map(address => {
+          return { address }
+        })
+      },
+      200
+    )
   })
   return discover
 }
