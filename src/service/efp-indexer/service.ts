@@ -25,6 +25,11 @@ export type FollowerStateResponse = {
   is_muting: boolean
 }
 
+export type TagsResponse = {
+  address: Address
+  tag: string
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -53,6 +58,7 @@ export interface IEFPIndexerService {
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
   getRecommended(address: Address): Promise<Address[]>
+  getTaggedAddressesByList(token_id: string): Promise<TagsResponse[]>
   getUserFollowersCount(address: Address): Promise<number>
   getUserFollowersCountByList(token_id: string): Promise<number>
   getUserFollowers(
@@ -815,5 +821,22 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     return result.rows[0]?.primary_list_address
+  }
+
+  /////////////////////////////////////////////////////////////////////////////
+  // Tags
+  /////////////////////////////////////////////////////////////////////////////
+
+  async getTaggedAddressesByList(token_id: string): Promise<TagsResponse[]> {
+    const query = sql<{
+      address: Address
+      tag: string
+    }>`SELECT hexlify(record_data) as address, UNNEST(tags) as tag FROM query.get_list_record_tags(${token_id}) WHERE tags IS NOT NULL;`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows
   }
 }
