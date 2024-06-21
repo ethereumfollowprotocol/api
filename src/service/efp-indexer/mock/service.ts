@@ -1,6 +1,6 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import type { FollowerStateResponse, FollowingStateResponse, IEFPIndexerService } from '../service'
+import type { FollowerStateResponse, FollowingStateResponse, IEFPIndexerService, TagsResponse } from '../service'
 import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
@@ -183,5 +183,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     const primaryList = await this.getUserPrimaryList(address)
     if (!primaryList) return []
     return (await this.getListRecordsWithTags(primaryList)).filter(r => r.tags.includes(tag))
+  }
+
+  async getTaggedAddressesByList(_token_id: string): Promise<TagsResponse[]> {
+    return await []
   }
 }

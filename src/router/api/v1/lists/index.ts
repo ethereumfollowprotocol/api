@@ -8,6 +8,7 @@ import { followerState } from './followerState'
 import { followers } from './followers'
 import { following } from './following'
 import { records } from './records'
+import { tags } from './tags'
 
 export function lists(services: Services): Hono<{ Bindings: Environment }> {
   const lists = new Hono<{ Bindings: Environment }>()
@@ -18,6 +19,7 @@ export function lists(services: Services): Hono<{ Bindings: Environment }> {
   followerState(lists, services)
   following(lists, services)
   records(lists, services)
+  tags(lists, services)
 
   return lists
 }
