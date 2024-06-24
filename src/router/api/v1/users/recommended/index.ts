@@ -1,5 +1,6 @@
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
+import { TEAM_BRANTLY } from '#/constant'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
@@ -24,15 +25,19 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
-    const efp: IEFPIndexerService = services.efp(env(context))
-    const addresses: Address[] = await efp.getRecommended(address)
 
-    const profiles: ENSProfile[] = []
-    for (const address of addresses) {
-      const profile = await ensService.getENSProfile(address)
-      profiles.push(profile)
+    const seed = context.req.query('seed') ? (context.req.query('seed') as Address) : (TEAM_BRANTLY as Address)
+    const efp: IEFPIndexerService = services.efp(env(context))
+    const recommendedAddresses: Address[] = await efp.getRecommended(address, seed)
+    if (context.req.query('include')?.includes('ens')) {
+      const profiles: ENSProfile[] = []
+      for (const addr of recommendedAddresses) {
+        const profile = await ensService.getENSProfile(addr)
+        profiles.push(profile)
+      }
+      return context.json({ recommended: profiles }, 200)
     }
 
-    return context.json({ recommended: profiles }, 200)
+    return context.json({ recommended: recommendedAddresses }, 200)
   })
 }

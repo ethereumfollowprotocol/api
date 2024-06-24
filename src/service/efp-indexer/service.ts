@@ -1,5 +1,6 @@
 import { type Kysely, type QueryResult, sql } from 'kysely'
 
+import { TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW } from '#/constant'
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
@@ -57,7 +58,7 @@ export interface IEFPIndexerService {
   ): Promise<{ token_id: bigint; list_user: Address; tags: string[] }[]>
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
-  getRecommended(address: Address): Promise<Address[]>
+  getRecommended(address: Address, seed: Address | undefined): Promise<Address[]>
   getTaggedAddressesByList(token_id: string): Promise<TagsResponse[]>
   getUserFollowersCount(address: Address): Promise<number>
   getUserFollowersCountByList(token_id: string): Promise<number>
@@ -672,7 +673,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Recommendations
   /////////////////////////////////////////////////////////////////////////////
 
-  async getRecommended(address: Address): Promise<Address[]> {
+  async getRecommended(address: Address, seed: Address | undefined): Promise<Address[]> {
     interface QueryResponse {
       data: Data
     }
@@ -708,12 +709,12 @@ export class EFPIndexerService implements IEFPIndexerService {
     const AIRSTACK_API_URL = 'https://api.airstack.xyz/graphql'
     const AIRSTACK_API_KEY = this.#env.AIRSTACK_API_KEY
     if (!AIRSTACK_API_KEY) throw new Error('AIRSTACK_API_KEY not set')
-
+    const seedAddress = seed ? seed : TEAM_BRANTLY
     let query = `query GetNFTs {
         ethereum: TokenBalances(
           input: {
             filter: {
-              owner: { _in: ["${address}"] }
+              owner: { _in: ["${address}", "${seedAddress}"] }
               tokenType: { _in: [ ERC721] }
             }
             blockchain: ethereum
@@ -737,6 +738,9 @@ export class EFPIndexerService implements IEFPIndexerService {
 
     const json = (await res?.json()) as QueryResponse
     const data = json?.data
+    if (!data?.ethereum?.TokenBalance) {
+      return [TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW] as Address[]
+    }
     const formatted = data?.ethereum?.TokenBalance?.map((value: TokenBalance) => value.tokenAddress)
     const queryFormattedTokens = formatted?.filter(
       (address: string, index: Number) => formatted.indexOf(address) === index
@@ -779,7 +783,21 @@ export class EFPIndexerService implements IEFPIndexerService {
     const holderData = holderJson?.data
     const holders = holderData.ethereum?.TokenNft?.flatMap(data => data.tokenBalances?.map(data => data.owner.identity))
     const dedupedHolders = holders?.filter((address: string, index: number) => holders.indexOf(address) === index)
-    const accountList = dedupedHolders?.slice(0, 10)
+    const filteredAddresses = dedupedHolders.filter(
+      addr => addr.toLowerCase() !== address.toLowerCase() && addr.toLowerCase() !== seed?.toLowerCase()
+    )
+    const accountList = filteredAddresses?.slice(0, 12)
+
+    const rand = Math.floor(Math.random() * 100)
+    if (rand < 10) {
+      const team = [TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW]
+      const member = team.length > 0 ? team[Math.floor(Math.random() * team.length)] : TEAM_BRANTLY
+      accountList.unshift(member as string)
+    }
+
+    if (accountList.length === 0) {
+      return [TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW] as Address[]
+    }
 
     return accountList as Address[]
   }
