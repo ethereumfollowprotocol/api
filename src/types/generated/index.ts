@@ -289,6 +289,7 @@ export interface ViewJoinEfpListRecordsWithTags {
   record_version: number | null
   slot: Buffer | null
   tags: string[] | null
+  updated_at: Timestamp | null
 }
 
 export interface ViewLatestFollows {
