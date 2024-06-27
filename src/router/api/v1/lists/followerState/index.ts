@@ -1,7 +1,7 @@
 import type { Hono } from 'hono'
 import { env } from 'hono/adapter'
 import type { Services } from '#/service'
-import type { FollowerStateResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
+import type { FollowStateResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { Address, Environment } from '#/types'
 import { isAddress } from '#/utilities'
 
@@ -14,7 +14,7 @@ export function followerState(lists: Hono<{ Bindings: Environment }>, services: 
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
     const efp: IEFPIndexerService = services.efp(env(context))
-    const state: FollowerStateResponse = await efp.getListFollowerState(token_id, address)
+    const state: FollowStateResponse = await efp.getListFollowerState(token_id, address)
     return context.json({ token_id, address, state }, 200)
   })
 }

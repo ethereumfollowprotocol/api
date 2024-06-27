@@ -1,6 +1,6 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import type { FollowerStateResponse, FollowingStateResponse, IEFPIndexerService, TagsResponse } from '../service'
+import type { FollowStateResponse, IEFPIndexerService, TagResponse, TagsResponse } from '../service'
 import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
@@ -138,19 +138,19 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.#socialGraph.getListRecordTags(tokenId)
   }
 
-  async getListFollowerState(_tokenId: string, _address: Address): Promise<FollowerStateResponse> {
+  async getListFollowerState(_tokenId: string, _address: Address): Promise<FollowStateResponse> {
     return await {
-      is_follower: false,
-      is_blocking: false,
-      is_muting: false
+      follow: false,
+      block: false,
+      mute: false
     }
   }
 
-  async getListFollowingState(_tokenId: string, _address: Address): Promise<FollowingStateResponse> {
+  async getListFollowingState(_tokenId: string, _address: Address): Promise<FollowStateResponse> {
     return await {
-      is_following: false,
-      is_blocked: false,
-      is_muted: false
+      follow: false,
+      block: false,
+      mute: false
     }
   }
 
@@ -185,7 +185,11 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return (await this.getListRecordsWithTags(primaryList)).filter(r => r.tags.includes(tag))
   }
 
-  async getTaggedAddressesByList(_token_id: string): Promise<TagsResponse[]> {
+  async getTaggedAddressesByList(_token_id: string): Promise<TagResponse[]> {
+    return await []
+  }
+
+  async getTaggedAddressesByTags(_token_id: string, _tags: string[] | undefined): Promise<TagsResponse[]> {
     return await []
   }
 }
