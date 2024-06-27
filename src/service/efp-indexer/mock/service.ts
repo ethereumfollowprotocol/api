@@ -171,6 +171,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return (await []) as TaggedListRecord[]
   }
 
+  async getUserFollowingRaw(_address: Address): Promise<TaggedListRecord[]> {
+    return (await []) as TaggedListRecord[]
+  }
+
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getIncomingRelationships(
     _address: `0x${string}`,

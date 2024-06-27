@@ -4,7 +4,7 @@ import { TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW } from '#/constant'
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
-import type { ListRecord, TaggedListRecord } from '#/types/list-record'
+import { type ListRecord, type TaggedListRecord, hexlify } from '#/types/list-record'
 
 export type FollowerResponse = {
   address: `0x${string}`
@@ -26,6 +26,14 @@ export type TagResponse = {
 }
 export type TagsResponse = {
   address: Address
+  tags: string[]
+}
+
+export type FollowingRow = {
+  efp_list_nft_token_id: bigint
+  record_version: number
+  record_type: number
+  following_address: `0x${string}`
   tags: string[]
 }
 
@@ -74,6 +82,7 @@ export interface IEFPIndexerService {
   getUserFollowingCount(address: Address): Promise<number>
   getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]>
   getUserFollowingCountByList(token_id: string): Promise<number>
+  getUserFollowingRaw(address: Address): Promise<TaggedListRecord[]>
   getUserFollowing(
     address: Address,
     limit: string[] | string | undefined,
@@ -218,36 +227,37 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
 
   async getUserFollowingCount(address: Address): Promise<number> {
-    type Row = {
-      efp_list_nft_token_id: bigint
-      record_version: number
-      record_type: number
-      following_address: `0x${string}`
-      tags: string[]
-    }
-    const query = sql<Row>`SELECT * FROM query.get_following__record_type_001(${address})`
+    const query = sql<FollowingRow>`SELECT * FROM query.get_following__record_type_001(${address})`
     const result = await query.execute(this.#db)
 
     return result?.rows.length
   }
 
   async getUserFollowing(address: Address, limit: string, offset: string): Promise<TaggedListRecord[]> {
-    const query = sql<Row>`SELECT * FROM query.get_following__record_type_page(${address}, ${limit}, ${offset})`
+    const query = sql<FollowingRow>`SELECT * FROM query.get_following__record_type_page(${address}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
       return []
     }
 
-    type Row = {
-      efp_list_nft_token_id: bigint
-      record_version: number
-      record_type: number
-      following_address: `0x${string}`
-      tags: string[]
+    return result.rows.map((row: FollowingRow) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async getUserFollowingRaw(address: Address): Promise<TaggedListRecord[]> {
+    const query = sql<FollowingRow>`SELECT * FROM query.get_following__record_type_001(${address})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
     }
 
-    return result.rows.map((row: Row) => ({
+    return result.rows.map((row: FollowingRow) => ({
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
@@ -256,36 +266,21 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getUserFollowingCountByList(token_id: string): Promise<number> {
-    type Row = {
-      efp_list_nft_token_id: bigint
-      record_version: number
-      record_type: number
-      following_address: `0x${string}`
-      tags: string[]
-    }
-    const query = sql<Row>`SELECT * FROM query.get_following_by_list(${token_id})`
+    const query = sql<FollowingRow>`SELECT * FROM query.get_following_by_list(${token_id})`
     const result = await query.execute(this.#db)
 
     return result?.rows.length
   }
 
   async getUserFollowingByList(token_id: string, limit: string, offset: string): Promise<TaggedListRecord[]> {
-    const query = sql<Row>`SELECT * FROM query.get_following_page_by_list(${token_id}, ${limit}, ${offset})`
+    const query = sql<FollowingRow>`SELECT * FROM query.get_following_page_by_list(${token_id}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
       return []
     }
 
-    type Row = {
-      efp_list_nft_token_id: bigint
-      record_version: number
-      record_type: number
-      following_address: `0x${string}`
-      tags: string[]
-    }
-
-    return result.rows.map((row: Row) => ({
+    return result.rows.map((row: FollowingRow) => ({
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
@@ -294,17 +289,10 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]> {
-    type Row = {
-      efp_list_nft_token_id: bigint
-      record_version: number
-      record_type: number
-      following_address: `0x${string}`
-      tags: string[]
-    }
-    const query = sql<Row>`SELECT * FROM query.get_following_by_list(${token_id})`
+    const query = sql<FollowingRow>`SELECT * FROM query.get_following_by_list(${token_id})`
     const result = await query.execute(this.#db)
 
-    return result.rows.map((row: Row) => ({
+    return result.rows.map((row: FollowingRow) => ({
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
@@ -782,10 +770,14 @@ export class EFPIndexerService implements IEFPIndexerService {
     const holderData = holderJson?.data
     const holders = holderData.ethereum?.TokenNft?.flatMap(data => data.tokenBalances?.map(data => data.owner.identity))
     const dedupedHolders = holders?.filter((address: string, index: number) => holders.indexOf(address) === index)
-    const filteredAddresses = dedupedHolders.filter(
+    const paramFilteredAddresses = dedupedHolders.filter(
       addr => addr.toLowerCase() !== address.toLowerCase() && addr.toLowerCase() !== seed?.toLowerCase()
     )
-    const accountList = filteredAddresses?.slice(0, 12)
+
+    const following = await this.getUserFollowingRaw(address)
+    const addresses: Address[] = following.map(record => hexlify(record.data))
+    const followingFiltered = paramFilteredAddresses.filter(addr => !addresses.includes(addr))
+    const accountList = followingFiltered?.slice(0, 20)
 
     const rand = Math.floor(Math.random() * 100)
     if (rand < 10) {
@@ -807,7 +799,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
     const query = sql<Row>`SELECT * FROM query.get_user_lists(${address});`
     const result = await query.execute(this.#db)
-    const lists: number[] = result.rows.map(record => record.efp_list_nft_token_id)
+    const lists: number[] = result.rows.map((record: Row) => record.efp_list_nft_token_id)
     return lists
   }
 
@@ -858,7 +850,6 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getTaggedAddressesByTags(token_id: string, tags: string[] | undefined): Promise<TagsResponse[]> {
-    console.log('get', token_id, tags)
     const query = sql<{
       address: Address
       tags: string[]

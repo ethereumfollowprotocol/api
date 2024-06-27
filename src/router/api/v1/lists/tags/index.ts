@@ -22,7 +22,6 @@ export function tags(lists: Hono<{ Bindings: Environment }>, services: Services)
 
     if (tagsToSearch.length > 0) {
       const tagsResponse: TagsResponse[] = await efp.getTaggedAddressesByTags(token_id, tagsToSearch)
-      console.log('tagsResponse', tagsResponse)
       return context.json({ token_id, tagsToSearch, taggedAddresses: tagsResponse }, 200)
     }
 
