@@ -88,6 +88,13 @@ export interface IEFPIndexerService {
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowerResponse[]>
+  getAllUserFollowersByListTagSort(
+    token_id: string,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined,
+    tags: string[] | undefined,
+    sort: string | undefined
+  ): Promise<FollowerResponse[]>
   getUserFollowersByListTagSort(
     token_id: string,
     limit: string[] | string | undefined,
@@ -109,6 +116,13 @@ export interface IEFPIndexerService {
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowingResponse[]>
+  getAllUserFollowingByListTagSort(
+    token_id: string,
+    limit: string,
+    offset: string,
+    tags: string[],
+    sort: string
+  ): Promise<TaggedListRecord[]>
   getUserFollowingByListTagSort(
     token_id: string,
     limit: string,
@@ -246,6 +260,29 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
+  async getAllUserFollowersByListTagSort(
+    token_id: string,
+    limit: string,
+    offset: string,
+    tags: string[],
+    sort: string
+  ): Promise<FollowerResponse[]> {
+    const query = sql<FollowerRow>`SELECT * FROM query.get_all_sorted_followers_by_list_tags(${token_id}, ${tags}, ${sort}) LIMIT ${limit} OFFSET ${offset}`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: FollowerRow) => ({
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      address: row.follower,
+      tags: row.tags?.sort() || [],
+      is_following: row.is_following,
+      is_blocked: row.is_blocked,
+      is_muted: row.is_muted
+    }))
+  }
+
   async getUserFollowersByListTagSort(
     token_id: string,
     limit: string,
@@ -337,6 +374,27 @@ export class EFPIndexerService implements IEFPIndexerService {
   async getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]> {
     const query = sql<FollowingRow>`SELECT * FROM query.get_following_by_list(${token_id})`
     const result = await query.execute(this.#db)
+
+    return result.rows.map((row: FollowingRow) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async getAllUserFollowingByListTagSort(
+    token_id: string,
+    limit: string,
+    offset: string,
+    tags: string[],
+    sort: string
+  ): Promise<TaggedListRecord[]> {
+    const query = sql<FollowingRow>`SELECT * FROM query.get_all_sorted_following_by_list_tags(${token_id}, ${tags}, ${sort}) LIMIT ${limit} OFFSET ${offset}`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
 
     return result.rows.map((row: FollowingRow) => ({
       version: row.record_version,
