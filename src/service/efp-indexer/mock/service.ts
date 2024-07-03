@@ -1,6 +1,6 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import type { FollowStateResponse, IEFPIndexerService, TagResponse, TagsResponse } from '../service'
+import type { FollowStateResponse, FollowerResponse, IEFPIndexerService, TagResponse, TagsResponse } from '../service'
 import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
@@ -66,11 +66,31 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getUserFollowersByListTagSort(
+    _token_id: string,
+    _limit: string,
+    _offset: string,
+    _tags: string[],
+    _sort: string
+  ): Promise<FollowerResponse[]> {
+    throw new Error('Method not implemented.')
+  }
+
   getUserFollowingCountByList(_token_id: string): Promise<number> {
     throw new Error('Method not implemented.')
   }
 
   getUserFollowingByList(_token_id: string, _limit: string, _offset: string): Promise<TaggedListRecord[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  getUserFollowingByListTagSort(
+    _token_id: string,
+    _limit: string,
+    _offset: string,
+    _tags: string[],
+    _sort: string
+  ): Promise<TaggedListRecord[]> {
     throw new Error('Method not implemented.')
   }
 
