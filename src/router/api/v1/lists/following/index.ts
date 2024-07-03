@@ -21,9 +21,7 @@ export function following(lists: Hono<{ Bindings: Environment }>, services: Serv
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/following', includeValidator, async context => {
     const { token_id } = context.req.param()
-
-    let limit = context.req.query('limit')
-    let offset = context.req.query('tags')
+    let { offset, limit } = context.req.valid('query')
 
     if (!limit || Number.isNaN(limit)) limit = '10'
     if (!offset || Number.isNaN(offset)) offset = '0'
@@ -46,8 +44,8 @@ export function following(lists: Hono<{ Bindings: Environment }>, services: Serv
     const efp: IEFPIndexerService = services.efp(env(context))
     const followingListRecords: FollowingResponse[] = await efp.getUserFollowingByListTagSort(
       token_id,
-      limit,
-      offset,
+      limit as string,
+      offset as string,
       tagsToSearch,
       direction
     )
