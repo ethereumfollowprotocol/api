@@ -12,29 +12,51 @@ import { isAddress } from '#/utilities'
 export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
 }
+const onlyLettersPattern = /^[A-Za-z]+$/
 
 /**
  * Enhanced to add ENS support
  */
 export function following(lists: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/following', includeValidator, async context => {
     const { token_id } = context.req.param()
-    let { offset, limit } = context.req.valid('query')
-    if (!limit) limit = '10'
-    if (!offset) offset = '0'
-    const ensService = services.ens(env(context))
+
+    let limit = context.req.query('limit')
+    let offset = context.req.query('tags')
+
+    if (!limit || Number.isNaN(limit)) limit = '10'
+    if (!offset || Number.isNaN(offset)) offset = '0'
+
     const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
 
     if (!listUser) {
       return context.json({ response: 'No User Found' }, 404)
     }
+
+    const tagsQuery = context.req.query('tags')
+    let tagsToSearch: string[] = []
+    if (tagsQuery) {
+      const tagsArray = tagsQuery.split(',')
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(onlyLettersPattern))
+    }
+
+    const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'
+
     const efp: IEFPIndexerService = services.efp(env(context))
-    const followingListRecords: FollowingResponse[] = await efp.getUserFollowingByList(token_id, limit, offset)
+    const followingListRecords: FollowingResponse[] = await efp.getUserFollowingByListTagSort(
+      token_id,
+      limit,
+      offset,
+      tagsToSearch,
+      direction
+    )
 
     let response: ENSFollowingResponse[]
 
     // Check if 'ens' information should be included
     if (context.req.query('include')?.includes('ens')) {
+      const ensService = services.ens(env(context))
       // Filter for address records
       const addressRecords = followingListRecords.filter(record => record.recordType === 1)
 
