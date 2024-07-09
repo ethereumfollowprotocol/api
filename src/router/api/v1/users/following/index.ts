@@ -12,11 +12,12 @@ import { isAddress } from '#/utilities'
 export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
 }
-
+const onlyLettersPattern = /^[A-Za-z]+$/
 /**
  * Enhanced to add ENS support
  */
 export function following(users: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   users.get('/:addressOrENS/following', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
     let { offset, limit } = context.req.valid('query')
@@ -27,8 +28,23 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
+
+    const tagsQuery = context.req.query('tags')
+    let tagsToSearch: string[] = []
+    if (tagsQuery) {
+      const tagsArray = tagsQuery.split(',')
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(onlyLettersPattern))
+    }
+    const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'
+
     const efp: IEFPIndexerService = services.efp(env(context))
-    const followingListRecords: FollowingResponse[] = await efp.getUserFollowing(address, limit, offset)
+    const followingListRecords: FollowingResponse[] = await efp.getUserFollowingByAddressTagSort(
+      address,
+      limit,
+      offset,
+      tagsToSearch,
+      direction
+    )
 
     let response: ENSFollowingResponse[]
 

@@ -9,6 +9,8 @@ import { isAddress } from '#/utilities'
 
 export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse }
 
+const onlyLettersPattern = /^[A-Za-z]+$/
+
 export function followers(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/followers', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
@@ -20,8 +22,18 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
-    const followers: FollowerResponse[] = await services.efp(env(context)).getUserFollowers(address, limit, offset)
 
+    const tagsQuery = context.req.query('tags')
+    let tagsToSearch: string[] = []
+    if (tagsQuery) {
+      const tagsArray = tagsQuery.split(',')
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(onlyLettersPattern))
+    }
+    const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'
+
+    const followers: FollowerResponse[] = await services
+      .efp(env(context))
+      .getUserFollowersByAddressTagSort(address, limit, offset, tagsToSearch, direction)
     let response: ENSFollowerResponse[] = followers
 
     if (include?.includes('ens')) {

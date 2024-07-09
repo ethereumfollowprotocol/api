@@ -83,6 +83,13 @@ export interface IEFPIndexerService {
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowerResponse[]>
+  getUserFollowersByAddressTagSort(
+    address: Address,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined,
+    tags: string[] | undefined,
+    sort: string | undefined
+  ): Promise<FollowerResponse[]>
   getUserFollowersByList(
     token_id: string,
     limit: string[] | string | undefined,
@@ -111,6 +118,13 @@ export interface IEFPIndexerService {
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowingResponse[]>
+  getUserFollowingByAddressTagSort(
+    address: Address,
+    limit: string[] | string | undefined,
+    offset: string[] | string | undefined,
+    tags: string[] | undefined,
+    sort: string | undefined
+  ): Promise<TaggedListRecord[]>
   getUserFollowingByList(
     token_id: string,
     limit: string[] | string | undefined,
@@ -169,28 +183,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result?.rows.length
   }
 
-  async getUserFollowers(
-    address: Address,
-    limit: string,
-    offset: string
-  ): Promise<
-    {
-      address: Address
-      tags: string[]
-      is_following: boolean
-      is_blocked: boolean
-      is_muted: boolean
-    }[]
-  > {
-    type Row = {
-      efp_list_nft_token_id: bigint
-      follower: Address
-      tags: string[] | null
-      is_following: boolean
-      is_blocked: boolean
-      is_muted: boolean
-    }
-    const query = sql<Row>`SELECT * FROM query.get_unique_followers_page(${address}, ${limit}, ${offset})`
+  async getUserFollowers(address: Address, limit: string, offset: string): Promise<FollowerResponse[]> {
+    const query = sql<FollowerRow>`SELECT * FROM query.get_unique_followers_page(${address}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -198,6 +192,29 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     return result.rows.map(row => ({
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      address: row.follower,
+      tags: row.tags?.sort() || [],
+      is_following: row.is_following,
+      is_blocked: row.is_blocked,
+      is_muted: row.is_muted
+    }))
+  }
+
+  async getUserFollowersByAddressTagSort(
+    address: Address,
+    limit: string,
+    offset: string,
+    tags: string[],
+    sort: string
+  ): Promise<FollowerResponse[]> {
+    const query = sql<FollowerRow>`SELECT * FROM query.get_sorted_followers_by_address_tags(${address}, ${tags}, ${sort}) LIMIT ${limit} OFFSET ${offset}`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: FollowerRow) => ({
       efp_list_nft_token_id: row.efp_list_nft_token_id,
       address: row.follower,
       tags: row.tags?.sort() || [],
@@ -320,6 +337,27 @@ export class EFPIndexerService implements IEFPIndexerService {
     const query = sql<FollowingRow>`SELECT * FROM query.get_following__record_type_page(${address}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: FollowingRow) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async getUserFollowingByAddressTagSort(
+    address: Address,
+    limit: string,
+    offset: string,
+    tags: string[],
+    sort: string
+  ): Promise<TaggedListRecord[]> {
+    const query = sql<FollowingRow>`SELECT * FROM query.get_sorted_following_by_address_tags(${address}, ${tags}, ${sort}) LIMIT ${limit} OFFSET ${offset}`
+    const result = await query.execute(this.#db)
     if (!result || result.rows.length === 0) {
       return []
     }
