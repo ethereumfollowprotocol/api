@@ -35,7 +35,7 @@ export function allFollowers(lists: Hono<{ Bindings: Environment }>, services: S
 
     const efp: IEFPIndexerService = services.efp(env(context))
 
-    const followers: FollowerResponse[] = await efp.getUserFollowersByListTagSort(
+    const followers: FollowerResponse[] = await efp.getAllUserFollowersByListTagSort(
       token_id,
       limit,
       offset,
