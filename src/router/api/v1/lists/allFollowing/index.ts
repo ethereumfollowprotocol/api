@@ -7,12 +7,11 @@ import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
 import { type PrettyTaggedListRecord, hexlify, prettifyListRecord } from '#/types/list-record'
-import { isAddress } from '#/utilities'
+import { textOrEmojiPattern } from '#/utilities'
 
 export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
 }
-const onlyLettersPattern = /^[A-Za-z]+$/
 
 /**
  * Enhanced to add ENS support
@@ -36,7 +35,7 @@ export function allFollowing(lists: Hono<{ Bindings: Environment }>, services: S
     let tagsToSearch: string[] = []
     if (tagsQuery) {
       const tagsArray = tagsQuery.split(',')
-      tagsToSearch = tagsArray.filter((tag: any) => tag.match(onlyLettersPattern))
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
     const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'

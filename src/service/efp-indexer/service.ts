@@ -410,7 +410,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]> {
-    const query = sql<FollowingRow>`SELECT * FROM query.get_following_by_list(${token_id})`
+    const query = sql<FollowingRow>`SELECT * FROM query.get_all_following_by_list(${token_id})`
     const result = await query.execute(this.#db)
 
     return result.rows.map((row: FollowingRow) => ({
