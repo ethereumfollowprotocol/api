@@ -5,11 +5,9 @@ import type { Services } from '#/service'
 import type { FollowerResponse, IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { Address, Environment } from '#/types'
-import { isAddress } from '#/utilities'
+import { textOrEmojiPattern } from '#/utilities'
 
 export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse }
-
-const onlyLettersPattern = /^[A-Za-z]+$/
 
 export function followers(lists: Hono<{ Bindings: Environment }>, services: Services) {
   lists.get('/:token_id/followers', includeValidator, async context => {
@@ -28,7 +26,7 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
     let tagsToSearch: string[] = []
     if (tagsQuery) {
       const tagsArray = tagsQuery.split(',')
-      tagsToSearch = tagsArray.filter((tag: any) => tag.match(onlyLettersPattern))
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
     const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'
