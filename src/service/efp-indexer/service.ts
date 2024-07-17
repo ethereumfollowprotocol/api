@@ -109,6 +109,7 @@ export interface IEFPIndexerService {
     tags: string[] | undefined,
     sort: string | undefined
   ): Promise<FollowerResponse[]>
+  getUserFollowerTags(address: Address): Promise<TagResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
   getUserFollowingByListRaw(token_id: string): Promise<TaggedListRecord[]>
   getUserFollowingCountByList(token_id: string): Promise<number>
@@ -321,6 +322,20 @@ export class EFPIndexerService implements IEFPIndexerService {
       is_blocked: row.is_blocked,
       is_muted: row.is_muted
     }))
+  }
+
+  async getUserFollowerTags(address: Address): Promise<TagResponse[]> {
+    const query = sql<{
+      address: Address
+      tag: string
+    }>`SELECT follower as address, UNNEST(tags) as tag FROM query.get_sorted_followers_by_address_tags(${address}, null, 'DESC') WHERE cardinality(tags) > 0`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows
   }
   /////////////////////////////////////////////////////////////////////////////
   // Following
