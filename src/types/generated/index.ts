@@ -277,6 +277,7 @@ export interface ViewJoinEfpListRecordsWithNftManagerUserTags {
   record_version: number | null
   tags: string[] | null
   token_id: Int8 | null
+  updated_at: Timestamp | null
   user: string | null
 }
 
