@@ -20,11 +20,17 @@ export function tags(users: Hono<{ Bindings: Environment }>, services: Services)
     // return context.json({ address, taggedAddresses: tagsResponse }, 200)
 
     const tags: string[] = []
+    const counts: any[] = []
     for (const tagResponse of tagsResponse) {
       if (!tags.includes(tagResponse.tag)) {
         tags.push(tagResponse.tag)
+        ;(counts as any)[tagResponse.tag] = 0
       }
+      ;(counts as any)[tagResponse.tag]++
     }
-    return context.json({ address, tags, taggedAddresses: tagsResponse }, 200)
+    const tagCounts = tags.map(tag => {
+      return { tag: tag, count: (counts as any)[tag] }
+    })
+    return context.json({ address, tags, tagCounts, taggedAddresses: tagsResponse }, 200)
   })
 }
