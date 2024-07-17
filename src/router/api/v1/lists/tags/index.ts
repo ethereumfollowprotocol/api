@@ -27,11 +27,17 @@ export function tags(lists: Hono<{ Bindings: Environment }>, services: Services)
 
     const tagsResponse: TagResponse[] = await efp.getTaggedAddressesByList(token_id)
     const tags: string[] = []
+    const counts: any[] = []
     for (const tagResponse of tagsResponse) {
       if (!tags.includes(tagResponse.tag)) {
         tags.push(tagResponse.tag)
+        ;(counts as any)[tagResponse.tag] = 0
       }
+      ;(counts as any)[tagResponse.tag]++
     }
-    return context.json({ token_id, tags, taggedAddresses: tagsResponse }, 200)
+    const tagCounts = tags.map(tag => {
+      return { tag: tag, count: (counts as any)[tag] }
+    })
+    return context.json({ token_id, tags, tagCounts, taggedAddresses: tagsResponse }, 200)
   })
 }
