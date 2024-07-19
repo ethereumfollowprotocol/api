@@ -5,8 +5,8 @@ import type { IEFPIndexerService, TagResponse } from '#/service/efp-indexer/serv
 import type { Address, Environment } from '#/types'
 import { isAddress } from '#/utilities'
 
-export function tags(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:addressOrENS/tags', async context => {
+export function taggedAs(users: Hono<{ Bindings: Environment }>, services: Services) {
+  users.get('/:addressOrENS/taggedAs', async context => {
     const { addressOrENS } = context.req.param()
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
@@ -15,11 +15,8 @@ export function tags(users: Hono<{ Bindings: Environment }>, services: Services)
     }
 
     const efp: IEFPIndexerService = services.efp(env(context))
-    const list_id = await efp.getUserPrimaryList(address)
-    if (!list_id) {
-      return context.json({ response: 'Primary List Not Found' }, 404)
-    }
-    const tagsResponse: TagResponse[] = await efp.getTaggedAddressesByList(list_id as unknown as string)
+
+    const tagsResponse: TagResponse[] = await efp.getUserFollowerTags(address)
 
     const tags: string[] = []
     const counts: any[] = []

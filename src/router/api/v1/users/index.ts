@@ -13,6 +13,7 @@ import { profile } from './profile'
 import { recommended } from './recommended'
 import { relationships } from './relationships'
 import { stats } from './stats'
+import { taggedAs } from './taggedAs'
 import { tags } from './tags'
 
 export function users(services: Services): Hono<{ Bindings: Environment }> {
@@ -30,6 +31,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   recommended(users, services)
   relationships(users, services)
   stats(users, services)
+  taggedAs(users, services)
   tags(users, services)
 
   users.get('/:addressOrENS', context =>
@@ -46,6 +48,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
           '/recommended',
           '/relationships',
           '/stats',
+          '/taggedAs',
           '/tags'
         ].join(', ')}`
       },
