@@ -116,6 +116,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getAllUserFollowingAddresses(_token_id: string): Promise<Address[]> {
+    throw new Error('Method not implemented.')
+  }
+
   getAllUserFollowingByListTagSort(
     _token_id: string,
     _limit: string,

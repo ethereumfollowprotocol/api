@@ -1,5 +1,6 @@
 import { type Kysely, type QueryResult, sql } from 'kysely'
 
+import { resize_img_browser } from 'node_modules/@cf-wasm/photon/dist/dts/lib/photon_rs'
 import { TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW } from '#/constant'
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
@@ -119,6 +120,7 @@ export interface IEFPIndexerService {
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowingResponse[]>
+  getAllUserFollowingAddresses(token_id: string): Promise<Address[]>
   getUserFollowingByAddressTagSort(
     address: Address,
     limit: string[] | string | undefined,
@@ -362,6 +364,17 @@ export class EFPIndexerService implements IEFPIndexerService {
       data: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
+  }
+
+  async getAllUserFollowingAddresses(token_id: string): Promise<Address[]> {
+    const query = sql<{
+      address: Address
+    }>`SELECT following_address as address FROM query.get_all_following_by_list(${token_id})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    return result.rows.map((row: { address: Address }) => row.address)
   }
 
   async getUserFollowingByAddressTagSort(
