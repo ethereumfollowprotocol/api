@@ -8,6 +8,7 @@ import { followers } from './followers'
 import { following } from './following'
 import { muted } from './muted'
 import { mutes } from './mutes'
+import { ranked } from './ranked'
 import { includeValidator, limitValidator } from './validators'
 
 export function leaderboard(services: Services): Hono<{ Bindings: Environment }> {
@@ -19,6 +20,7 @@ export function leaderboard(services: Services): Hono<{ Bindings: Environment }>
   following(leaderboard, services, limitValidator, includeValidator)
   muted(leaderboard, services, limitValidator, includeValidator)
   mutes(leaderboard, services, limitValidator, includeValidator)
+  ranked(leaderboard, services, limitValidator, includeValidator)
 
   return leaderboard
 }

@@ -41,6 +41,18 @@ export interface EfpAccountMetadata {
   value: string
 }
 
+export interface EfpLeaderboard {
+  address: string
+  avatar: string | null
+  blocks: Int8 | null
+  created_at: Generated<Timestamp | null>
+  followers: Int8 | null
+  following: Int8 | null
+  mutuals: Int8 | null
+  name: string
+  updated_at: Generated<Timestamp | null>
+}
+
 export interface EfpListMetadata {
   chain_id: Int8
   contract_address: string
@@ -300,6 +312,7 @@ export interface ViewLatestFollows {
 export interface DB {
   contracts: Contracts
   efp_account_metadata: EfpAccountMetadata
+  efp_leaderboard: EfpLeaderboard
   efp_list_metadata: EfpListMetadata
   efp_list_nfts: EfpListNfts
   efp_list_ops: EfpListOps
