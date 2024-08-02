@@ -1,6 +1,13 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
-import type { FollowStateResponse, FollowerResponse, IEFPIndexerService, TagResponse, TagsResponse } from '../service'
+import type {
+  FollowStateResponse,
+  FollowerResponse,
+  IEFPIndexerService,
+  LeaderBoardRow,
+  TagResponse,
+  TagsResponse
+} from '../service'
 import { type SocialGraph, makeSocialGraph } from './social-graph'
 
 export class MockEFPIndexerService implements IEFPIndexerService {
@@ -192,6 +199,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
 
   async getLeaderboardFollowing(limit: number): Promise<{ rank: number; address: Address; following_count: number }[]> {
     return (await this.#socialGraph.getLeaderboardFollowing(limit)).map((item, index) => ({ rank: index + 1, ...item }))
+  }
+
+  getLeaderboardRanked(_limit: number, _offset: number, _sort: string, _direction: string): Promise<LeaderBoardRow[]> {
+    throw new Error('Method not implemented.')
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>

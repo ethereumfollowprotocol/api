@@ -47,6 +47,17 @@ export type FollowerRow = {
   is_muted: boolean
 }
 
+export type LeaderBoardRow = {
+  address: Address
+  name: string | undefined
+  avatar: string | undefined
+  mutuals_rank: number
+  mutuals: number
+  following: number
+  followers: number
+  blocks: number
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -57,6 +68,12 @@ export interface IEFPIndexerService {
   getLeaderboardFollowing(limit: number): Promise<{ rank: number; address: Address; following_count: number }[]>
   getLeaderboardMuted(limit: number): Promise<{ rank: number; address: Address; muted_by_count: number }[]>
   getLeaderboardMutes(limit: number): Promise<{ rank: number; address: Address; mutes_count: number }[]>
+  getLeaderboardRanked(
+    limit: number,
+    offset: number,
+    sort: string | undefined,
+    direction: string | undefined
+  ): Promise<LeaderBoardRow[]>
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
   getDebugTotalSupply(): Promise<number>
@@ -613,6 +630,30 @@ export class EFPIndexerService implements IEFPIndexerService {
       rank: index + 1,
       address: row.address,
       mutes_count: row.mutes_count
+    }))
+  }
+
+  async getLeaderboardRanked(
+    limit: number,
+    offset: number,
+    sort: string | undefined,
+    direction: string
+  ): Promise<LeaderBoardRow[]> {
+    const query = sql<LeaderBoardRow>`SELECT * FROM query.get_leaderboard_ranked(${limit}, ${offset}, ${sort}, ${direction})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: LeaderBoardRow) => ({
+      address: row.address,
+      name: row.name,
+      avatar: row.avatar,
+      mutuals_rank: row.mutuals_rank,
+      mutuals: row.mutuals,
+      following: row.following,
+      followers: row.followers,
+      blocks: row.blocks
     }))
   }
 
