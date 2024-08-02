@@ -641,7 +641,6 @@ export class EFPIndexerService implements IEFPIndexerService {
   ): Promise<LeaderBoardRow[]> {
     const query = sql<LeaderBoardRow>`SELECT * FROM query.get_leaderboard_ranked(${limit}, ${offset}, ${sort}, ${direction})`
     const result = await query.execute(this.#db)
-    console.log('result', result)
     if (!result || result.rows.length === 0) {
       return []
     }
