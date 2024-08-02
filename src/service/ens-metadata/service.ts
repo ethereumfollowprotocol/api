@@ -38,7 +38,7 @@ export class ENSMetadataService implements IENSMetadataService {
     this.#env = env
   }
 
-  url = 'https://ens.efp.workers.dev'
+  url = 'https://ens.evm.workers.dev'
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
     if (isAddress(ensNameOrAddress)) {
