@@ -28,10 +28,10 @@ export function ranked(
 
     const parsedLimit = Number.parseInt(limit as string, 10)
     const offsetLimit = Number.parseInt(offset as string, 10)
-    const mostFollowing: LeaderBoardRow[] = await services
+    const ranked: LeaderBoardRow[] = await services
       .efp(env(context))
       .getLeaderboardRanked(parsedLimit, offsetLimit, sort, direction)
 
-    return context.json(mostFollowing, 200)
+    return context.json(ranked, 200)
   })
 }

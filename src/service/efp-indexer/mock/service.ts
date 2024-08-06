@@ -210,6 +210,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getLeaderboardCount(): Promise<number> {
+    throw new Error('Method not implemented.')
+  }
+
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getListStorageLocation(_tokenId: bigint): Promise<Address | undefined> {
     throw new Error('MockEFPIndexerService::getListStorageLocation not implemented.')

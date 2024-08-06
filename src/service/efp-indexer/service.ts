@@ -84,6 +84,7 @@ export interface IEFPIndexerService {
     sort: string | undefined,
     direction: string | undefined
   ): Promise<LeaderBoardRow[]>
+  getLeaderboardCount(): Promise<number>
   getUserRanks(address: Address): Promise<RankRow>
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
@@ -669,6 +670,16 @@ export class EFPIndexerService implements IEFPIndexerService {
       followers: row.followers,
       blocks: row.blocks
     }))
+  }
+
+  async getLeaderboardCount(): Promise<number> {
+    const query = sql<{ count: number }>`SELECT COUNT(*) FROM public.efp_leaderboard`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return 0
+    }
+
+    return result.rows[0] ? result.rows[0]?.count : 0
   }
 
   async getUserRanks(address: Address): Promise<RankRow> {
