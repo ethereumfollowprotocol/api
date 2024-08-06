@@ -16,6 +16,7 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const primaryList = await efp.getUserPrimaryList(address)
+    const ranks = await efp.getUserRanks(address)
 
     const stats = {
       followers_count: await efp.getUserFollowersCount(address),
@@ -23,6 +24,6 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
     }
 
     const response = { address } as Record<string, unknown>
-    return context.json({ ...response, ens, stats, primary_list: primaryList?.toString() ?? null }, 200)
+    return context.json({ ...response, ens, ranks, stats, primary_list: primaryList?.toString() ?? null }, 200)
   })
 }

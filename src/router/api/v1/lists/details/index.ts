@@ -16,6 +16,7 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
     }
     const { address, ...ens }: ENSProfile = await ensService.getENSProfile(listUser.toLowerCase())
     const primaryList = await efp.getUserPrimaryList(address)
+    const ranks = await efp.getUserRanks(address)
 
     const stats = {
       followers_count: await efp.getUserFollowersCountByList(token_id),
@@ -23,6 +24,6 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
     }
 
     const response = { address } as Record<string, unknown>
-    return context.json({ ...response, ens, stats, primary_list: primaryList?.toString() ?? null }, 200)
+    return context.json({ ...response, ens, ranks, stats, primary_list: primaryList?.toString() ?? null }, 200)
   })
 }
