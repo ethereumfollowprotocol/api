@@ -45,9 +45,12 @@ export interface EfpLeaderboard {
   address: string
   avatar: string | null
   blocks: Generated<Int8 | null>
+  blocks_rank: Int8 | null
   created_at: Generated<Timestamp | null>
   followers: Generated<Int8 | null>
+  followers_rank: Int8 | null
   following: Generated<Int8 | null>
+  following_rank: Int8 | null
   mutuals: Generated<Int8 | null>
   mutuals_rank: Int8 | null
   name: string | null
@@ -282,8 +285,13 @@ export interface ViewEventsLatestRecordTags {
 export interface ViewJoinEfpLeaderboard {
   address: string | null
   blocks: Int8 | null
+  blocks_rank: Int8 | null
+  ens_avatar: string | null
+  ens_name: string | null
   followers: Int8 | null
+  followers_rank: Int8 | null
   following: Int8 | null
+  following_rank: Int8 | null
   mutuals: Int8 | null
   mutuals_rank: Int8 | null
 }

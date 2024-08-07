@@ -22,6 +22,22 @@ export function discover(services: Services): Hono<{ Bindings: Environment }> {
       }
       return context.json({ discover: profiles }, 200)
     }
+    if (context.req.query('include')?.includes('counts')) {
+      const discoverAccounts: { address: Address; followingCount: number; followersCount: number }[] = []
+      for (const address of latestFollows) {
+        const followersCount: number = await efp.getUserFollowersCount(address)
+        let followingCount = 0
+        const primaryList = await efp.getUserPrimaryList(address)
+        if (primaryList === undefined) {
+          followingCount = 0
+        } else {
+          followingCount = await efp.getUserFollowingCountByList(primaryList as unknown as string)
+        }
+        discoverAccounts.push({ address, followersCount, followingCount })
+      }
+
+      return context.json({ discover: discoverAccounts }, 200)
+    }
     return context.json(
       {
         discover: latestFollows.map(address => {
