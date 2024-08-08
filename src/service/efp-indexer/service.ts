@@ -86,6 +86,7 @@ export interface IEFPIndexerService {
   ): Promise<LeaderBoardRow[]>
   getLeaderboardCount(): Promise<number>
   getUserRanks(address: Address): Promise<RankRow>
+  searchLeaderboard(term: string): Promise<LeaderBoardRow[]>
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
   getDebugTotalSupply(): Promise<number>
@@ -700,6 +701,28 @@ export class EFPIndexerService implements IEFPIndexerService {
       following_rank: result.rows[0] ? result.rows[0]?.following_rank : 0,
       blocks_rank: result.rows[0] ? result.rows[0]?.blocks_rank : 0
     }
+  }
+
+  async searchLeaderboard(term: string): Promise<LeaderBoardRow[]> {
+    const query = sql<LeaderBoardRow>`SELECT * FROM query.search_leaderboard(${term})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: LeaderBoardRow) => ({
+      address: row.address,
+      name: row.name,
+      avatar: row.avatar,
+      mutuals_rank: row.mutuals_rank,
+      followers_rank: row.followers_rank,
+      following_rank: row.following_rank,
+      blocks_rank: row.blocks_rank,
+      mutuals: row.mutuals,
+      following: row.following,
+      followers: row.followers,
+      blocks: row.blocks
+    }))
   }
 
   /////////////////////////////////////////////////////////////////////////////

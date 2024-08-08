@@ -6,18 +6,12 @@ import type { LeaderBoardRow } from '#/service/efp-indexer/service'
 import type { Environment } from '#/types'
 import type { IncludeValidator, LimitValidator } from '../validators'
 
-/**
- * TODO: add support for whether :addressOrENS is followed, is following, is muting, is blocking, is blocked by
- */
 export function ranked(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
   limitValidator: LimitValidator,
   includeValidator: IncludeValidator
 ) {
-  /**
-   * Same as /followers, but for following.
-   */
   leaderboard.get('/ranked', limitValidator, includeValidator, async context => {
     let { limit, offset } = context.req.valid('query')
 
