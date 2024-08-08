@@ -12,7 +12,6 @@ export function count(
   limitValidator: LimitValidator,
   includeValidator: IncludeValidator
 ) {
-    
   leaderboard.get('/count', limitValidator, includeValidator, async context => {
     const efp = await services.efp(env(context))
     const leaderboardCount: number = await efp.getLeaderboardCount()
