@@ -59,6 +59,7 @@ export type LeaderBoardRow = {
   following: number
   followers: number
   blocks: number
+  updated_at: string
 }
 
 export type RankRow = {
@@ -669,7 +670,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       mutuals: row.mutuals,
       following: row.following,
       followers: row.followers,
-      blocks: row.blocks
+      blocks: row.blocks,
+      updated_at: row.updated_at
     }))
   }
 
@@ -721,7 +723,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       mutuals: row.mutuals,
       following: row.following,
       followers: row.followers,
-      blocks: row.blocks
+      blocks: row.blocks,
+      updated_at: row.updated_at
     }))
   }
 

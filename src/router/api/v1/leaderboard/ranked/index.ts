@@ -22,10 +22,10 @@ export function ranked(
 
     const parsedLimit = Number.parseInt(limit as string, 10)
     const offsetLimit = Number.parseInt(offset as string, 10)
-    const ranked: LeaderBoardRow[] = await services
-      .efp(env(context))
-      .getLeaderboardRanked(parsedLimit, offsetLimit, sort, direction)
+    const efp = services.efp(env(context))
+    const results: LeaderBoardRow[] = await efp.getLeaderboardRanked(parsedLimit, offsetLimit, sort, direction)
+    const last_updated = results.length > 0 ? results[0]?.updated_at : '0'
 
-    return context.json(ranked, 200)
+    return context.json({ last_updated, results }, 200)
   })
 }

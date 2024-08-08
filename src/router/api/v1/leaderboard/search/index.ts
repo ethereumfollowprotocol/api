@@ -17,14 +17,15 @@ export function search(
     let term = context.req.query('term')
 
     if (!term?.match(textOrEmojiPattern)) {
-      return context.json({ searchResults: [] }, 200)
+      return context.json({ results: [] }, 200)
     }
     if (!isAddress(term as string)) {
       term = term?.toLowerCase()
     }
     const efp = services.efp(env(context))
-    const searchResults: LeaderBoardRow[] = await efp.searchLeaderboard(term as string)
+    const results: LeaderBoardRow[] = await efp.searchLeaderboard(term as string)
+    const last_updated = results.length > 0 ? results[0]?.updated_at : '0'
 
-    return context.json({ searchResults }, 200)
+    return context.json({ last_updated, results }, 200)
   })
 }
