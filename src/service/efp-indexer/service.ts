@@ -745,7 +745,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     type Row = {
       address: Address
     }
-    const query = sql<Row>`SELECT * FROM public.view__latest_follows;`
+    const query = sql<Row>`SELECT DISTINCT * FROM public.view__latest_follows;`
     const result = await query.execute(this.#db)
     const addresses: Address[] = result.rows.map(record => record.address)
     return addresses
