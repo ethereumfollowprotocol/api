@@ -1,7 +1,7 @@
 import { type Kysely, type QueryResult, sql } from 'kysely'
 
 import { resize_img_browser } from 'node_modules/@cf-wasm/photon/dist/dts/lib/photon_rs'
-import { TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW } from '#/constant'
+import { NETWORKED_WALLET, TEAM_BRANTLY, TEAM_ENCRYPTEDDEGEN, TEAM_THROW } from '#/constant'
 import { database } from '#/database'
 import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
@@ -1000,7 +1000,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     const AIRSTACK_API_URL = 'https://api.airstack.xyz/graphql'
     const AIRSTACK_API_KEY = this.#env.AIRSTACK_API_KEY
     if (!AIRSTACK_API_KEY) throw new Error('AIRSTACK_API_KEY not set')
-    const seedAddress = seed ? seed : TEAM_BRANTLY
+    const seedAddress = seed ? seed : NETWORKED_WALLET
     let query = `query GetNFTs {
         ethereum: TokenBalances(
           input: {
