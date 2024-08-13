@@ -316,6 +316,26 @@ export interface ViewJoinEfpListRecordsWithNftManagerUserTags {
   user: string | null
 }
 
+export interface ViewJoinEfpListRecordsWithNftManagerUserTagsNoPrim {
+  has_block_tag: boolean | null
+  has_mute_tag: boolean | null
+  list_storage_location_chain_id: Int8 | null
+  list_storage_location_contract_address: string | null
+  list_storage_location_slot: Buffer | null
+  manager: string | null
+  nft_chain_id: Int8 | null
+  nft_contract_address: string | null
+  owner: string | null
+  record: Buffer | null
+  record_data: Buffer | null
+  record_type: number | null
+  record_version: number | null
+  tags: string[] | null
+  token_id: Int8 | null
+  updated_at: Timestamp | null
+  user: string | null
+}
+
 export interface ViewJoinEfpListRecordsWithTags {
   chain_id: Int8 | null
   contract_address: string | null
@@ -359,6 +379,7 @@ export interface DB {
   view__events__latest_record_tags: ViewEventsLatestRecordTags
   view__join__efp_leaderboard: ViewJoinEfpLeaderboard
   view__join__efp_list_records_with_nft_manager_user_tags: ViewJoinEfpListRecordsWithNftManagerUserTags
+  view__join__efp_list_records_with_nft_manager_user_tags_no_prim: ViewJoinEfpListRecordsWithNftManagerUserTagsNoPrim
   view__join__efp_list_records_with_tags: ViewJoinEfpListRecordsWithTags
   view__latest_follows: ViewLatestFollows
 }

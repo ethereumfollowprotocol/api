@@ -1,6 +1,7 @@
 import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type {
+  CommonFollowers,
   FollowStateResponse,
   FollowerResponse,
   IEFPIndexerService,
@@ -17,6 +18,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   constructor() {
     // apiLogger.info('Using MockEFPIndexerService')
     this.#socialGraph = makeSocialGraph()
+  }
+
+  getCommonFollowers(_user: Address, _target: Address): Promise<CommonFollowers[]> {
+    throw new Error('Method not implemented.')
   }
   getDebugNumEvents(): Promise<number> {
     throw new Error('Method not implemented.')

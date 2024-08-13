@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
+import { commonFollowers } from './commonFollowers'
 import { details } from './details'
 import { ens } from './ens'
 import { followers } from './followers'
@@ -20,6 +21,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   const users = new Hono<{ Bindings: Environment }>()
 
   // ENS profile metadata
+  commonFollowers(users, services)
   details(users, services)
   ens(users, services)
   followers(users, services)
@@ -38,6 +40,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
     context.json(
       {
         message: `Not a valid endpoint. Available subpaths: ${[
+          '/commonFollowers',
           '/details',
           '/ens',
           '/followers',

@@ -7,6 +7,13 @@ import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
 import { type ListRecord, type TaggedListRecord, hexlify } from '#/types/list-record'
 
+export type CommonFollowers = {
+  address: Address
+  name: string
+  avatar: string
+  mutuals_rank: number
+}
+
 export type FollowerResponse = {
   address: `0x${string}`
   tags: string[]
@@ -73,6 +80,7 @@ export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
   getAddressByList(token_id: string): Promise<Address | undefined>
+  getCommonFollowers(user: Address, target: Address): Promise<CommonFollowers[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
   getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: Address; blocks_count: number }[]>
   getLeaderboardFollowers(limit: number): Promise<{ rank: number; address: Address; followers_count: number }[]>
@@ -406,6 +414,16 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
     return result.rows.map((row: { address: Address }) => row.address)
+  }
+
+  async getCommonFollowers(user: Address, target: Address): Promise<CommonFollowers[]> {
+    const query = sql<CommonFollowers>`SELECT * FROM query.get_common_followers_by_address(${user}, ${target})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    // return result.rows.map((row: { address: Address }) => row.address)
+    return result.rows
   }
 
   async getUserFollowingByAddressTagSort(
