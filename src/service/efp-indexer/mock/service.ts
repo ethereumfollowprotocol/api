@@ -8,6 +8,7 @@ import type {
   IEFPIndexerService,
   LeaderBoardRow,
   RankRow,
+  RecommendedRow,
   TagResponse,
   TagsResponse
 } from '../service'
@@ -260,8 +261,13 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     }
   }
 
-  async getRecommended(_address: Address): Promise<Address[]> {
-    return (await []) as Address[]
+  async getRecommended(
+    _address: `0x${string}`,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]> {
+    return (await []) as RecommendedRow[]
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>

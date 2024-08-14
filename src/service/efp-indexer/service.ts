@@ -84,6 +84,12 @@ export type DiscoverRow = {
   following: number
 }
 
+export type RecommendedRow = {
+  address: Address
+  name: string
+  avatar: string
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -121,7 +127,7 @@ export interface IEFPIndexerService {
   ): Promise<{ token_id: bigint; list_user: Address; tags: string[] }[]>
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
-  getRecommended(address: Address, seed: Address | undefined): Promise<Address[]>
+  getRecommended(address: Address, seed: Address | undefined, limit: string, offset: string): Promise<RecommendedRow[]>
   getTaggedAddressesByList(token_id: string): Promise<TagResponse[]>
   getTaggedAddressesByTags(token_id: string, tags: string[] | undefined): Promise<TagsResponse[]>
   getUserFollowersCount(address: Address): Promise<number>
@@ -995,7 +1001,27 @@ export class EFPIndexerService implements IEFPIndexerService {
   // Recommendations
   /////////////////////////////////////////////////////////////////////////////
 
-  async getRecommended(address: Address, seed: Address | undefined): Promise<Address[]> {
+  async getRecommended(
+    _address: `0x${string}`,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]> {
+    const query = sql<RecommendedRow>`SELECT * FROM public.view__events__efp_recommended`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    return result.rows
+  }
+
+  async getRecommendedFallback(
+    address: Address,
+    seed: Address | undefined,
+    limit: string,
+    offset: string
+  ): Promise<Address[]> {
     interface QueryResponse {
       data: Data
     }
@@ -1112,7 +1138,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     const following = await this.getUserFollowingRaw(address)
     const addresses: Address[] = following.map(record => hexlify(record.data))
     const followingFiltered = paramFilteredAddresses.filter(addr => !addresses.includes(addr))
-    const accountList = followingFiltered?.slice(0, 20)
+    const accountList = followingFiltered?.slice(Number.parseInt(offset), Number.parseInt(limit))
 
     const rand = Math.floor(Math.random() * 100)
     if (rand < 10) {
