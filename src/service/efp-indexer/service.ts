@@ -76,6 +76,14 @@ export type RankRow = {
   blocks_rank: number
 }
 
+export type DiscoverRow = {
+  address: Address
+  name: string
+  avatar: string
+  followers: number
+  following: number
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -99,7 +107,7 @@ export interface IEFPIndexerService {
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
   getDebugTotalSupply(): Promise<number>
-  getDiscoverAccounts(): Promise<Address[]>
+  getDiscoverAccounts(): Promise<DiscoverRow[]>
   // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
@@ -759,17 +767,22 @@ export class EFPIndexerService implements IEFPIndexerService {
   //   return (result?.list_storage_location as Address) || undefined
   // }
 
-  async getDiscoverAccounts(): Promise<Address[]> {
-    type Row = {
-      address: Address
-    }
-    const query = sql<Row>`SELECT * FROM public.view__latest_follows;`
+  //   async getDiscoverAccounts(): Promise<Address[]> {
+  //     type Row = {
+  //       address: Address
+  //     }
+  //     const query = sql<Row>`SELECT * FROM public.view__latest_follows;`
+  //     const result = await query.execute(this.#db)
+  //     const addresses: Address[] = result.rows.map(record => record.address)
+  //     const dedupedAddresses = addresses?.filter((address: string, index: Number) => addresses.indexOf(address) === index)
+  //     return dedupedAddresses
+  //   }
+  async getDiscoverAccounts(): Promise<DiscoverRow[]> {
+    const query = sql<DiscoverRow>`SELECT * FROM public.view__discover;`
     const result = await query.execute(this.#db)
-    const addresses: Address[] = result.rows.map(record => record.address)
-    const dedupedAddresses = addresses?.filter((address: string, index: Number) => addresses.indexOf(address) === index)
-    return dedupedAddresses
+    const discovers: DiscoverRow[] = result.rows.map(record => record)
+    return discovers
   }
-
   /////////////////////////////////////////////////////////////////////////////
   // Debug
   /////////////////////////////////////////////////////////////////////////////

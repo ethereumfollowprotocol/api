@@ -2,6 +2,7 @@ import type { Address } from '#/types'
 import type { ListRecord, TaggedListRecord } from '#/types/list-record'
 import type {
   CommonFollowers,
+  DiscoverRow,
   FollowStateResponse,
   FollowerResponse,
   IEFPIndexerService,
@@ -37,8 +38,8 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
-  async getDiscoverAccounts(): Promise<Address[]> {
-    return (await []) as Address[]
+  async getDiscoverAccounts(): Promise<DiscoverRow[]> {
+    return (await []) as DiscoverRow[]
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>
