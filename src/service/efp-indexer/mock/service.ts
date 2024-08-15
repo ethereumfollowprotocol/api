@@ -123,6 +123,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getListFollowerTags(_list: string): Promise<TagResponse[]> {
+    throw new Error('Method not implemented.')
+  }
+
   getUserFollowingCountByList(_token_id: string): Promise<number> {
     throw new Error('Method not implemented.')
   }

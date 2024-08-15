@@ -13,11 +13,12 @@ export function taggedAs(lists: Hono<{ Bindings: Environment }>, services: Servi
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const address = await efp.getAddressByList(token_id)
+    console.log('address: ', address)
     if (!(address && isAddress(address))) {
       return context.json({ response: 'Primary List Not Found' }, 404)
     }
 
-    const tagsResponse: TagResponse[] = await efp.getUserFollowerTags(address)
+    const tagsResponse: TagResponse[] = await efp.getListFollowerTags(token_id)
 
     const tags: string[] = []
     const counts: any[] = []
