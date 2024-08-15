@@ -5,6 +5,7 @@ import type { Environment } from '#/types'
 import { commonFollowers } from './commonFollowers'
 import { details } from './details'
 import { ens } from './ens'
+import { followerState } from './followerState'
 import { followers } from './followers'
 import { following } from './following'
 import { listRecords } from './list-records'
@@ -25,6 +26,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   details(users, services)
   ens(users, services)
   followers(users, services)
+  followerState(users, services)
   following(users, services)
   listRecords(users, services)
   lists(users, services)
@@ -44,6 +46,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
           '/details',
           '/ens',
           '/followers',
+          '/followerState',
           '/following',
           '/lists',
           '/primary-list',

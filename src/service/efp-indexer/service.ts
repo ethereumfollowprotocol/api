@@ -163,6 +163,7 @@ export interface IEFPIndexerService {
     tags: string[] | undefined,
     sort: string | undefined
   ): Promise<FollowerResponse[]>
+  getUserFollowerState(addressUser: Address, addressFollower: Address): Promise<FollowStateResponse>
   getUserFollowerTags(address: Address): Promise<TagResponse[]>
   getListFollowerTags(list: string): Promise<TagResponse[]>
   getUserFollowingCount(address: Address): Promise<number>
@@ -936,6 +937,31 @@ export class EFPIndexerService implements IEFPIndexerService {
 
   async getListFollowerState(tokenId: string, address: Address): Promise<FollowStateResponse> {
     const query = sql<Row>`SELECT * FROM query.get_list_follower_state(${tokenId}, ${address})`
+    const result = await query.execute(this.#db)
+
+    type Row = {
+      is_follower: boolean
+      is_blocking: boolean
+      is_muting: boolean
+    }
+
+    if (!result || result.rows.length === 0) {
+      return {
+        follow: false,
+        block: false,
+        mute: false
+      }
+    }
+
+    return {
+      follow: result.rows[0]?.is_follower ?? false,
+      block: result.rows[0]?.is_blocking ?? false,
+      mute: result.rows[0]?.is_muting ?? false
+    }
+  }
+
+  async getUserFollowerState(addressUser: Address, addressFollower: Address): Promise<FollowStateResponse> {
+    const query = sql<Row>`SELECT * FROM query.get_user_follower_state(${addressUser}, ${addressFollower})`
     const result = await query.execute(this.#db)
 
     type Row = {

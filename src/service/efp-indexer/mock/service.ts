@@ -257,6 +257,14 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     }
   }
 
+  async getUserFollowerState(_addressUser: Address, _addressFollower: Address): Promise<FollowStateResponse> {
+    return await {
+      follow: false,
+      block: false,
+      mute: false
+    }
+  }
+
   async getListFollowingState(_tokenId: string, _address: Address): Promise<FollowStateResponse> {
     return await {
       follow: false,
