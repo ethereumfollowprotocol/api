@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
+import { account } from './account'
 import { allFollowers } from './allFollowers'
 import { allFollowing } from './allFollowing'
 import { allFollowingAddresses } from './allFollowingAddresses'
@@ -16,6 +17,7 @@ import { tags } from './tags'
 
 export function lists(services: Services): Hono<{ Bindings: Environment }> {
   const lists = new Hono<{ Bindings: Environment }>()
+  account(lists, services)
   allFollowers(lists, services)
   allFollowing(lists, services)
   allFollowingAddresses(lists, services)
