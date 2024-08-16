@@ -90,6 +90,12 @@ export type RecommendedRow = {
   avatar: string
 }
 
+export type StatsRow = {
+  address_count: number
+  list_count: number
+  list_op_count: number
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export interface IEFPIndexerService {
@@ -128,6 +134,7 @@ export interface IEFPIndexerService {
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
   getRecommended(address: Address, seed: Address | undefined, limit: string, offset: string): Promise<RecommendedRow[]>
+  getStats(): Promise<StatsRow>
   getTaggedAddressesByList(token_id: string): Promise<TagResponse[]>
   getTaggedAddressesByTags(token_id: string, tags: string[] | undefined): Promise<TagsResponse[]>
   getUserFollowersCount(address: Address): Promise<number>
@@ -1041,6 +1048,23 @@ export class EFPIndexerService implements IEFPIndexerService {
   /////////////////////////////////////////////////////////////////////////////
   // Recommendations
   /////////////////////////////////////////////////////////////////////////////
+  async getStats(): Promise<StatsRow> {
+    const query = sql<StatsRow>`SELECT * FROM public.view__efp_stats`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return {
+        address_count: 0,
+        list_count: 0,
+        list_op_count: 0
+      }
+    }
+    return {
+      address_count: result.rows[0]?.address_count as number,
+      list_count: result.rows[0]?.list_count as number,
+      list_op_count: result.rows[0]?.list_op_count as number
+    }
+  }
 
   async getRecommended(
     _address: `0x${string}`,

@@ -9,6 +9,7 @@ import type {
   LeaderBoardRow,
   RankRow,
   RecommendedRow,
+  StatsRow,
   TagResponse,
   TagsResponse
 } from '../service'
@@ -271,6 +272,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
       block: false,
       mute: false
     }
+  }
+
+  getStats(): Promise<StatsRow> {
+    throw new Error('Method not implemented.')
   }
 
   async getRecommended(
