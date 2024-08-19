@@ -14,6 +14,8 @@ import { primaryList } from './primary-list'
 import { profile } from './profile'
 import { recommended } from './recommended'
 import { relationships } from './relationships'
+import { searchFollowers } from './searchFollowers'
+import { searchFollowing } from './searchFollowing'
 import { stats } from './stats'
 import { taggedAs } from './taggedAs'
 import { tags } from './tags'
@@ -34,6 +36,8 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   profile(users, services)
   recommended(users, services)
   relationships(users, services)
+  searchFollowers(users, services)
+  searchFollowing(users, services)
   stats(users, services)
   taggedAs(users, services)
   tags(users, services)
@@ -53,6 +57,8 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
           '/profile',
           '/recommended',
           '/relationships',
+          '/searchFollowers',
+          '/searchFollowing',
           '/stats',
           '/taggedAs',
           '/tags'

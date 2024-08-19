@@ -45,6 +45,11 @@ export type FollowingRow = {
   tags: string[]
 }
 
+export type SearchFollowingRow = FollowingRow & {
+  name: string | null
+  avatar: string | null
+}
+
 export type FollowerRow = {
   efp_list_nft_token_id: bigint
   follower: Address
@@ -52,6 +57,11 @@ export type FollowerRow = {
   is_following: boolean
   is_blocked: boolean
   is_muted: boolean
+}
+
+export type SearchFollowerRow = FollowerRow & {
+  name: string | null
+  avatar: string | null
 }
 
 export type LeaderBoardRow = {
@@ -97,6 +107,13 @@ export type StatsRow = {
 }
 
 export type FollowingResponse = TaggedListRecord
+
+export type ENSTaggedListRecord = TaggedListRecord & {
+  ens?: {
+    name: string | null
+    avatar: string | null
+  }
+}
 
 export interface IEFPIndexerService {
   getAddressByList(token_id: string): Promise<Address | undefined>
@@ -212,6 +229,20 @@ export interface IEFPIndexerService {
   getUserListRecords(address: Address): Promise<TaggedListRecord[]>
   getUserLists(address: Address): Promise<number[]>
   getUserPrimaryList(address: Address): Promise<bigint | undefined>
+  searchUserFollowersByAddress(
+    address: Address,
+    limit: string,
+    offset: string,
+    term: string
+  ): Promise<FollowerResponse[]>
+  searchUserFollowersByList(list: string, limit: string, offset: string, term: string): Promise<FollowerResponse[]>
+  searchUserFollowingByAddress(
+    address: Address,
+    limit: string,
+    offset: string,
+    term: string
+  ): Promise<ENSTaggedListRecord[]>
+  searchUserFollowingByList(list: string, limit: string, offset: string, term: string): Promise<ENSTaggedListRecord[]>
 }
 
 function bufferize(data: Uint8Array | string): Buffer {
@@ -289,6 +320,57 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
+  async searchUserFollowersByAddress(
+    address: Address,
+    limit: string,
+    offset: string,
+    term: string
+  ): Promise<FollowerResponse[]> {
+    const query = sql<SearchFollowerRow>`SELECT * FROM query.search_followers_by_address(${address}, ${term}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: SearchFollowerRow) => ({
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      address: row.follower,
+      ens: {
+        name: row.name,
+        avatar: row.avatar
+      },
+      tags: row.tags?.sort() || [],
+      is_following: row.is_following,
+      is_blocked: row.is_blocked,
+      is_muted: row.is_muted
+    }))
+  }
+
+  async searchUserFollowersByList(
+    list: string,
+    limit: string,
+    offset: string,
+    term: string
+  ): Promise<FollowerResponse[]> {
+    const query = sql<SearchFollowerRow>`SELECT * FROM query.search_followers_by_list(${list}, ${term}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: SearchFollowerRow) => ({
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      address: row.follower,
+      ens: {
+        name: row.name,
+        avatar: row.avatar
+      },
+      tags: row.tags?.sort() || [],
+      is_following: row.is_following,
+      is_blocked: row.is_blocked,
+      is_muted: row.is_muted
+    }))
+  }
   async getUserFollowersCountByList(token_id: string): Promise<number> {
     type Row = {
       efp_list_nft_token_id: bigint
@@ -480,6 +562,54 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async searchUserFollowingByAddress(
+    address: Address,
+    limit: string,
+    offset: string,
+    term: string
+  ): Promise<ENSTaggedListRecord[]> {
+    const query = sql<SearchFollowingRow>`SELECT * FROM query.search_following_by_address(${address}, ${term}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: SearchFollowingRow) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      ens: {
+        name: row.name,
+        avatar: row.avatar
+      },
+      tags: row.tags ? row.tags.sort() : row.tags
+    }))
+  }
+
+  async searchUserFollowingByList(
+    list: string,
+    limit: string,
+    offset: string,
+    term: string
+  ): Promise<ENSTaggedListRecord[]> {
+    const query = sql<SearchFollowingRow>`SELECT * FROM query.search_following_by_list(${list}, ${term}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: SearchFollowingRow) => ({
+      version: row.record_version,
+      recordType: row.record_type,
+      data: bufferize(row.following_address),
+      ens: {
+        name: row.name,
+        avatar: row.avatar
+      },
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }

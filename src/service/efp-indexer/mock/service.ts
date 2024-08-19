@@ -325,4 +325,40 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   async getTaggedAddressesByTags(_token_id: string, _tags: string[] | undefined): Promise<TagsResponse[]> {
     return await []
   }
+
+  searchUserFollowersByAddress(
+    _address: Address,
+    _limit: string,
+    _offset: string,
+    _term: string
+  ): Promise<FollowerResponse[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  searchUserFollowersByList(
+    _list: string,
+    _limit: string,
+    _offset: string,
+    _term: string
+  ): Promise<FollowerResponse[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  searchUserFollowingByAddress(
+    _address: Address,
+    _limit: string,
+    _offset: string,
+    _term: string
+  ): Promise<TaggedListRecord[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  searchUserFollowingByList(
+    _list: string,
+    _limit: string,
+    _offset: string,
+    _term: string
+  ): Promise<TaggedListRecord[]> {
+    throw new Error('Method not implemented.')
+  }
 }

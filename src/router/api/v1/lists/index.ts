@@ -12,6 +12,8 @@ import { followerState } from './followerState'
 import { followers } from './followers'
 import { following } from './following'
 import { records } from './records'
+import { searchFollowers } from './searchFollowers'
+import { searchFollowing } from './searchFollowing'
 import { taggedAs } from './taggedAs'
 import { tags } from './tags'
 
@@ -26,6 +28,8 @@ export function lists(services: Services): Hono<{ Bindings: Environment }> {
   followers(lists, services)
   followerState(lists, services)
   following(lists, services)
+  searchFollowers(lists, services)
+  searchFollowing(lists, services)
   records(lists, services)
   taggedAs(lists, services)
   tags(lists, services)
