@@ -29,10 +29,14 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
-    const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'
+    let direction = 'latest'
+    if (context.req.query('sort')?.toLowerCase() === 'followers') {
+      direction = 'followers'
+    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
+      direction = 'earliest'
+    }
 
     const efp: IEFPIndexerService = services.efp(env(context))
-
     const followers: FollowerResponse[] = await efp.getUserFollowersByListTagSort(
       token_id,
       limit,

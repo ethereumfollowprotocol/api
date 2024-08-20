@@ -27,8 +27,12 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
       const tagsArray = tagsQuery.split(',')
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
-    const direction = context.req.query('sort') === 'latest' ? 'DESC' : 'ASC'
-
+    let direction = 'latest'
+    if (context.req.query('sort')?.toLowerCase() === 'followers') {
+      direction = 'followers'
+    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
+      direction = 'earliest'
+    }
     const followers: FollowerResponse[] = await services
       .efp(env(context))
       .getUserFollowersByAddressTagSort(address, limit, offset, tagsToSearch, direction)

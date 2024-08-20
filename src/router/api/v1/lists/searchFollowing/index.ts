@@ -13,9 +13,6 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
 }
 
-/**
- * Enhanced to add ENS support
- */
 export function searchFollowing(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:token_id/searchFollowing', includeValidator, async context => {
     const { token_id } = context.req.param()
