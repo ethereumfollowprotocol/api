@@ -151,6 +151,13 @@ export interface IEFPIndexerService {
   // outgoing relationship means the given address has the given tag on another list
   getOutgoingRelationships(address: Address, tag: string): Promise<TaggedListRecord[]>
   getRecommended(address: Address, seed: Address | undefined, limit: string, offset: string): Promise<RecommendedRow[]>
+  getRecommendedByAddress(
+    address: `0x${string}`,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]>
+  getRecommendedByList(list: string, _seed: `0x${string}`, _limit: string, _offset: string): Promise<RecommendedRow[]>
   getStats(): Promise<StatsRow>
   getTaggedAddressesByList(token_id: string): Promise<TagResponse[]>
   getTaggedAddressesByTags(token_id: string, tags: string[] | undefined): Promise<TagsResponse[]>
@@ -1203,6 +1210,36 @@ export class EFPIndexerService implements IEFPIndexerService {
     _offset: string
   ): Promise<RecommendedRow[]> {
     const query = sql<RecommendedRow>`SELECT * FROM public.view__events__efp_recommended`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    return result.rows
+  }
+
+  async getRecommendedByAddress(
+    address: `0x${string}`,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]> {
+    const query = sql<RecommendedRow>`SELECT * FROM query.get_recommended_by_address(${address})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    return result.rows
+  }
+
+  async getRecommendedByList(
+    list: string,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]> {
+    const query = sql<RecommendedRow>`SELECT * FROM query.get_recommended_by_list(${list})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {

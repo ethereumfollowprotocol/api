@@ -18,21 +18,16 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
  * Enhanced to add ENS support
  */
 export function recommended(users: Hono<{ Bindings: Environment }>, services: Services) {
-  users.get('/:addressOrENS/recommended', includeValidator, async context => {
-    const { addressOrENS } = context.req.param()
+  users.get('/:token_id/recommended', includeValidator, async context => {
+    const { token_id } = context.req.param()
     let { offset, limit } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
-    const ensService = services.ens(env(context))
-    const address: Address = await ensService.getAddress(addressOrENS)
-    if (!isAddress(address)) {
-      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
-    }
 
     const seed = context.req.query('seed') ? (context.req.query('seed') as Address) : (NETWORKED_WALLET as Address)
     const efp: IEFPIndexerService = services.efp(env(context))
-    const recommendedAddresses: RecommendedRow[] = await efp.getRecommendedByAddress(
-      address,
+    const recommendedAddresses: RecommendedRow[] = await efp.getRecommendedByList(
+      token_id,
       seed,
       limit as string,
       offset as string

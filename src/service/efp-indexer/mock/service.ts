@@ -287,6 +287,24 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return (await []) as RecommendedRow[]
   }
 
+  async getRecommendedByAddress(
+    _address: `0x${string}`,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]> {
+    return (await []) as RecommendedRow[]
+  }
+
+  async getRecommendedByList(
+    _address: `0x${string}`,
+    _seed: `0x${string}`,
+    _limit: string,
+    _offset: string
+  ): Promise<RecommendedRow[]> {
+    return (await []) as RecommendedRow[]
+  }
+
   // biome-ignore lint/suspicious/useAwait: <explanation>
   async getUserPrimaryList(address: Address): Promise<bigint | undefined> {
     return this.#socialGraph.getPrimaryList(address)
