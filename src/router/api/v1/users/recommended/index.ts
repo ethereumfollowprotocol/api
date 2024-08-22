@@ -14,9 +14,6 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
 }
 
-/**
- * Enhanced to add ENS support
- */
 export function recommended(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/recommended', includeValidator, async context => {
     const { addressOrENS } = context.req.param()

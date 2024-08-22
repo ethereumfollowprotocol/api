@@ -1221,10 +1221,10 @@ export class EFPIndexerService implements IEFPIndexerService {
   async getRecommendedByAddress(
     address: `0x${string}`,
     _seed: `0x${string}`,
-    _limit: string,
-    _offset: string
+    limit: string,
+    offset: string
   ): Promise<RecommendedRow[]> {
-    const query = sql<RecommendedRow>`SELECT * FROM query.get_recommended_by_address(${address})`
+    const query = sql<RecommendedRow>`SELECT * FROM query.get_recommended_by_address(${address}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
@@ -1236,10 +1236,10 @@ export class EFPIndexerService implements IEFPIndexerService {
   async getRecommendedByList(
     list: string,
     _seed: `0x${string}`,
-    _limit: string,
-    _offset: string
+    limit: string,
+    offset: string
   ): Promise<RecommendedRow[]> {
-    const query = sql<RecommendedRow>`SELECT * FROM query.get_recommended_by_list(${list})`
+    const query = sql<RecommendedRow>`SELECT * FROM query.get_recommended_by_list(${list}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
