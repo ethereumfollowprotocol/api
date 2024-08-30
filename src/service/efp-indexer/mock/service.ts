@@ -40,7 +40,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
-  async getDiscoverAccounts(): Promise<DiscoverRow[]> {
+  async getDiscoverAccounts(_limit: string, _offset: string): Promise<DiscoverRow[]> {
     return (await []) as DiscoverRow[]
   }
 

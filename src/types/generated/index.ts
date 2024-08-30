@@ -130,6 +130,7 @@ export interface EfpRecommended {
   avatar: string | null
   class: string | null
   created_at: Generated<Timestamp | null>
+  index: Int8
   name: string
 }
 
@@ -206,6 +207,7 @@ export interface ViewEventsEfpContracts {
 export interface ViewEventsEfpLeaderboardMutuals {
   leader: string | null
   mutuals: Int8 | null
+  mutuals_rank: Int8 | null
 }
 
 export interface ViewEventsEfpListMetadata {
@@ -295,14 +297,6 @@ export interface ViewEventsEfpListStorageLocations {
   efp_list_storage_location_version: number | null
 }
 
-export interface ViewEventsEfpRecommended {
-  address: string | null
-  avatar: string | null
-  class: string | null
-  created_at: Timestamp | null
-  name: string | null
-}
-
 export interface ViewEventsLatestRecordTags {
   chain_id: Int8 | null
   contract_address: string | null
@@ -379,7 +373,15 @@ export interface ViewJoinEfpListRecordsWithTags {
 }
 
 export interface ViewLatestFollows {
+  _index: Int8 | null
   address: string | null
+  updated_at: Timestamp | null
+}
+
+export interface ViewLatestLeaders {
+  _index: Int8 | null
+  address: string | null
+  updated_at: Timestamp | null
 }
 
 export interface DB {
@@ -409,11 +411,11 @@ export interface DB {
   view__events__efp_list_record_tags: ViewEventsEfpListRecordTags
   view__events__efp_list_records: ViewEventsEfpListRecords
   view__events__efp_list_storage_locations: ViewEventsEfpListStorageLocations
-  view__events__efp_recommended: ViewEventsEfpRecommended
   view__events__latest_record_tags: ViewEventsLatestRecordTags
   view__join__efp_leaderboard: ViewJoinEfpLeaderboard
   view__join__efp_list_records_with_nft_manager_user_tags: ViewJoinEfpListRecordsWithNftManagerUserTags
   view__join__efp_list_records_with_nft_manager_user_tags_no_prim: ViewJoinEfpListRecordsWithNftManagerUserTagsNoPrim
   view__join__efp_list_records_with_tags: ViewJoinEfpListRecordsWithTags
   view__latest_follows: ViewLatestFollows
+  view__latest_leaders: ViewLatestLeaders
 }

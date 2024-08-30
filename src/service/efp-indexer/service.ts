@@ -136,7 +136,7 @@ export interface IEFPIndexerService {
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
   getDebugTotalSupply(): Promise<number>
-  getDiscoverAccounts(): Promise<DiscoverRow[]>
+  getDiscoverAccounts(limit: string, offset: string): Promise<DiscoverRow[]>
   // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
@@ -933,8 +933,8 @@ export class EFPIndexerService implements IEFPIndexerService {
   //   return (result?.list_storage_location as Address) || undefined
   // }
 
-  async getDiscoverAccounts(): Promise<DiscoverRow[]> {
-    const query = sql<DiscoverRow>`SELECT * FROM public.view__discover;`
+  async getDiscoverAccounts(limit: string, offset: string): Promise<DiscoverRow[]> {
+    const query = sql<DiscoverRow>`SELECT * FROM public.view__discover LIMIT ${limit} OFFSET ${offset};`
     const result = await query.execute(this.#db)
     const discovers: DiscoverRow[] = result.rows.map(record => record)
     const uniqueDiscovers = discovers.filter(
