@@ -12,6 +12,7 @@ import { exportState } from './exportState'
 import { leaderboard } from './leaderboard'
 import { lists } from './lists'
 import { stats } from './stats'
+import { token } from './token'
 import { users } from './users'
 
 export function api(services: Services): Hono<{ Bindings: Environment }> {
@@ -41,6 +42,7 @@ export function api(services: Services): Hono<{ Bindings: Environment }> {
   api.route('/leaderboard', leaderboard(services))
   api.route('/lists', lists(services))
   api.route('/stats', stats(services))
+  api.route('/token', token(services))
   api.route('/users', users(services))
 
   return api
