@@ -933,21 +933,14 @@ export class EFPIndexerService implements IEFPIndexerService {
   //   return (result?.list_storage_location as Address) || undefined
   // }
 
-  //   async getDiscoverAccounts(): Promise<Address[]> {
-  //     type Row = {
-  //       address: Address
-  //     }
-  //     const query = sql<Row>`SELECT * FROM public.view__latest_follows;`
-  //     const result = await query.execute(this.#db)
-  //     const addresses: Address[] = result.rows.map(record => record.address)
-  //     const dedupedAddresses = addresses?.filter((address: string, index: Number) => addresses.indexOf(address) === index)
-  //     return dedupedAddresses
-  //   }
   async getDiscoverAccounts(): Promise<DiscoverRow[]> {
     const query = sql<DiscoverRow>`SELECT * FROM public.view__discover;`
     const result = await query.execute(this.#db)
     const discovers: DiscoverRow[] = result.rows.map(record => record)
-    return discovers
+    const uniqueDiscovers = discovers.filter(
+      (discover, index, self) => index === self.findIndex(d => d.address === discover.address)
+    )
+    return uniqueDiscovers
   }
   /////////////////////////////////////////////////////////////////////////////
   // Debug
