@@ -1,15 +1,12 @@
-import { apiLogger } from '#/logger'
-import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
-import type { ENSProfile } from './types'
-
+import { ens_normalize } from '@adraffy/ens-normalize'
 import { type Kysely, type QueryResult, sql } from 'kysely'
-
 import { database } from '#/database'
-
+import { apiLogger } from '#/logger'
 import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
+import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
 import { S3Cache } from './s3-cache'
-// import { truncate } from 'fs'
+import type { ENSProfile } from './types'
 
 export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }
 
@@ -45,8 +42,10 @@ export class ENSMetadataService implements IENSMetadataService {
     if (isAddress(ensNameOrAddress)) {
       return ensNameOrAddress.toLowerCase() as Address
     }
+    // check if it is a valid ENS name
+    const normalized = ens_normalize(ensNameOrAddress)
 
-    return (await this.getENSProfile(ensNameOrAddress)).address.toLowerCase() as Address
+    return (await this.getENSProfile(normalized)).address.toLowerCase() as Address
   }
 
   async checkCache(ensNameOrAddress: Address | string): Promise<ENSProfile | boolean> {
@@ -98,9 +97,13 @@ export class ENSMetadataService implements IENSMetadataService {
    * currently our ENS metadata service can return a non-200 response with a JSON body
    * We should read that body and throw an error with the message
    */
-  async getENSProfile(ensNameOrAddress: Address | string): Promise<ENSProfile> {
+  async getENSProfile(rawNameOrAddress: Address | string): Promise<ENSProfile> {
+    let ensNameOrAddress = rawNameOrAddress
     if (ensNameOrAddress === undefined) {
       raise('ENS name or address is required')
+    }
+    if (!isAddress(ensNameOrAddress)) {
+      ensNameOrAddress = ens_normalize(ensNameOrAddress)
     }
 
     const cachedProfile = await this.checkCache(ensNameOrAddress)

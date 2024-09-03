@@ -20,6 +20,7 @@
     "update-dependencies": "bun ./scripts/update-dependencies.ts"
   },
   "dependencies": {
+    "@adraffy/ens-normalize": "^1.10.1",
     "@cf-wasm/photon": "^0.1.20",
     "aws4fetch": "^1.0.18",
     "consola": "^3.2.3",
