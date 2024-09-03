@@ -1,15 +1,5 @@
-import type { RankRow } from '#/service/efp-indexer/service'
-import type { ENSProfile } from '#/service/ens-metadata/types'
-
-export type listData = {
-  ens: ENSProfile
-  ranks: RankRow
-  followers_count: number
-  following_count: number
-  is_primary: boolean
-}
-
-export function formatSVG(token_id: string, listData: listData): string {
+export function formatSVG(token_id: string): string {
+  console.log('svg', token_id)
   return `<svg width="500" height="500" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
     <rect width="500" height="500" rx="67" fill="url(#paint0_linear_715_37)"/>
     <rect width="500" height="500" rx="67" fill="white" fill-opacity="0.5"/>
@@ -59,13 +49,5 @@ export function formatSVG(token_id: string, listData: listData): string {
     </linearGradient>
     </defs>
     <text x="400" y="420" fill="#333333" fill-opacity="1" text-anchor="end" font-size="4em" font-family="mono" font-weight="bold">#${token_id}</text>
-    <text x="400" y="200" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">List User: ${listData.ens.name}</text>
-    <text x="400" y="220" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Followers: ${listData.followers_count}</text>
-    <text x="400" y="240" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Following: ${listData.following_count}</text>
-    <text x="400" y="260" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Mutuals Rank: #${listData.ranks.mutuals_rank}</text>
-    <text x="400" y="280" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Followers Rank: #${listData.ranks.followers_rank}</text>
-    <text x="400" y="300" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Following Rank: #${listData.ranks.following_rank}</text>
-    <text x="400" y="320" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Blocks Rank: #${listData.ranks.blocks_rank}</text>
-    <text x="400" y="340" fill="#333333" fill-opacity="1" text-anchor="end" font-family="mono">Primary List: ${listData.is_primary}</text>
     </svg>`
 }
