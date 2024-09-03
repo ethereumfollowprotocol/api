@@ -25,6 +25,7 @@ type Row = {
   name: string
   address: `0x${string}`
   avatar: string
+  records: string
   updated_at: string
 }
 
@@ -74,7 +75,18 @@ export class ENSMetadataService implements IENSMetadataService {
       if (newAvatar !== '') profile.avatar = newAvatar
     }
     const nameData = ENSMetadataService.#toTableRow(profile)
-    const result = await this.#db.insertInto('ens_metadata').values(nameData).executeTakeFirst()
+
+    const result = await this.#db
+      .insertInto('ens_metadata')
+      .values(nameData)
+      .onConflict(oc =>
+        oc.column('address').doUpdateSet(eb => ({
+          name: eb.ref('excluded.name'),
+          avatar: eb.ref('excluded.avatar'),
+          records: eb.ref('excluded.records')
+        }))
+      )
+      .executeTakeFirst()
     if (result.numInsertedOrUpdatedRows === BigInt(0)) {
       return false
     }
@@ -92,6 +104,7 @@ export class ENSMetadataService implements IENSMetadataService {
     }
 
     const cachedProfile = await this.checkCache(ensNameOrAddress)
+    // const cachedProfile = false
     if (!cachedProfile) {
       //silently cache fetched profile without waiting ->
       const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
@@ -110,10 +123,15 @@ export class ENSMetadataService implements IENSMetadataService {
         name: '',
         address: ensNameOrAddress,
         avatar: null,
+        records: null,
         updated_at: ''
       } as unknown as ENSProfile
     }
-    return cachedProfile as ENSProfile
+    const returnedRecord = cachedProfile as ENSProfile
+    if (cachedProfile) {
+      returnedRecord.records = JSON.parse(returnedRecord?.records || '') as string
+    }
+    return returnedRecord as ENSProfile
   }
 
   /**
@@ -172,6 +190,7 @@ export class ENSMetadataService implements IENSMetadataService {
         name: '',
         address: '0x',
         avatar: '',
+        records: '',
         updated_at: '',
         type: 'error'
       } as ENSProfileResponse
@@ -179,6 +198,14 @@ export class ENSMetadataService implements IENSMetadataService {
     for (const record of fetchedRecords) {
       if (record.name) {
         await this.cacheRecord(record)
+        record.records = JSON.parse(record?.records || '') as string
+      }
+      //   record.records = JSON.parse(record?.records || '') as string;
+    }
+
+    for (const record of filteredCache) {
+      if (record.name) {
+        record.records = JSON.parse(record?.records || '') as string
       }
     }
 
@@ -222,11 +249,13 @@ export class ENSMetadataService implements IENSMetadataService {
     address: string
     avatar: string | undefined
     updated_at: string | undefined
+    records: string | undefined
   } {
     return {
       name: namedata.name,
       address: namedata.address.toLowerCase(),
       avatar: namedata?.avatar,
+      records: namedata?.records,
       updated_at: namedata?.updated_at
     }
   }

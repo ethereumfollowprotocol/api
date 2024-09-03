@@ -6,7 +6,7 @@ export type ENSProfile = {
   avatar?: string
   updated_at?: string
   //   display: string
-  //   records: Record<string, string>
+  records?: string
   //   chains: Record<string, Address>
   //   fresh: number
   //   resolver: Address
