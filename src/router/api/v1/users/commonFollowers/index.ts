@@ -31,7 +31,10 @@ export function commonFollowers(users: Hono<{ Bindings: Environment }>, services
       return context.json({ response: 'Invalid query address' }, 404)
     }
     const efp: IEFPIndexerService = services.efp(env(context)) // efp is the service to get common followers
-    const common: CommonFollowers[] = await efp.getCommonFollowers(address, leader as Address) // get common followers
+    const common: CommonFollowers[] = await efp.getCommonFollowers(
+      address.toLowerCase() as Address,
+      leader.toLowerCase() as Address
+    ) // get common followers
 
     return context.json({ results: common, length: common.length }, 200) // return the common followers
   })

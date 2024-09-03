@@ -3,7 +3,7 @@ import { env } from 'hono/adapter'
 import type { Services } from '#/service'
 import type { IEFPIndexerService } from '#/service/efp-indexer/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
-import type { Environment } from '#/types'
+import type { Address, Environment } from '#/types'
 import { isAddress } from '#/utilities'
 
 export function details(users: Hono<{ Bindings: Environment }>, services: Services) {
@@ -14,13 +14,14 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
-    const efp: IEFPIndexerService = services.efp(env(context))
-    const primaryList = await efp.getUserPrimaryList(address)
-    const ranks = await efp.getUserRanks(address)
 
+    const normalizedAddress: Address = address.toLowerCase() as `0x${string}`
+    const efp: IEFPIndexerService = services.efp(env(context))
+    const primaryList = await efp.getUserPrimaryList(normalizedAddress)
+    const ranks = await efp.getUserRanks(normalizedAddress)
     const stats = {
-      followers_count: await efp.getUserFollowersCount(address),
-      following_count: await efp.getUserFollowingCount(address)
+      followers_count: await efp.getUserFollowersCount(normalizedAddress),
+      following_count: await efp.getUserFollowingCount(normalizedAddress)
     }
 
     const response = { address } as Record<string, unknown>
