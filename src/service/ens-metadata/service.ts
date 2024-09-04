@@ -97,6 +97,7 @@ export class ENSMetadataService implements IENSMetadataService {
    * currently our ENS metadata service can return a non-200 response with a JSON body
    * We should read that body and throw an error with the message
    */
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   async getENSProfile(rawNameOrAddress: Address | string): Promise<ENSProfile> {
     let ensNameOrAddress = rawNameOrAddress
     if (ensNameOrAddress === undefined) {
@@ -107,18 +108,18 @@ export class ENSMetadataService implements IENSMetadataService {
     }
 
     const cachedProfile = await this.checkCache(ensNameOrAddress)
-    try{
-        if (cachedProfile && typeof cachedProfile !== 'boolean') {
-            cachedProfile.name = cachedProfile.name ? ens_normalize(cachedProfile.name) : ''
-        }
-    } catch (error) {
-        return {
-            name: '',
-            address: ensNameOrAddress,
-            avatar: null,
-            records: null,
-            updated_at: ''
-        } as unknown as ENSProfile
+    try {
+      if (cachedProfile && typeof cachedProfile !== 'boolean') {
+        cachedProfile.name = cachedProfile.name ? ens_normalize(cachedProfile.name) : ''
+      }
+    } catch (_error) {
+      return {
+        name: '',
+        address: ensNameOrAddress,
+        avatar: null,
+        records: null,
+        updated_at: ''
+      } as unknown as ENSProfile
     }
     // const cachedProfile = false
     if (!cachedProfile) {
@@ -127,17 +128,17 @@ export class ENSMetadataService implements IENSMetadataService {
       if (response.ok) {
         // raise(`invalid ENS name: ${ensNameOrAddress}`)
         try {
-            const ensProfileData = (await response.json()) as ENSProfile
-            ensProfileData.name = ens_normalize(ensProfileData.name)
-            try {
-              await this.cacheRecord(ensProfileData)
-            } catch (error) {
-              console.log('cache failed', error)
-            }
-    
-            return ensProfileData as ENSProfile
+          const ensProfileData = (await response.json()) as ENSProfile
+          ensProfileData.name = ens_normalize(ensProfileData.name)
+          try {
+            await this.cacheRecord(ensProfileData)
+          } catch (error) {
+            console.log('cache failed', error)
+          }
+
+          return ensProfileData as ENSProfile
         } catch (error) {
-            console.log('error', error)
+          console.log('error', error)
         }
       }
       return {
@@ -150,7 +151,7 @@ export class ENSMetadataService implements IENSMetadataService {
     }
     const returnedRecord = cachedProfile as ENSProfile
     if (cachedProfile) {
-      returnedRecord.records = returnedRecord?.records ? JSON.parse(returnedRecord?.records) as string : ''
+      returnedRecord.records = returnedRecord?.records ? (JSON.parse(returnedRecord?.records) as string) : ''
     }
     return returnedRecord as ENSProfile
   }
