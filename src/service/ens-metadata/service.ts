@@ -12,7 +12,7 @@ export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }
 
 export interface IENSMetadataService {
   getAddress(ensNameOrAddress: Address | string): Promise<Address>
-  getENSProfile(ensNameOrAddress?: Address | string): Promise<ENSProfile>
+  getENSProfile(ensNameOrAddress: Address | string, refresh?: boolean): Promise<ENSProfile>
   batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<ENSProfileResponse[]>
   getENSAvatar(ensNameOrAddress: Address | string): Promise<string>
   batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
@@ -36,7 +36,7 @@ export class ENSMetadataService implements IENSMetadataService {
     this.#env = env
   }
 
-  url = 'https://ens.evm.workers.dev'
+  url = 'https://ens.ethfollow.xyz'
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
     if (isAddress(ensNameOrAddress)) {
@@ -98,7 +98,7 @@ export class ENSMetadataService implements IENSMetadataService {
    * We should read that body and throw an error with the message
    */
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
-  async getENSProfile(rawNameOrAddress: Address | string): Promise<ENSProfile> {
+  async getENSProfile(rawNameOrAddress: Address | string, refresh = false): Promise<ENSProfile> {
     let ensNameOrAddress = rawNameOrAddress
     if (ensNameOrAddress === undefined) {
       raise('ENS name or address is required')
@@ -107,7 +107,7 @@ export class ENSMetadataService implements IENSMetadataService {
       ensNameOrAddress = ens_normalize(ensNameOrAddress)
     }
 
-    const cachedProfile = await this.checkCache(ensNameOrAddress)
+    const cachedProfile = !refresh ? await this.checkCache(ensNameOrAddress) : false
     try {
       if (cachedProfile && typeof cachedProfile !== 'boolean') {
         cachedProfile.name = cachedProfile.name ? ens_normalize(cachedProfile.name) : ''
@@ -121,7 +121,6 @@ export class ENSMetadataService implements IENSMetadataService {
         updated_at: ''
       } as unknown as ENSProfile
     }
-    // const cachedProfile = false
     if (!cachedProfile) {
       //silently cache fetched profile without waiting ->
       const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
@@ -130,6 +129,7 @@ export class ENSMetadataService implements IENSMetadataService {
         try {
           const ensProfileData = (await response.json()) as ENSProfile
           ensProfileData.name = ens_normalize(ensProfileData.name)
+          ensProfileData.address = ensProfileData.address.toLowerCase() as Address
           try {
             await this.cacheRecord(ensProfileData)
           } catch (error) {

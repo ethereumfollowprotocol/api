@@ -143,7 +143,7 @@ export interface EnsMetadata {
   errors: string | null
   fresh: Int8 | null
   name: string
-  records: string | null
+  records: Json | null
   resolver: string | null
   updated_at: Generated<Timestamp | null>
 }

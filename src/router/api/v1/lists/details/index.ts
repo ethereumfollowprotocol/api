@@ -14,7 +14,7 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
     if (!listUser) {
       return context.json({ response: 'No User Found' }, 404)
     }
-    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(listUser.toLowerCase())
+    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(listUser.toLowerCase(), true)
     const primaryList = await efp.getUserPrimaryList(address)
     const ranks = await efp.getUserRanks(address)
 
