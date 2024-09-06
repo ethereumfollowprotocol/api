@@ -23,6 +23,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     this.#socialGraph = makeSocialGraph()
   }
 
+  claimPoapLink(_address: Address): Promise<string> {
+    throw new Error('Method not implemented.')
+  }
   getCommonFollowers(_user: Address, _target: Address): Promise<CommonFollowers[]> {
     throw new Error('Method not implemented.')
   }

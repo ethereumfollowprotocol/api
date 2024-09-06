@@ -116,6 +116,7 @@ export type ENSTaggedListRecord = TaggedListRecord & {
 }
 
 export interface IEFPIndexerService {
+  claimPoapLink(address: Address): Promise<string>
   getAddressByList(token_id: string): Promise<Address | undefined>
   getCommonFollowers(user: Address, target: Address): Promise<CommonFollowers[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
@@ -1446,5 +1447,27 @@ export class EFPIndexerService implements IEFPIndexerService {
     }
 
     return result.rows
+  }
+
+  async claimPoapLink(address: Address): Promise<string> {
+    const query = sql<{
+      link: string
+    }>`SELECT link FROM public.efp_poap_links WHERE claimed = 'false' LIMIT 1;`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return ''
+    }
+
+    const link = result.rows[0]?.link as string
+    const _update = await this.#db
+      .updateTable('efp_poap_links')
+      .set({
+        claimant: address,
+        claimed: true
+      })
+      .where('link', '=', link)
+      .execute()
+
+    return link
   }
 }

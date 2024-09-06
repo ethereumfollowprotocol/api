@@ -125,6 +125,14 @@ export interface EfpLists {
   user: string
 }
 
+export interface EfpPoapLinks {
+  claimant: string | null
+  claimed: boolean
+  created_at: Generated<Timestamp | null>
+  link: string
+  updated_at: Generated<Timestamp | null>
+}
+
 export interface EfpRecommended {
   address: string
   avatar: string | null
@@ -409,6 +417,7 @@ export interface DB {
   efp_list_record_tags: EfpListRecordTags
   efp_list_records: EfpListRecords
   efp_lists: EfpLists
+  efp_poap_links: EfpPoapLinks
   efp_recommended: EfpRecommended
   ens_metadata: EnsMetadata
   events: Events

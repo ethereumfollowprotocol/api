@@ -11,6 +11,7 @@ import { followers } from './followers'
 import { following } from './following'
 import { listRecords } from './list-records'
 import { lists } from './lists'
+import { poap } from './poap'
 import { primaryList } from './primary-list'
 import { profile } from './profile'
 import { recommended } from './recommended'
@@ -34,6 +35,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
   following(users, services)
   listRecords(users, services)
   lists(users, services)
+  poap(users, services)
   primaryList(users, services)
   profile(users, services)
   recommended(users, services)
@@ -56,6 +58,7 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
           '/followerState',
           '/following',
           '/lists',
+          '/poap',
           '/primary-list',
           '/profile',
           '/recommended',
