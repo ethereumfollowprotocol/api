@@ -107,7 +107,7 @@ export class ENSMetadataService implements IENSMetadataService {
       ensNameOrAddress = ens_normalize(ensNameOrAddress)
     }
 
-    const cachedProfile = !refresh ? await this.checkCache(ensNameOrAddress) : false
+    const cachedProfile = refresh ? false : await this.checkCache(ensNameOrAddress)
     try {
       if (cachedProfile && typeof cachedProfile !== 'boolean') {
         cachedProfile.name = cachedProfile.name ? ens_normalize(cachedProfile.name) : ''
@@ -135,12 +135,17 @@ export class ENSMetadataService implements IENSMetadataService {
           } catch (error) {
             console.log('cache failed', error)
           }
-
           return ensProfileData as ENSProfile
         } catch (error) {
           console.log('error', error)
         }
       }
+      // return a default profile if the fetch fails
+      const secondTry = await this.checkCache(ensNameOrAddress)
+      if (secondTry) {
+        return secondTry as ENSProfile
+      }
+
       return {
         name: '',
         address: ensNameOrAddress,
