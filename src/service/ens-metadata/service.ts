@@ -143,6 +143,10 @@ export class ENSMetadataService implements IENSMetadataService {
       // return a default profile if the fetch fails
       const secondTry = await this.checkCache(ensNameOrAddress)
       if (secondTry) {
+        const formattedSecondTry = secondTry as ENSProfile
+        formattedSecondTry.records = formattedSecondTry?.records
+          ? (JSON.parse(formattedSecondTry?.records) as string)
+          : ''
         return secondTry as ENSProfile
       }
 
