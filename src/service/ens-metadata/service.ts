@@ -67,12 +67,12 @@ export class ENSMetadataService implements IENSMetadataService {
 
   async cacheRecord(profile: ENSProfile): Promise<boolean> {
     //if profile.records.avatar then set profile.avatar to value
-    const cacheService = new S3Cache(this.#env)
-    let newAvatar = '' as string
-    if (profile.avatar) {
-      newAvatar = await cacheService.cacheImage(profile.avatar, profile.address)
-      if (newAvatar !== '') profile.avatar = newAvatar
-    }
+    // const cacheService = new S3Cache(this.#env)
+    // let newAvatar = '' as string
+    // if (profile.avatar) {
+    //   newAvatar = await cacheService.cacheImage(profile.avatar, profile.address)
+    //   if (newAvatar !== '') profile.avatar = newAvatar
+    // }
     const nameData = ENSMetadataService.#toTableRow(profile)
 
     const result = await this.#db

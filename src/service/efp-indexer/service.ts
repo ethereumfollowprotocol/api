@@ -72,10 +72,12 @@ export type LeaderBoardRow = {
   followers_rank: number
   following_rank: number
   blocks_rank: number
+  top8_rank: number
   mutuals: number
   following: number
   followers: number
   blocks: number
+  top8: number
   updated_at: string
 }
 
@@ -860,10 +862,12 @@ export class EFPIndexerService implements IEFPIndexerService {
       followers_rank: row.followers_rank,
       following_rank: row.following_rank,
       blocks_rank: row.blocks_rank,
+      top8_rank: row.top8_rank,
       mutuals: row.mutuals,
       following: row.following,
       followers: row.followers,
       blocks: row.blocks,
+      top8: row.top8,
       updated_at: row.updated_at
     }))
   }
@@ -913,10 +917,12 @@ export class EFPIndexerService implements IEFPIndexerService {
       followers_rank: row.followers_rank,
       following_rank: row.following_rank,
       blocks_rank: row.blocks_rank,
+      top8_rank: row.top8_rank,
       mutuals: row.mutuals,
       following: row.following,
       followers: row.followers,
       blocks: row.blocks,
+      top8: row.top8,
       updated_at: row.updated_at
     }))
   }

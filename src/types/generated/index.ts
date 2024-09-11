@@ -54,6 +54,8 @@ export interface EfpLeaderboard {
   mutuals: Generated<Int8 | null>
   mutuals_rank: Int8 | null
   name: string | null
+  top8: Generated<Int8 | null>
+  top8_rank: Int8 | null
   updated_at: Generated<Timestamp | null>
 }
 
@@ -326,6 +328,8 @@ export interface ViewJoinEfpLeaderboard {
   following_rank: Int8 | null
   mutuals: Int8 | null
   mutuals_rank: Int8 | null
+  top8: Int8 | null
+  top8_rank: Int8 | null
 }
 
 export interface ViewJoinEfpListRecordsWithNftManagerUserTags {
