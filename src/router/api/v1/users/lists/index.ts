@@ -11,7 +11,7 @@ export function lists(users: Hono<{ Bindings: Environment }>, services: Services
     const { addressOrENS } = context.req.param()
     let address: Address
     if (isAddress(addressOrENS)) {
-      address = addressOrENS
+      address = addressOrENS.toLowerCase() as Address
     } else {
       address = await services.ens(env(context)).getAddress(addressOrENS)
       if (!isAddress(address)) {
