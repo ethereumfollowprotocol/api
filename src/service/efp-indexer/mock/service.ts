@@ -7,6 +7,7 @@ import type {
   FollowerResponse,
   IEFPIndexerService,
   LeaderBoardRow,
+  RankCountsRow,
   RankRow,
   RecommendedRow,
   StatsRow,
@@ -222,6 +223,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   getUserRanks(_address: Address): Promise<RankRow> {
+    throw new Error('Method not implemented.')
+  }
+
+  getUserRanksCounts(_address: Address): Promise<RankCountsRow> {
     throw new Error('Method not implemented.')
   }
 

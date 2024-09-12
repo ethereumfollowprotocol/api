@@ -85,7 +85,16 @@ export type RankRow = {
   mutuals_rank: number
   followers_rank: number
   following_rank: number
+  top8_rank: number
   blocks_rank: number
+}
+
+export type RankCountsRow = RankRow & {
+  mutuals: number
+  followers: number
+  following: number
+  top8: number
+  blocks: number
 }
 
 export type DiscoverRow = {
@@ -135,6 +144,7 @@ export interface IEFPIndexerService {
   ): Promise<LeaderBoardRow[]>
   getLeaderboardCount(): Promise<number>
   getUserRanks(address: Address): Promise<RankRow>
+  getUserRanksCounts(address: Address): Promise<RankCountsRow>
   searchLeaderboard(term: string): Promise<LeaderBoardRow[]>
   getDebugNumEvents(): Promise<number>
   getDebugNumListOps(): Promise<number>
@@ -890,6 +900,7 @@ export class EFPIndexerService implements IEFPIndexerService {
         mutuals_rank: 0,
         followers_rank: 0,
         following_rank: 0,
+        top8_rank: 0,
         blocks_rank: 0
       }
     }
@@ -898,7 +909,40 @@ export class EFPIndexerService implements IEFPIndexerService {
       mutuals_rank: result.rows[0] ? result.rows[0]?.mutuals_rank : 0,
       followers_rank: result.rows[0] ? result.rows[0]?.followers_rank : 0,
       following_rank: result.rows[0] ? result.rows[0]?.following_rank : 0,
+      top8_rank: result.rows[0] ? result.rows[0]?.top8_rank : 0,
       blocks_rank: result.rows[0] ? result.rows[0]?.blocks_rank : 0
+    }
+  }
+
+  async getUserRanksCounts(address: Address): Promise<RankCountsRow> {
+    const query = sql<RankCountsRow>`SELECT * FROM query.get_user_ranks_and_counts(${address})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return {
+        mutuals_rank: 0,
+        followers_rank: 0,
+        following_rank: 0,
+        top8_rank: 0,
+        blocks_rank: 0,
+        mutuals: 0,
+        following: 0,
+        followers: 0,
+        top8: 0,
+        blocks: 0
+      }
+    }
+
+    return {
+      mutuals_rank: result.rows[0]?.mutuals_rank || 0,
+      followers_rank: result.rows[0]?.followers_rank || 0,
+      following_rank: result.rows[0]?.following_rank || 0,
+      top8_rank: result.rows[0]?.top8_rank || 0,
+      blocks_rank: result.rows[0]?.blocks_rank || 0,
+      mutuals: result.rows[0]?.mutuals || 0,
+      following: result.rows[0]?.following || 0,
+      followers: result.rows[0]?.followers || 0,
+      top8: result.rows[0]?.top8 || 0,
+      blocks: result.rows[0]?.blocks || 0
     }
   }
 

@@ -9,9 +9,14 @@ import { isAddress } from '#/utilities'
 export function lists(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/lists', async context => {
     const { addressOrENS } = context.req.param()
-    const address: Address = await services.ens(env(context)).getAddress(addressOrENS)
-    if (!isAddress(address)) {
-      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+    let address: Address
+    if (isAddress(addressOrENS)) {
+      address = addressOrENS
+    } else {
+      address = await services.ens(env(context)).getAddress(addressOrENS)
+      if (!isAddress(address)) {
+        return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+      }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const primaryList = await efp.getUserPrimaryList(address)
