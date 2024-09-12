@@ -30,19 +30,19 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
       const response = { address } as Record<string, unknown>
       return context.json({ ...response, ens, ranks, stats, primary_list: primaryList?.toString() ?? null }, 200)
     }
-    const ranks = await efp.getUserRanksCounts(address)
+    const ranksAndCounts = await efp.getUserRanksCounts(address)
     const stats = {
-      followers_count: ranks.followers,
-      following_count: ranks.following
+      followers_count: ranksAndCounts.followers,
+      following_count: ranksAndCounts.following
     }
-    const ranksOnly = {
-      mutuals_rank: ranks.mutuals_rank,
-      followers_rank: ranks.followers_rank,
-      following_rank: ranks.following_rank,
-      top8_rank: ranks.top8_rank,
-      blocks_rank: ranks.blocks_rank
+    const ranks = {
+      mutuals_rank: ranksAndCounts.mutuals_rank,
+      followers_rank: ranksAndCounts.followers_rank,
+      following_rank: ranksAndCounts.following_rank,
+      top8_rank: ranksAndCounts.top8_rank,
+      blocks_rank: ranksAndCounts.blocks_rank
     }
     const response = { address } as Record<string, unknown>
-    return context.json({ ...response, ens, ranksOnly, stats, primary_list: primaryList?.toString() ?? null }, 200)
+    return context.json({ ...response, ens, ranks, stats, primary_list: primaryList?.toString() ?? null }, 200)
   })
 }
