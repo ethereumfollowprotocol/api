@@ -103,6 +103,7 @@ export type DiscoverRow = {
   avatar: string
   followers: number
   following: number
+  _index?: number
 }
 
 export type RecommendedRow = {
@@ -985,13 +986,20 @@ export class EFPIndexerService implements IEFPIndexerService {
   // }
 
   async getDiscoverAccounts(limit: string, offset: string): Promise<DiscoverRow[]> {
-    const query = sql<DiscoverRow>`SELECT * FROM public.view__discover LIMIT ${limit} OFFSET ${offset};`
+    const query = sql<DiscoverRow>`SELECT * FROM public.efp_recent_activity LIMIT ${limit} OFFSET ${offset};`
     const result = await query.execute(this.#db)
-    const discovers: DiscoverRow[] = result.rows.map(record => record)
-    const uniqueDiscovers = discovers.filter(
-      (discover, index, self) => index === self.findIndex(d => d.address === discover.address)
-    )
-    return uniqueDiscovers
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: DiscoverRow) => ({
+      address: row.address,
+      name: row.name,
+      avatar: row.avatar,
+      followers: row.followers,
+      following: row.following
+    }))
   }
   /////////////////////////////////////////////////////////////////////////////
   // Debug

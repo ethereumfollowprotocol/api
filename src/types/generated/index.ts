@@ -135,6 +135,17 @@ export interface EfpPoapLinks {
   updated_at: Generated<Timestamp | null>
 }
 
+export interface EfpRecentActivity {
+  address: string
+  avatar: string | null
+  created_at: Generated<Timestamp | null>
+  followers: Generated<Int8 | null>
+  following: Generated<Int8 | null>
+  name: string | null
+  updated_at: Generated<Timestamp | null>
+  _index: Generated<Int8 | null>
+}
+
 export interface EfpRecommended {
   address: string
   avatar: string | null
@@ -422,6 +433,7 @@ export interface DB {
   efp_list_records: EfpListRecords
   efp_lists: EfpLists
   efp_poap_links: EfpPoapLinks
+  efp_recent_activity: EfpRecentActivity
   efp_recommended: EfpRecommended
   ens_metadata: EnsMetadata
   events: Events
