@@ -38,10 +38,7 @@
       },
       "performance": { "noAccumulatingSpread": "off" },
       "nursery": {
-        "all": true,
-        "noConsole": "off",
-        "noUndeclaredDependencies": "off",
-        "useImportExtensions": "off"
+        "all": true
       },
       "complexity": {
         "noBannedTypes": "off",
@@ -49,9 +46,12 @@
         "useLiteralKeys": "off"
       },
       "correctness": {
-        "noUnusedImports": "off"
+        "noUndeclaredDependencies": "off",
+        "noUnusedImports": "off",
+        "useImportExtensions": "off"
       },
       "suspicious": {
+        "noConsole": "off",
         "noEmptyBlockStatements": "off",
         "noEmptyInterface": "off",
         "noExplicitAny": "off",

@@ -30,7 +30,7 @@
     "postgres": "^3.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.0",
+    "@biomejs/biome": "^1.9.0",
     "@cloudflare/workers-types": "^4.20240117.0",
     "@total-typescript/ts-reset": "^0.5.1",
     "@types/bun": "^1.0.4",
