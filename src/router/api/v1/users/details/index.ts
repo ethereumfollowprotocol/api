@@ -12,7 +12,7 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
     const { live } = context.req.query()
 
     const ensService = services.ens(env(context))
-    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), true)
+    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), false)
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
