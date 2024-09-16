@@ -9,7 +9,7 @@ import { isAddress } from '#/utilities'
 export function details(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/details', async context => {
     const { addressOrENS } = context.req.param()
-    const { live } = context.req.query()
+    // const { live } = context.req.query()
 
     const ensService = services.ens(env(context))
     const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), false)
@@ -20,21 +20,9 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
     const normalizedAddress: Address = address.toLowerCase() as `0x${string}`
     const efp: IEFPIndexerService = services.efp(env(context))
     const primaryList = await efp.getUserPrimaryList(normalizedAddress)
-    if (live === 'true') {
-      const ranks = await efp.getUserRanks(normalizedAddress)
-      const stats = {
-        followers_count: await efp.getUserFollowersCount(normalizedAddress),
-        following_count: await efp.getUserFollowingCount(normalizedAddress)
-      }
 
-      const response = { address } as Record<string, unknown>
-      return context.json({ ...response, ens, ranks, stats, primary_list: primaryList?.toString() ?? null }, 200)
-    }
     const ranksAndCounts = await efp.getUserRanksCounts(address)
-    const stats = {
-      followers_count: ranksAndCounts.followers,
-      following_count: ranksAndCounts.following
-    }
+
     const ranks = {
       mutuals_rank: ranksAndCounts.mutuals_rank,
       followers_rank: ranksAndCounts.followers_rank,
@@ -43,6 +31,6 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
       blocks_rank: ranksAndCounts.blocks_rank
     }
     const response = { address } as Record<string, unknown>
-    return context.json({ ...response, ens, ranks, stats, primary_list: primaryList?.toString() ?? null }, 200)
+    return context.json({ ...response, ens, ranks, primary_list: primaryList?.toString() ?? null }, 200)
   })
 }
