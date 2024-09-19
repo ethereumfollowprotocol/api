@@ -6,6 +6,7 @@ export type ListRecord = {
 
 export type TaggedListRecord = ListRecord & {
   tags: string[]
+  address: Buffer
 }
 
 function toHexString(num: number): string {
@@ -27,7 +28,7 @@ export function hashRecord(tokenId: bigint, listRecord: ListRecord): `0x${string
 export type PrettyTaggedListRecord = {
   version: number
   record_type: string
-  data: `0x${string}`
+  address: `0x${string}`
   tags: string[]
 }
 
@@ -39,7 +40,7 @@ export function prettifyListRecord(record: TaggedListRecord): PrettyTaggedListRe
   return {
     version: record.version,
     record_type: record.recordType === 1 ? 'address' : `${record.recordType}`,
-    data: hexlify(record.data),
+    address: hexlify(record.data),
     tags: record.tags
   }
 }

@@ -541,6 +541,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -583,6 +584,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -603,6 +605,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       ens: {
         name: row.name,
         avatar: row.avatar
@@ -627,6 +630,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       ens: {
         name: row.name,
         avatar: row.avatar
@@ -647,6 +651,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -670,6 +675,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -682,6 +688,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -703,6 +710,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -724,6 +732,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.following_address),
+      address: bufferize(row.following_address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -752,6 +761,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.address),
+      address: bufferize(row.address),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -1097,6 +1107,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.record_version,
       recordType: row.record_type,
       data: bufferize(row.record_data),
+      address: bufferize(row.record_data),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }
@@ -1230,6 +1241,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       version: row.version,
       recordType: row.record_type,
       data: bufferize(row.data),
+      address: bufferize(row.data),
       tags: row.tags ? row.tags.sort() : row.tags
     }))
   }

@@ -13,9 +13,6 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
   ens?: ENSProfileResponse
 }
 
-/**
- * Enhanced to add ENS support
- */
 export function commonFollowers(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/commonFollowers', async context => {
     const { addressOrENS } = context.req.param()
@@ -30,12 +27,12 @@ export function commonFollowers(users: Hono<{ Bindings: Environment }>, services
     if (!(isAddress(leader as Address) && leader)) {
       return context.json({ response: 'Invalid query address' }, 404)
     }
-    const efp: IEFPIndexerService = services.efp(env(context)) // efp is the service to get common followers
+    const efp: IEFPIndexerService = services.efp(env(context))
     const common: CommonFollowers[] = await efp.getCommonFollowers(
       address.toLowerCase() as Address,
       leader.toLowerCase() as Address
-    ) // get common followers
+    )
 
-    return context.json({ results: common, length: common.length }, 200) // return the common followers
+    return context.json({ results: common, length: common.length }, 200)
   })
 }

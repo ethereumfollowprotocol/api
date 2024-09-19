@@ -184,6 +184,7 @@ export class SocialGraph {
           version: node.value.version,
           recordType: node.value.recordType,
           data: node.value.data,
+          address: node.value.data,
           tags: Array.from(tags).sort()
         })
         node = node.next
@@ -254,7 +255,7 @@ export class SocialGraph {
       if (!SocialGraph.isBlock({ version, recordType, data }, tags)) {
         continue
       }
-      blocks.push({ version, recordType, data, tags: tags })
+      blocks.push({ version, recordType, data, address: data, tags: tags })
     }
     return blocks
   }
@@ -317,7 +318,7 @@ export class SocialGraph {
       if (!SocialGraph.isFollow({ version, recordType, data }, tags)) {
         continue
       }
-      following.push({ version, recordType, data, tags })
+      following.push({ version, recordType, data, address: data, tags })
     }
     return following
   }
@@ -363,7 +364,7 @@ export class SocialGraph {
       if (!SocialGraph.isMute({ version, recordType, data }, tags)) {
         continue
       }
-      mutes.push({ version, recordType, data, tags: tags })
+      mutes.push({ version, recordType, data, address: data, tags: tags })
     }
     return mutes
   }

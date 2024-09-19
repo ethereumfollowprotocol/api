@@ -17,7 +17,7 @@ export function muted(
   /**
    * Same as /followers, but for muted.
    */
-  leaderboard.get('/muted/:addressOrENS?', limitValidator, includeValidator, async context => {
+  leaderboard.get('/muted?', limitValidator, includeValidator, async context => {
     const { include, limit } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     let mostMuted: { address: string; muted_by_count: number }[] = await services

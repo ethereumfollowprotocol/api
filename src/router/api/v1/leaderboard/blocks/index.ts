@@ -19,7 +19,7 @@ export function blocks(
    */
   leaderboard.get('/blocks/:addressOrENS?', limitValidator, includeValidator, async context => {
     const { include, limit } = context.req.valid('query')
-    const parsedLimit = Number.parseInt(limit as string, 10)
+    const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     let mostBlocks: { address: string; blocks_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardBlocks(parsedLimit)

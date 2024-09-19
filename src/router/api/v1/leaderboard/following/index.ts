@@ -19,7 +19,7 @@ export function following(
    */
   leaderboard.get('/following/:addressOrENS?', limitValidator, includeValidator, async context => {
     const { include, limit } = context.req.valid('query')
-    const parsedLimit = Number.parseInt(limit as string, 10)
+    const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     let mostFollowing: { address: string; following_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardFollowing(parsedLimit)
