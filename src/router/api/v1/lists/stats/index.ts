@@ -8,23 +8,16 @@ import type { Address, Environment } from '#/types'
 export function stats(lists: Hono<{ Bindings: Environment }>, services: Services) {
   lists.get('/:token_id/stats', async context => {
     const { token_id } = context.req.param()
-    const { live } = context.req.query()
 
-    const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
-    if (!listUser) {
-      return context.json({ response: 'No User Found' }, 404)
+    if (!token_id) {
+      return context.json({ response: 'Invalid List Id' }, 404)
     }
-    const address = listUser.toLowerCase() as Address
+
     const efp: IEFPIndexerService = services.efp(env(context))
 
-    const ranksAndCounts = await efp.getUserRanksCounts(address)
     const stats = {
-      followers_count: ranksAndCounts.followers,
-      following_count: ranksAndCounts.following
-    }
-
-    if (live === 'true') {
-      stats.following_count = await efp.getUserFollowingCount(address)
+      followers_count: await efp.getUserFollowersCountByList(token_id),
+      following_count: await efp.getUserFollowingCountByList(token_id)
     }
 
     return context.json(stats, 200)
