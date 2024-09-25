@@ -41,6 +41,10 @@ export interface EfpAccountMetadata {
   value: string
 }
 
+export interface EfpAddresses {
+  address: string
+}
+
 export interface EfpLeaderboard {
   address: string
   avatar: string | null
@@ -127,6 +131,12 @@ export interface EfpLists {
   user: string
 }
 
+export interface EfpMutuals {
+  address: string
+  mutuals: Generated<Int8 | null>
+  mutuals_rank: Int8 | null
+}
+
 export interface EfpPoapLinks {
   claimant: string | null
   claimed: boolean
@@ -136,6 +146,7 @@ export interface EfpPoapLinks {
 }
 
 export interface EfpRecentActivity {
+  _index: Generated<Int8 | null>
   address: string
   avatar: string | null
   created_at: Generated<Timestamp | null>
@@ -143,7 +154,6 @@ export interface EfpRecentActivity {
   following: Generated<Int8 | null>
   name: string | null
   updated_at: Generated<Timestamp | null>
-  _index: Generated<Int8 | null>
 }
 
 export interface EfpRecommended {
@@ -425,6 +435,7 @@ export interface ViewLatestLeaders {
 export interface DB {
   contracts: Contracts
   efp_account_metadata: EfpAccountMetadata
+  efp_addresses: EfpAddresses
   efp_leaderboard: EfpLeaderboard
   efp_list_metadata: EfpListMetadata
   efp_list_nfts: EfpListNfts
@@ -432,6 +443,7 @@ export interface DB {
   efp_list_record_tags: EfpListRecordTags
   efp_list_records: EfpListRecords
   efp_lists: EfpLists
+  efp_mutuals: EfpMutuals
   efp_poap_links: EfpPoapLinks
   efp_recent_activity: EfpRecentActivity
   efp_recommended: EfpRecommended

@@ -10,8 +10,14 @@ import { textOrEmojiPattern } from '#/utilities'
 export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse }
 
 export function followers(lists: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/followers', includeValidator, async context => {
     const { token_id } = context.req.param()
+
+    if (Number.isNaN(Number(token_id))) {
+      return context.json({ response: 'Invalid list id' }, 400)
+    }
+
     let { include, offset, limit } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
