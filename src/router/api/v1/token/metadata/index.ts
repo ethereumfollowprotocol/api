@@ -9,7 +9,9 @@ import type { Address } from '#/types/index'
 export function metadata(token: Hono<{ Bindings: Environment }>, services: Services): Hono<{ Bindings: Environment }> {
   token.get('/metadata/:token_id', async context => {
     const { token_id } = context.req.param()
-
+    if (Number.isNaN(Number(token_id))) {
+      return context.json({ response: 'Invalid list id' }, 400)
+    }
     const ensService = services.ens(env(context))
     const efp: IEFPIndexerService = services.efp(env(context))
     const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
@@ -20,11 +22,18 @@ export function metadata(token: Hono<{ Bindings: Environment }>, services: Servi
     const primaryList = await efp.getUserPrimaryList(address)
     const isPrimary = primaryList?.toString() === token_id
 
+    // const ranksAndCounts = await efp.getUserRanksCounts(address)
     const data = {
       ens: { address, ...ens },
-      ranks: await efp.getUserRanks(address),
-      followers_count: await efp.getUserFollowersCountByList(token_id),
-      following_count: await efp.getUserFollowingCountByList(token_id),
+      //   ranks: {
+      //     mutuals_rank: ranksAndCounts.mutuals_rank,
+      //     followers_rank: ranksAndCounts.followers_rank,
+      //     following_rank: ranksAndCounts.following_rank,
+      //     top8_rank: ranksAndCounts.top8_rank,
+      //     blocks_rank: ranksAndCounts.blocks_rank
+      //   },
+      //   followers_count: ranksAndCounts.followers,
+      //   following_count: ranksAndCounts.following,
       is_primary: isPrimary
     }
     const url = context.req.url
@@ -42,31 +51,31 @@ export function metadata(token: Hono<{ Bindings: Environment }>, services: Servi
         {
           trait_type: 'Primary List',
           value: data.is_primary
-        },
-        {
-          trait_type: 'Followers',
-          value: data.followers_count
-        },
-        {
-          trait_type: 'Following',
-          value: data.following_count
-        },
-        {
-          trait_type: 'Mutuals Rank',
-          value: data.ranks.mutuals_rank
-        },
-        {
-          trait_type: 'Followers Rank',
-          value: data.ranks.followers_rank
-        },
-        {
-          trait_type: 'Following Rank',
-          value: data.ranks.following_rank
-        },
-        {
-          trait_type: 'Blocked Rank',
-          value: data.ranks.blocks_rank ?? '0'
         }
+        // {
+        //   trait_type: 'Followers',
+        //   value: data.followers_count
+        // },
+        // {
+        //   trait_type: 'Following',
+        //   value: data.following_count
+        // },
+        // {
+        //   trait_type: 'Mutuals Rank',
+        //   value: data.ranks.mutuals_rank
+        // },
+        // {
+        //   trait_type: 'Followers Rank',
+        //   value: data.ranks.followers_rank
+        // },
+        // {
+        //   trait_type: 'Following Rank',
+        //   value: data.ranks.following_rank
+        // },
+        // {
+        //   trait_type: 'Blocked Rank',
+        //   value: data.ranks.blocks_rank ?? '0'
+        // }
       ]
     }
 

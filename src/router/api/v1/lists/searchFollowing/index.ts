@@ -16,6 +16,9 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
 export function searchFollowing(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:token_id/searchFollowing', includeValidator, async context => {
     const { token_id } = context.req.param()
+    if (Number.isNaN(Number(token_id))) {
+      return context.json({ response: 'Invalid list id' }, 400)
+    }
     let { offset, limit } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
