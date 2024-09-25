@@ -9,7 +9,9 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
   lists.get('/:token_id/details', async context => {
     const { token_id } = context.req.param()
     // const { live } = context.req.query()
-
+    if (Number.isNaN(Number(token_id))) {
+      return context.json({ response: 'Invalid list id' }, 400)
+    }
     const ensService = services.ens(env(context))
     const efp: IEFPIndexerService = services.efp(env(context))
     const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)

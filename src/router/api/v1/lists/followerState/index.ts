@@ -8,6 +8,9 @@ import { isAddress } from '#/utilities'
 export function followerState(lists: Hono<{ Bindings: Environment }>, services: Services) {
   lists.get('/:token_id/:addressOrENS/followerState', async context => {
     const { token_id, addressOrENS } = context.req.param()
+    if (Number.isNaN(Number(token_id))) {
+      return context.json({ response: 'Invalid list id' }, 400)
+    }
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
