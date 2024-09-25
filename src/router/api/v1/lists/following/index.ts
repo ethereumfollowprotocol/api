@@ -20,9 +20,9 @@ export function following(lists: Hono<{ Bindings: Environment }>, services: Serv
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/following', includeValidator, async context => {
     const { token_id } = context.req.param()
-    if (Number.isNaN(Number(token_id))) {
-      return context.json({ response: 'Invalid list id' }, 400)
-    }
+    // if (Number.isNaN(Number(token_id))) {
+    //   return context.json({ response: 'Invalid list id' }, 400)
+    // }
 
     let { offset, limit } = context.req.valid('query')
     if (!limit || Number.isNaN(limit)) limit = '10'
