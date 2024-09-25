@@ -9,7 +9,6 @@ import { isAddress } from '#/utilities'
 export function details(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/details', async context => {
     const { addressOrENS } = context.req.param()
-    // const { live } = context.req.query()
 
     const ensService = services.ens(env(context))
     const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), false)
