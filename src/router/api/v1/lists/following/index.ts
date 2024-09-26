@@ -20,18 +20,19 @@ export function following(lists: Hono<{ Bindings: Environment }>, services: Serv
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/following', includeValidator, async context => {
     const { token_id } = context.req.param()
-    if (Number.isNaN(Number(token_id))) {
+    if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
 
-    let { offset, limit } = context.req.valid('query')
+    let { offset, limit, cache } = context.req.valid('query')
     if (!limit || Number.isNaN(limit)) limit = '10'
     if (!offset || Number.isNaN(offset)) offset = '0'
 
-    const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
-
-    if (!listUser) {
-      return context.json({ response: 'No User Found' }, 404)
+    let direction = 'latest'
+    if (context.req.query('sort')?.toLowerCase() === 'followers') {
+      direction = 'followers'
+    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
+      direction = 'earliest'
     }
 
     const tagsQuery = context.req.query('tags')
@@ -41,11 +42,18 @@ export function following(lists: Hono<{ Bindings: Environment }>, services: Serv
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
-    let direction = 'latest'
-    if (context.req.query('sort')?.toLowerCase() === 'followers') {
-      direction = 'followers'
-    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
-      direction = 'earliest'
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `lists/${token_id}/following?limit=${limit}&offset=${offset}&sort=${direction}&tags=${tagsToSearch.join(',')}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+    const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
+
+    if (!listUser) {
+      return context.json({ response: 'No User Found' }, 404)
     }
 
     const efp: IEFPIndexerService = services.efp(env(context))
@@ -92,7 +100,9 @@ export function following(lists: Hono<{ Bindings: Environment }>, services: Serv
       // If ENS is not included, just map the following list records to the pretty format
       response = followingListRecords.map(prettifyListRecord)
     }
+    const packagedResponse = { following: response }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
 
-    return context.json({ following: response }, 200)
+    return context.json(packagedResponse, 200)
   })
 }

@@ -16,6 +16,9 @@ compatibility_date = "2023-10-30"
 #
 vars = { ENVIRONMENT = "development" }
 services = [{ binding = "ens", service = "ens" }]
+kv_namespaces = [
+  { binding = "EFP_DATA_CACHE", id = "5092581c2d524711a04560d335966a60", preview_id = "608971607bd2469e8972a0811f8de589" }
+]
 
 [env.development]
 name = "development"
@@ -25,6 +28,9 @@ routes = [
   { pattern = "development.api.ethfollow.xyz", custom_domain = true, zone_id = "0bb17a76c05f664a7c6cfd16721216cf" },
 ]
 services = [{ binding = "ens", service = "ens" }]
+kv_namespaces = [
+  { binding = "EFP_DATA_CACHE", id = "c350ab2182ba476bb060fe9f5d0e026b" }
+]
 
 [env.production]
 name = "production"
@@ -37,4 +43,5 @@ routes = [
 services = [{ binding = "ens", service = "ens" }]
 kv_namespaces = [
   { binding = "EFP_DEMO_KV", id = "c490de9b7d434fdb927933a86d1d2db4" },
+  { binding = "EFP_DATA_CACHE", id = "5092581c2d524711a04560d335966a60" }
 ]

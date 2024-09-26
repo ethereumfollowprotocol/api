@@ -20,13 +20,15 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
   // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   users.get('/:addressOrENS/following', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
-    let { offset, limit } = context.req.valid('query')
+    let { offset, limit, cache } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
-    const ensService = services.ens(env(context))
-    const address: Address = await ensService.getAddress(addressOrENS)
-    if (!isAddress(address)) {
-      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+
+    let direction = 'latest'
+    if (context.req.query('sort')?.toLowerCase() === 'followers') {
+      direction = 'followers'
+    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
+      direction = 'earliest'
     }
 
     const tagsQuery = context.req.query('tags')
@@ -36,11 +38,19 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
-    let direction = 'latest'
-    if (context.req.query('sort')?.toLowerCase() === 'followers') {
-      direction = 'followers'
-    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
-      direction = 'earliest'
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `users/${addressOrENS}/following?limit=${limit}&offset=${offset}&sort=${direction}&tags=${tagsToSearch.join(',')}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+
+    const ensService = services.ens(env(context))
+    const address: Address = await ensService.getAddress(addressOrENS)
+    if (!isAddress(address)) {
+      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
 
     const efp: IEFPIndexerService = services.efp(env(context))
@@ -53,7 +63,6 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
     )
 
     let response: ENSFollowingResponse[]
-
     // Check if 'ens' information should be included
     if (context.req.query('include')?.includes('ens')) {
       // Filter for address records
@@ -86,7 +95,9 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
       // If ENS is not included, just map the following list records to the pretty format
       response = followingListRecords.map(prettifyListRecord)
     }
+    const packagedResponse = { following: response }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
 
-    return context.json({ following: response }, 200)
+    return context.json(packagedResponse, 200)
   })
 }

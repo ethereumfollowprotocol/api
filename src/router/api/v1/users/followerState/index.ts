@@ -8,6 +8,16 @@ import { isAddress } from '#/utilities'
 export function followerState(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/:addressOrENS2/followerState', async context => {
     const { addressOrENS, addressOrENS2 } = context.req.param()
+    const { cache } = context.req.query()
+
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `users/${addressOrENS}/${addressOrENS2}/followerState`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     const ensService = services.ens(env(context))
     const addressUser: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(addressUser)) {
@@ -19,6 +29,8 @@ export function followerState(users: Hono<{ Bindings: Environment }>, services: 
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getUserFollowerState(addressUser, addressFollower)
-    return context.json({ addressUser, addressFollower, state }, 200)
+    const packagedResponse = { addressUser, addressFollower, state }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    return context.json(packagedResponse, 200)
   })
 }

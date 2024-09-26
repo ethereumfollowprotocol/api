@@ -14,13 +14,29 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
   lists.get('/:token_id/followers', includeValidator, async context => {
     const { token_id } = context.req.param()
 
-    if (Number.isNaN(Number(token_id))) {
+    if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
 
-    let { include, offset, limit } = context.req.valid('query')
+    let { include, offset, limit, cache } = context.req.valid('query')
+
     if (!limit) limit = '10'
     if (!offset) offset = '0'
+    let direction = 'latest'
+    if (context.req.query('sort')?.toLowerCase() === 'followers') {
+      direction = 'followers'
+    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
+      direction = 'earliest'
+    }
+
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `lists/${token_id}/followers?limit=${limit}&offset=${offset}&sort=${direction}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
 
     const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
     // const address: Address = await ensService.getAddress(addressOrENS)
@@ -33,13 +49,6 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
     if (tagsQuery) {
       const tagsArray = tagsQuery.split(',')
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
-    }
-
-    let direction = 'latest'
-    if (context.req.query('sort')?.toLowerCase() === 'followers') {
-      direction = 'followers'
-    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
-      direction = 'earliest'
     }
 
     const efp: IEFPIndexerService = services.efp(env(context))
@@ -68,7 +77,9 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
         return ensFollowerResponse
       })
     }
+    const packagedResponse = { followers: response }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
 
-    return context.json({ followers: response }, 200)
+    return context.json(packagedResponse, 200)
   })
 }

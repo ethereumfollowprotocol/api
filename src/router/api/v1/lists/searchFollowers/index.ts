@@ -12,7 +12,7 @@ export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse 
 export function searchFollowers(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:token_id/searchFollowers', includeValidator, async context => {
     const { token_id } = context.req.param()
-    if (Number.isNaN(Number(token_id))) {
+    if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
     let { offset, limit } = context.req.valid('query')

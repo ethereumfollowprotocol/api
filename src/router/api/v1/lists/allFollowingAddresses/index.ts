@@ -18,7 +18,18 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
 export function allFollowingAddresses(lists: Hono<{ Bindings: Environment }>, services: Services) {
   lists.get('/:token_id/allFollowingAddresses', includeValidator, async context => {
     const { token_id } = context.req.param()
-
+    if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
+      return context.json({ response: 'Invalid list id' }, 400)
+    }
+    const { cache } = context.req.valid('query')
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `lists/${token_id}/allFollowingAddresses`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
     if (!listUser) {
       return context.json({ response: 'No User Found' }, 404)
@@ -27,6 +38,9 @@ export function allFollowingAddresses(lists: Hono<{ Bindings: Environment }>, se
     const efp: IEFPIndexerService = services.efp(env(context))
     const followingAddresses: Address[] = await efp.getAllUserFollowingAddresses(token_id)
 
-    return context.json(followingAddresses, 200)
+    const packagedResponse = followingAddresses
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 180 })
+
+    return context.json(packagedResponse, 200)
   })
 }

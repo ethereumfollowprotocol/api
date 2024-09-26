@@ -13,12 +13,21 @@ export function ranked(
   includeValidator: IncludeValidator
 ) {
   leaderboard.get('/ranked', limitValidator, includeValidator, async context => {
-    let { limit, offset } = context.req.valid('query')
+    let { limit, offset, cache } = context.req.valid('query')
 
     if (!limit) limit = '50'
     if (!offset) offset = '0'
     const sort = context.req.query('sort') ? context.req.query('sort') : 'mutuals'
     const direction = context.req.query('direction') ? context.req.query('direction') : 'DESC'
+
+    const demoKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `leaderboard/ranked?limit=${limit}&offset=${offset}&sort=${sort}&direction=${direction}`
+    if (cache !== 'fresh') {
+      const cacheHit = await demoKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
 
     const parsedLimit = Number.parseInt(limit as string, 10)
     const offsetLimit = Number.parseInt(offset as string, 10)
@@ -26,6 +35,8 @@ export function ranked(
     const results: LeaderBoardRow[] = await efp.getLeaderboardRanked(parsedLimit, offsetLimit, sort, direction)
     const last_updated = results.length > 0 ? results[0]?.updated_at : '0'
 
-    return context.json({ last_updated, results }, 200)
+    const packagedResponse = { last_updated, results }
+    await demoKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    return context.json(packagedResponse, 200)
   })
 }
