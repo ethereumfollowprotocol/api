@@ -8,8 +8,8 @@ import { isAddress } from '#/utilities'
 export function taggedAs(lists: Hono<{ Bindings: Environment }>, services: Services) {
   lists.get('/:token_id/taggedAs', async context => {
     const { token_id } = context.req.param()
-    if (!token_id || Number.isNaN(token_id)) {
-      return context.json({ response: 'invalid list id' }, 404)
+    if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
+      return context.json({ response: 'Invalid list id' }, 400)
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const address = await efp.getAddressByList(token_id)

@@ -8,9 +8,19 @@ import { isAddress } from '#/utilities'
 export function followerState(lists: Hono<{ Bindings: Environment }>, services: Services) {
   lists.get('/:token_id/:addressOrENS/followerState', async context => {
     const { token_id, addressOrENS } = context.req.param()
-    if (Number.isNaN(Number(token_id))) {
+    const { cache } = context.req.query()
+    if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `lists/${token_id}/${addressOrENS}/followerState`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
@@ -18,6 +28,8 @@ export function followerState(lists: Hono<{ Bindings: Environment }>, services: 
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getListFollowerState(token_id, address)
-    return context.json({ token_id, address, state }, 200)
+    const packagedResponse = { token_id, address, state }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    return context.json(packagedResponse, 200)
   })
 }

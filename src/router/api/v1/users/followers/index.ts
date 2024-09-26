@@ -10,11 +10,29 @@ import { isAddress, textOrEmojiPattern } from '#/utilities'
 export type ENSFollowerResponse = FollowerResponse & { ens?: ENSProfileResponse }
 
 export function followers(users: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   users.get('/:addressOrENS/followers', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
+    const { cache } = context.req.query()
     let { include, offset, limit } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
+
+    let direction = 'latest'
+    if (context.req.query('sort')?.toLowerCase() === 'followers') {
+      direction = 'followers'
+    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
+      direction = 'earliest'
+    }
+
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `users/${addressOrENS}/followers?limit=${limit}&offset=${offset}&sort=${direction}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
@@ -27,12 +45,7 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
       const tagsArray = tagsQuery.split(',')
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
-    let direction = 'latest'
-    if (context.req.query('sort')?.toLowerCase() === 'followers') {
-      direction = 'followers'
-    } else if (context.req.query('sort')?.toLowerCase() === 'earliest') {
-      direction = 'earliest'
-    }
+
     const followers: FollowerResponse[] = await services
       .efp(env(context))
       .getUserFollowersByAddressTagSort(address, limit, offset, tagsToSearch, direction)
@@ -52,7 +65,9 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
         return ensFollowerResponse
       })
     }
+    const packagedResponse = { followers: response }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
 
-    return context.json({ followers: response }, 200)
+    return context.json(packagedResponse, 200)
   })
 }

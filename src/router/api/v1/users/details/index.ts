@@ -9,7 +9,16 @@ import { isAddress } from '#/utilities'
 export function details(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/details', async context => {
     const { addressOrENS } = context.req.param()
+    const { cache } = context.req.query()
 
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `users/${addressOrENS}/details`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     const ensService = services.ens(env(context))
     const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), false)
     if (!isAddress(address)) {
@@ -30,6 +39,8 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
       blocks_rank: ranksAndCounts.blocks_rank
     }
     const response = { address } as Record<string, unknown>
-    return context.json({ ...response, ens, ranks, primary_list: primaryList?.toString() ?? null }, 200)
+    const packagedResponse = { ...response, ens, ranks, primary_list: primaryList?.toString() ?? null }
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 180 })
+    return context.json(packagedResponse, 200)
   })
 }

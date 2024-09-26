@@ -9,7 +9,16 @@ import { isAddress } from '#/utilities'
 export function stats(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/stats', async context => {
     const { addressOrENS } = context.req.param()
-    const { live } = context.req.query()
+    const { live, cache } = context.req.query()
+
+    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheTarget = `users/${addressOrENS}/stats`
+    if (cache !== 'fresh' || live !== 'true') {
+      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     let address: Address = addressOrENS.toLowerCase() as Address
     if (!isAddress(addressOrENS)) {
       const ens: IENSMetadataService = services.ens(env(context))
@@ -30,6 +39,7 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       stats.following_count = await efp.getUserFollowingCount(address)
     }
 
+    await cacheKV.put(cacheTarget, JSON.stringify(stats), { expirationTtl: 120 })
     return context.json(stats, 200)
   })
 }
