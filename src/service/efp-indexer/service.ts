@@ -116,6 +116,7 @@ export type StatsRow = {
   address_count: number
   list_count: number
   list_op_count: number
+  user_count: number
 }
 
 export type FollowingResponse = TaggedListRecord
@@ -1257,13 +1258,15 @@ export class EFPIndexerService implements IEFPIndexerService {
       return {
         address_count: 0,
         list_count: 0,
-        list_op_count: 0
+        list_op_count: 0,
+        user_count: 0
       }
     }
     return {
       address_count: result.rows[0]?.address_count as number,
       list_count: result.rows[0]?.list_count as number,
-      list_op_count: result.rows[0]?.list_op_count as number
+      list_op_count: result.rows[0]?.list_op_count as number,
+      user_count: result.rows[0]?.user_count as number
     }
   }
 
