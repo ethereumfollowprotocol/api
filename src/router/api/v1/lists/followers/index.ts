@@ -29,8 +29,15 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
       direction = 'earliest'
     }
 
+    const tagsQuery = context.req.query('tags')
+    let tagsToSearch: string[] = []
+    if (tagsQuery) {
+      const tagsArray = tagsQuery.split(',')
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
+    }
+
     const cacheKV = context.env.EFP_DATA_CACHE
-    const cacheTarget = `lists/${token_id}/followers?limit=${limit}&offset=${offset}&sort=${direction}`
+    const cacheTarget = `lists/${token_id}/followers?limit=${limit}&offset=${offset}&sort=${direction}&tags=${tagsToSearch.join(',')}`
     if (cache !== 'fresh') {
       const cacheHit = await cacheKV.get(cacheTarget, 'json')
       if (cacheHit) {
@@ -42,13 +49,6 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
     // const address: Address = await ensService.getAddress(addressOrENS)
     if (!listUser) {
       return context.json({ response: 'No User Found' }, 404)
-    }
-
-    const tagsQuery = context.req.query('tags')
-    let tagsToSearch: string[] = []
-    if (tagsQuery) {
-      const tagsArray = tagsQuery.split(',')
-      tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
     const efp: IEFPIndexerService = services.efp(env(context))

@@ -25,8 +25,15 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
       direction = 'earliest'
     }
 
+    const tagsQuery = context.req.query('tags')
+    let tagsToSearch: string[] = []
+    if (tagsQuery) {
+      const tagsArray = tagsQuery.split(',')
+      tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
+    }
+
     const cacheKV = context.env.EFP_DATA_CACHE
-    const cacheTarget = `users/${addressOrENS}/followers?limit=${limit}&offset=${offset}&sort=${direction}`
+    const cacheTarget = `users/${addressOrENS}/followers?limit=${limit}&offset=${offset}&sort=${direction}&tags=${tagsToSearch.join(',')}`
     if (cache !== 'fresh') {
       const cacheHit = await cacheKV.get(cacheTarget, 'json')
       if (cacheHit) {
@@ -37,13 +44,6 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
-    }
-
-    const tagsQuery = context.req.query('tags')
-    let tagsToSearch: string[] = []
-    if (tagsQuery) {
-      const tagsArray = tagsQuery.split(',')
-      tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
     const followers: FollowerResponse[] = await services
