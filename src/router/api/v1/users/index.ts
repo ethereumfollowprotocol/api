@@ -3,6 +3,8 @@ import { Hono } from 'hono'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import { account } from './account'
+import { allFollowers } from './allFollowers'
+import { allFollowing } from './allFollowing'
 import { commonFollowers } from './commonFollowers'
 import { details } from './details'
 import { ens } from './ens'
@@ -26,6 +28,8 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
 
   // ENS profile metadata
   account(users, services)
+  allFollowers(users, services)
+  allFollowing(users, services)
   commonFollowers(users, services)
   details(users, services)
   ens(users, services)
@@ -49,7 +53,9 @@ export function users(services: Services): Hono<{ Bindings: Environment }> {
       {
         message: `Not a valid endpoint. Available subpaths: ${[
           '/account',
+          '/allFollowers',
           '/commonFollowers',
+          '/allFollowing',
           '/details',
           '/ens',
           '/followers',

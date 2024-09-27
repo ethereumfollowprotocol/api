@@ -86,6 +86,24 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getAllUserFollowersByAddressTagSort(
+    _address: Address,
+    _limit: string,
+    _offset: string,
+    _tags: string[],
+    _sort: string
+  ): Promise<
+    {
+      address: Address
+      tags: string[]
+      is_following: boolean
+      is_blocked: boolean
+      is_muted: boolean
+    }[]
+  > {
+    throw new Error('Method not implemented.')
+  }
+
   getUserFollowersByAddressTagSort(
     _address: Address,
     _limit: string,
@@ -156,6 +174,16 @@ export class MockEFPIndexerService implements IEFPIndexerService {
 
   getUserFollowingByListTagSort(
     _token_id: string,
+    _limit: string,
+    _offset: string,
+    _tags: string[],
+    _sort: string
+  ): Promise<TaggedListRecord[]> {
+    throw new Error('Method not implemented.')
+  }
+
+  getAllUserFollowingByAddressTagSort(
+    _address: Address,
     _limit: string,
     _offset: string,
     _tags: string[],
