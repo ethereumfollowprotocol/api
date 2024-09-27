@@ -36,7 +36,7 @@ export function ranked(
     const last_updated = results.length > 0 ? results[0]?.updated_at : '0'
 
     const packagedResponse = { last_updated, results }
-    await demoKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    await demoKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
     return context.json(packagedResponse, 200)
   })
 }

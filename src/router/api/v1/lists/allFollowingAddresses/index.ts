@@ -39,7 +39,7 @@ export function allFollowingAddresses(lists: Hono<{ Bindings: Environment }>, se
     const followingAddresses: Address[] = await efp.getAllUserFollowingAddresses(token_id)
 
     const packagedResponse = followingAddresses
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 180 })
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
 
     return context.json(packagedResponse, 200)
   })

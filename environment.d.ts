@@ -14,6 +14,7 @@ interface EnvironmentVariables {
   readonly S3_BUCKET: string
   readonly S3_REGION: string
   readonly AIRSTACK_API_KEY: string
+  readonly CACHE_TTL: number
 }
 
 // Cloudflare Workers
