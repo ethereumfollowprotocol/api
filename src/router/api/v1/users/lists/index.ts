@@ -34,7 +34,7 @@ export function lists(users: Hono<{ Bindings: Environment }>, services: Services
     const lists: number[] = await efp.getUserLists(address)
 
     const packagedResponse = { primary_list: primaryList?.toString() ?? null, lists }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
 
     return context.json(packagedResponse, 200)
   })

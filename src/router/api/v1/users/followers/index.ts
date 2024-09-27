@@ -66,7 +66,7 @@ export function followers(users: Hono<{ Bindings: Environment }>, services: Serv
       })
     }
     const packagedResponse = { followers: response }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
 
     return context.json(packagedResponse, 200)
   })

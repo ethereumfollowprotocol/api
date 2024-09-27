@@ -96,7 +96,7 @@ export function following(users: Hono<{ Bindings: Environment }>, services: Serv
       response = followingListRecords.map(prettifyListRecord)
     }
     const packagedResponse = { following: response }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 120 })
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
 
     return context.json(packagedResponse, 200)
   })

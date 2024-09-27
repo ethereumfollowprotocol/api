@@ -40,7 +40,7 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
     }
     const response = { address } as Record<string, unknown>
     const packagedResponse = { ...response, ens, ranks, primary_list: primaryList?.toString() ?? null }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: 180 })
+    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
     return context.json(packagedResponse, 200)
   })
 }

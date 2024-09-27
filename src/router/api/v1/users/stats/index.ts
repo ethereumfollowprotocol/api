@@ -39,7 +39,7 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       stats.following_count = await efp.getUserFollowingCount(address)
     }
 
-    await cacheKV.put(cacheTarget, JSON.stringify(stats), { expirationTtl: 120 })
+    await cacheKV.put(cacheTarget, JSON.stringify(stats), { expirationTtl: context.env.CACHE_TTL })
     return context.json(stats, 200)
   })
 }
