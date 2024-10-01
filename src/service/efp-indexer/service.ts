@@ -533,7 +533,7 @@ export class EFPIndexerService implements IEFPIndexerService {
     const query = sql<{
       address: Address
       tag: string
-    }>`SELECT follower as address, UNNEST(tags) as tag FROM query.get_sorted_followers_by_address_tags(${address}, null, 'DESC') WHERE cardinality(tags) > 0`
+    }>`SELECT follower as address, UNNEST(tags) as tag FROM query.get_all_sorted_followers_by_address_tags(${address}, null, 'DESC') WHERE cardinality(tags) > 0`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
