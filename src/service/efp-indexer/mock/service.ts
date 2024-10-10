@@ -7,6 +7,7 @@ import type {
   FollowerResponse,
   IEFPIndexerService,
   LeaderBoardRow,
+  MintersRow,
   RankCountsRow,
   RankRow,
   RecommendedRow,
@@ -311,6 +312,9 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   getStats(): Promise<StatsRow> {
+    throw new Error('Method not implemented.')
+  }
+  getUniqueMinters(_limit: number, _offset: number): Promise<MintersRow[]> {
     throw new Error('Method not implemented.')
   }
 

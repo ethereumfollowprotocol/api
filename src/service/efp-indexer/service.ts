@@ -119,6 +119,13 @@ export type StatsRow = {
   user_count: number
 }
 
+export type MintersRow = {
+  address: Address
+  name: string
+  avatar: string
+  list: number
+}
+
 export type FollowingResponse = TaggedListRecord
 
 export type ENSTaggedListRecord = TaggedListRecord & {
@@ -174,6 +181,7 @@ export interface IEFPIndexerService {
   ): Promise<RecommendedRow[]>
   getRecommendedByList(list: string, _seed: `0x${string}`, _limit: string, _offset: string): Promise<RecommendedRow[]>
   getStats(): Promise<StatsRow>
+  getUniqueMinters(limit: number, offset: number): Promise<MintersRow[]>
   getTaggedAddressesByList(token_id: string): Promise<TagResponse[]>
   getTaggedAddressesByTags(token_id: string, tags: string[] | undefined): Promise<TagsResponse[]>
   getUserFollowersCount(address: Address): Promise<number>
@@ -1327,6 +1335,16 @@ export class EFPIndexerService implements IEFPIndexerService {
       list_op_count: result.rows[0]?.list_op_count as number,
       user_count: result.rows[0]?.user_count as number
     }
+  }
+
+  async getUniqueMinters(limit: number, offset: number): Promise<MintersRow[]> {
+    const query = sql<MintersRow>`SELECT * FROM query.get_unique_minters(${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    return result.rows
   }
 
   async getRecommended(
