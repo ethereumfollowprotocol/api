@@ -14,7 +14,7 @@ export function minters(services: Services): Hono<{ Bindings: Environment }> {
     if (!limit) limit = '10'
     if (!offset) offset = '0'
     const cacheKV = context.env.EFP_DATA_CACHE
-    const cacheTarget = `minters`
+    const cacheTarget = `minters?limit=${limit}&offset=${offset}`
     if (cache !== 'fresh') {
       const cacheHit = await cacheKV.get(cacheTarget, 'json')
       if (cacheHit) {
