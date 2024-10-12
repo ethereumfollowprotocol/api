@@ -95,5 +95,5 @@ ____
 
 <br />
 
-Follow [**@ethfollowpr**](https://x.com/ethfollowpr) on **𝕏** for updates and join the [**Discord**](https://discord.ethfollow.xyz) to get involved.
+Follow [**@efp**](https://x.com/efp) on **𝕏** for updates and join the [**Discord**](https://discord.ethfollow.xyz) to get involved.
  
