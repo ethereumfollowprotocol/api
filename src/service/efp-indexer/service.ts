@@ -373,7 +373,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       tags: row.tags?.sort() || [],
       is_following: row.is_following,
       is_blocked: row.is_blocked,
-      is_muted: row.is_muted
+      is_muted: row.is_muted,
+      updated_at: row.updated_at
     }))
   }
 
@@ -396,7 +397,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       tags: row.tags?.sort() || [],
       is_following: row.is_following,
       is_blocked: row.is_blocked,
-      is_muted: row.is_muted
+      is_muted: row.is_muted,
+      updated_at: row.updated_at
     }))
   }
 
