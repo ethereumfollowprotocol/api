@@ -11,6 +11,7 @@ import type {
   RankCountsRow,
   RankRow,
   RecommendedRow,
+  RecommendedStackRow,
   StatsRow,
   TagResponse,
   TagsResponse
@@ -343,6 +344,14 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     _offset: string
   ): Promise<RecommendedRow[]> {
     return (await []) as RecommendedRow[]
+  }
+
+  async getRecommendedStackByList(
+    _address: `0x${string}`,
+    _limit: number,
+    _offset: number
+  ): Promise<RecommendedStackRow[]> {
+    return (await []) as RecommendedStackRow[]
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>
