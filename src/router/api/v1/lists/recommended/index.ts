@@ -3,7 +3,7 @@ import { env } from 'hono/adapter'
 import { NETWORKED_WALLET } from '#/constant'
 import { includeValidator } from '#/router/api/v1/leaderboard/validators'
 import type { Services } from '#/service'
-import type { IEFPIndexerService, RecommendedRow, RecommendedStackRow } from '#/service/efp-indexer/service'
+import type { IEFPIndexerService, RecommendedDetailsRow, RecommendedRow } from '#/service/efp-indexer/service'
 import type { ENSProfileResponse } from '#/service/ens-metadata/service'
 import type { ENSProfile } from '#/service/ens-metadata/types'
 import type { Address, Environment } from '#/types'
@@ -36,7 +36,7 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
     return context.json({ recommended: recommendedAddresses }, 200)
   })
 
-  users.get('/:token_id/recommended/stack', includeValidator, async context => {
+  users.get('/:token_id/recommended/details', includeValidator, async context => {
     const { token_id } = context.req.param()
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
@@ -46,7 +46,7 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
     if (!offset) offset = '0'
 
     const efp: IEFPIndexerService = services.efp(env(context))
-    const recommendedAddresses: RecommendedStackRow[] = await efp.getRecommendedStackByList(
+    const recommendedAddresses: RecommendedDetailsRow[] = await efp.getRecommendedStackByList(
       token_id,
       Number.parseInt(limit as string),
       Number.parseInt(offset as string)

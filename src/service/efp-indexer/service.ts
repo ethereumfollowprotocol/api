@@ -112,7 +112,7 @@ export type RecommendedRow = {
   avatar: string
 }
 
-export type RecommendedStackRow = RecommendedRow & {
+export type RecommendedDetailsRow = RecommendedRow & {
   records: string
   followers: number
   following: number
@@ -191,7 +191,7 @@ export interface IEFPIndexerService {
     _offset: string
   ): Promise<RecommendedRow[]>
   getRecommendedByList(list: string, _seed: `0x${string}`, _limit: string, _offset: string): Promise<RecommendedRow[]>
-  getRecommendedStackByList(list: string, limit: number, offset: number): Promise<RecommendedStackRow[]>
+  getRecommendedStackByList(list: string, limit: number, offset: number): Promise<RecommendedDetailsRow[]>
   getStats(): Promise<StatsRow>
   getUniqueMinters(limit: number, offset: number): Promise<MintersRow[]>
   getTaggedAddressesByList(token_id: string): Promise<TagResponse[]>
@@ -1404,8 +1404,8 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result.rows
   }
 
-  async getRecommendedStackByList(list: string, limit: number, offset: number): Promise<RecommendedStackRow[]> {
-    const query = sql<RecommendedStackRow>`SELECT * FROM query.get_recommended_stack_by_list(${list}, ${limit}, ${offset})`
+  async getRecommendedStackByList(list: string, limit: number, offset: number): Promise<RecommendedDetailsRow[]> {
+    const query = sql<RecommendedDetailsRow>`SELECT * FROM query.get_recommended_stack_by_list(${list}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {

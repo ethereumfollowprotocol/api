@@ -10,8 +10,8 @@ import type {
   MintersRow,
   RankCountsRow,
   RankRow,
+  RecommendedDetailsRow,
   RecommendedRow,
-  RecommendedStackRow,
   StatsRow,
   TagResponse,
   TagsResponse
@@ -350,8 +350,8 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     _address: `0x${string}`,
     _limit: number,
     _offset: number
-  ): Promise<RecommendedStackRow[]> {
-    return (await []) as RecommendedStackRow[]
+  ): Promise<RecommendedDetailsRow[]> {
+    return (await []) as RecommendedDetailsRow[]
   }
 
   // biome-ignore lint/suspicious/useAwait: <explanation>
