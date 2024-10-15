@@ -337,8 +337,16 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return (await []) as RecommendedRow[]
   }
 
-  async getRecommendedByList(
+  async getRecommendedStackByAddress(
     _address: `0x${string}`,
+    _limit: number,
+    _offset: number
+  ): Promise<RecommendedDetailsRow[]> {
+    return (await []) as RecommendedDetailsRow[]
+  }
+
+  async getRecommendedByList(
+    _list: `0x${string}`,
     _seed: `0x${string}`,
     _limit: string,
     _offset: string
@@ -347,7 +355,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   }
 
   async getRecommendedStackByList(
-    _address: `0x${string}`,
+    _list: `0x${string}`,
     _limit: number,
     _offset: number
   ): Promise<RecommendedDetailsRow[]> {

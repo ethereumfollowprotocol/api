@@ -191,6 +191,7 @@ export interface IEFPIndexerService {
     _limit: string,
     _offset: string
   ): Promise<RecommendedRow[]>
+  getRecommendedStackByAddress(address: `0x${string}`, limit: number, offset: number): Promise<RecommendedDetailsRow[]>
   getRecommendedByList(list: string, _seed: `0x${string}`, _limit: string, _offset: string): Promise<RecommendedRow[]>
   getRecommendedStackByList(list: string, limit: number, offset: number): Promise<RecommendedDetailsRow[]>
   getStats(): Promise<StatsRow>
@@ -1394,6 +1395,20 @@ export class EFPIndexerService implements IEFPIndexerService {
     return result.rows
   }
 
+  async getRecommendedStackByAddress(
+    address: `0x${string}`,
+    limit: number,
+    offset: number
+  ): Promise<RecommendedDetailsRow[]> {
+    const query = sql<RecommendedDetailsRow>`SELECT * FROM query.get_algo_recommended_by_address(${address}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+    return result.rows
+  }
+
   async getRecommendedByList(
     list: string,
     _seed: `0x${string}`,
@@ -1410,7 +1425,7 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async getRecommendedStackByList(list: string, limit: number, offset: number): Promise<RecommendedDetailsRow[]> {
-    const query = sql<RecommendedDetailsRow>`SELECT * FROM query.get_recommended_stack_by_list(${list}, ${limit}, ${offset})`
+    const query = sql<RecommendedDetailsRow>`SELECT * FROM query.get_algo_recommended_by_list(${list}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
 
     if (!result || result.rows.length === 0) {
