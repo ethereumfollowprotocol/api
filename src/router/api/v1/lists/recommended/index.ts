@@ -60,8 +60,8 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
           records: JSON.parse(rec?.records) as string
         },
         stats: {
-          followers: rec.followers,
-          following: rec.following
+          followers_count: rec.followers,
+          following_count: rec.following
         },
         ranks: {
           mutuals_rank: rec.mutuals_rank,
