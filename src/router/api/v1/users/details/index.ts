@@ -19,8 +19,9 @@ export function details(users: Hono<{ Bindings: Environment }>, services: Servic
         return context.json({ ...cacheHit }, 200)
       }
     }
+    const refreshENS = !!cache
     const ensService = services.ens(env(context))
-    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), false)
+    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS.toLowerCase(), refreshENS)
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }

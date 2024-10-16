@@ -22,13 +22,14 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
         return context.json({ ...cacheHit }, 200)
       }
     }
+    const refreshENS = !!cache
     const ensService = services.ens(env(context))
     const efp: IEFPIndexerService = services.efp(env(context))
     const listUser: Address | undefined = await services.efp(env(context)).getAddressByList(token_id)
     if (!listUser) {
       return context.json({ response: 'No User Found' }, 404)
     }
-    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(listUser.toLowerCase(), false)
+    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(listUser.toLowerCase(), refreshENS)
     const primaryList = await efp.getUserPrimaryList(address)
 
     const ranksAndCounts = await efp.getUserRanksCounts(address)
