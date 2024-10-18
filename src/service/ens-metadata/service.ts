@@ -105,13 +105,13 @@ export class ENSMetadataService implements IENSMetadataService {
     }
     if (!isAddress(ensNameOrAddress)) {
       const checkPrimary = await fetch(`${this.url}/u/${ensNameOrAddress}`)
-      if(checkPrimary.ok){
+      if (checkPrimary.ok) {
         const ensProfileData = (await checkPrimary.json()) as ENSProfile
-        if(!ensProfileData.address){
-            raise('ENS name or address is required')
-        }else{
-            ensNameOrAddress = ensProfileData.address
-        }   
+        if (ensProfileData.address) {
+          ensNameOrAddress = ensProfileData.address
+        } else {
+          raise('ENS name or address is required')
+        }
       }
       ensNameOrAddress = ens_normalize(ensNameOrAddress)
     }
