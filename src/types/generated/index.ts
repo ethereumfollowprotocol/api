@@ -210,6 +210,7 @@ export interface ViewEfpStats {
   address_count: Int8 | null
   list_count: Int8 | null
   list_op_count: Int8 | null
+  user_count: Int8 | null
 }
 
 export interface ViewEventsEfpAccountMetadata {
@@ -432,6 +433,13 @@ export interface ViewLatestLeaders {
   updated_at: Timestamp | null
 }
 
+export interface ViewTrending {
+  address: string | null
+  avatar: string | null
+  count: Int8 | null
+  name: string | null
+}
+
 export interface DB {
   contracts: Contracts
   efp_account_metadata: EfpAccountMetadata
@@ -471,4 +479,5 @@ export interface DB {
   view__join__efp_lists_with_metadata: ViewJoinEfpListsWithMetadata
   view__latest_follows: ViewLatestFollows
   view__latest_leaders: ViewLatestLeaders
+  view__trending: ViewTrending
 }
