@@ -6,6 +6,7 @@ import type {
   FollowStateResponse,
   FollowerResponse,
   IEFPIndexerService,
+  LatestFollowerResponse,
   LeaderBoardRow,
   MintersRow,
   RankCountsRow,
@@ -121,6 +122,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
       is_muted: boolean
     }[]
   > {
+    throw new Error('Method not implemented.')
+  }
+
+  getLatestFollowersByAddress(_address: Address, _limit: string, _offset: string): Promise<LatestFollowerResponse[]> {
     throw new Error('Method not implemented.')
   }
 

@@ -22,6 +22,12 @@ export type FollowerResponse = {
   is_muted: boolean
 }
 
+export type LatestFollowerResponse = {
+  address: `0x${string}`
+  efp_list_nft_token_id: bigint
+  updated_at?: string
+}
+
 export type FollowStateResponse = {
   follow: boolean
   block: boolean
@@ -58,6 +64,12 @@ export type FollowerRow = {
   is_blocked: boolean
   is_muted: boolean
   updated_at?: string
+}
+
+export type LatestFollowerRow = {
+  follower: Address
+  efp_list_nft_token_id: bigint
+  updated_at: string
 }
 
 export type SearchFollowerRow = FollowerRow & {
@@ -219,11 +231,13 @@ export interface IEFPIndexerService {
     tags: string[] | undefined,
     sort: string | undefined
   ): Promise<FollowerResponse[]>
+  getLatestFollowersByAddress(address: Address, limit: string, offset: string): Promise<LatestFollowerResponse[]>
   getUserFollowersByList(
     token_id: string,
     limit: string[] | string | undefined,
     offset: string[] | string | undefined
   ): Promise<FollowerResponse[]>
+  getLatestFollowersByList(token_id: string, limit: string, offset: string): Promise<LatestFollowerResponse[]>
   getAllUserFollowersByListTagSort(
     token_id: string,
     limit: string[] | string | undefined,
@@ -403,6 +417,24 @@ export class EFPIndexerService implements IEFPIndexerService {
     }))
   }
 
+  async getLatestFollowersByAddress(
+    address: Address,
+    limit: string,
+    offset: string
+  ): Promise<LatestFollowerResponse[]> {
+    const query = sql<LatestFollowerRow>`SELECT * FROM query.get_latest_followers_by_address(${address}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: LatestFollowerRow) => ({
+      address: row.follower,
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
+      updated_at: row.updated_at
+    }))
+  }
+
   async searchUserFollowersByAddress(
     address: Address,
     limit: string,
@@ -527,6 +559,20 @@ export class EFPIndexerService implements IEFPIndexerService {
       is_following: row.is_following,
       is_blocked: row.is_blocked,
       is_muted: row.is_muted,
+      updated_at: row.updated_at
+    }))
+  }
+
+  async getLatestFollowersByList(token_id: string, limit: string, offset: string): Promise<LatestFollowerResponse[]> {
+    const query = sql<LatestFollowerRow>`SELECT * FROM query.get_latest_followers_by_list(${token_id}, ${limit}, ${offset})`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: LatestFollowerRow) => ({
+      address: row.follower,
+      efp_list_nft_token_id: row.efp_list_nft_token_id,
       updated_at: row.updated_at
     }))
   }
