@@ -149,6 +149,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     throw new Error('Method not implemented.')
   }
 
+  getLatestFollowersByList(_token_id: string, _limit: string, _offset: string): Promise<LatestFollowerResponse[]> {
+    throw new Error('Method not implemented.')
+  }
+
   getUserFollowerTags(_address: Address): Promise<TagResponse[]> {
     throw new Error('Method not implemented.')
   }
