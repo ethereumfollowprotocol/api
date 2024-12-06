@@ -26,10 +26,12 @@ export function notifications(users: Hono<{ Bindings: Environment }>, services: 
     const cacheKV = context.env.EFP_DATA_CACHE
     const cacheTarget = `users/${addressOrENS}/notifications?opcode=${opcode}&interval=${interval}&tag=${tag}&limit=${limit}&offset=${offset}`
 
-    if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
-      if (cacheHit) {
-        return context.json({ ...cacheHit }, 200)
+    if (cacheKV !== undefined) {
+      if (cache !== 'fresh') {
+        const cacheHit = await cacheKV.get(cacheTarget, 'json')
+        if (cacheHit) {
+          return context.json({ ...cacheHit }, 200)
+        }
       }
     }
     const ensService = services.ens(env(context))
@@ -83,8 +85,9 @@ export function notifications(users: Hono<{ Bindings: Environment }>, services: 
     }
 
     const packagedResponse = { summary: summary, notifications: response }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
-
+    if (cacheKV !== undefined) {
+      await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    }
     return context.json(packagedResponse, 200)
   })
 }
