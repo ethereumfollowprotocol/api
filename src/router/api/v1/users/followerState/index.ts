@@ -10,10 +10,10 @@ export function followerState(users: Hono<{ Bindings: Environment }>, services: 
     const { addressOrENS, addressOrENS2 } = context.req.param()
     const { cache } = context.req.query()
 
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/${addressOrENS2}/followerState`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -30,7 +30,7 @@ export function followerState(users: Hono<{ Bindings: Environment }>, services: 
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getUserFollowerState(addressUser, addressFollower)
     const packagedResponse = { addressUser, addressFollower, state }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
     return context.json(packagedResponse, 200)
   })
 }

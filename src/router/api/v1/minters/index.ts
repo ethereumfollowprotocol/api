@@ -13,10 +13,10 @@ export function minters(services: Services): Hono<{ Bindings: Environment }> {
 
     if (!limit) limit = '10'
     if (!offset) offset = '0'
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `minters?limit=${limit}&offset=${offset}`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -24,7 +24,7 @@ export function minters(services: Services): Hono<{ Bindings: Environment }> {
 
     const efp: IEFPIndexerService = services.efp(env(context))
     const minters: MintersRow[] = await efp.getUniqueMinters(Number.parseInt(limit), Number.parseInt(offset))
-    await cacheKV.put(cacheTarget, JSON.stringify({ minters }), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify({ minters }))
     return context.json({ minters }, 200)
   })
   return minters

@@ -36,10 +36,10 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
       tagsToSearch = tagsArray.filter((tag: any) => tag.match(textOrEmojiPattern))
     }
 
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `lists/${token_id}/followers?limit=${limit}&offset=${offset}&sort=${direction}&tags=${tagsToSearch.join(',')}`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -78,7 +78,7 @@ export function followers(lists: Hono<{ Bindings: Environment }>, services: Serv
       })
     }
     const packagedResponse = { followers: response }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
 
     return context.json(packagedResponse, 200)
   })

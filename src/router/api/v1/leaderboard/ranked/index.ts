@@ -20,10 +20,10 @@ export function ranked(
     const sort = context.req.query('sort') ? context.req.query('sort') : 'mutuals'
     const direction = context.req.query('direction') ? context.req.query('direction') : 'DESC'
 
-    const demoKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `leaderboard/ranked?limit=${limit}&offset=${offset}&sort=${sort}&direction=${direction}`
     if (cache !== 'fresh') {
-      const cacheHit = await demoKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -36,7 +36,7 @@ export function ranked(
     const last_updated = results.length > 0 ? results[0]?.updated_at : '0'
 
     const packagedResponse = { last_updated, results }
-    await demoKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
     return context.json(packagedResponse, 200)
   })
 }

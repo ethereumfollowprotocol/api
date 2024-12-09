@@ -17,10 +17,10 @@ export function latestFollowers(users: Hono<{ Bindings: Environment }>, services
     if (!limit) limit = '10'
     if (!offset) offset = '0'
 
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/latestFollowers?limit=${limit}&offset=${offset}`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -36,7 +36,7 @@ export function latestFollowers(users: Hono<{ Bindings: Environment }>, services
       .getLatestFollowersByAddress(address, limit as string, offset as string)
 
     const packagedResponse = { followers: followers }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
 
     return context.json(packagedResponse, 200)
   })

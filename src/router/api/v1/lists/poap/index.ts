@@ -13,14 +13,14 @@ export function poap(lists: Hono<{ Bindings: Environment }>, services: Services)
       return context.json({ response: 'Invalid list id' }, 400)
     }
 
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `lists/${token_id}/badges`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
-    }
+    }   
 
     const efp: IEFPIndexerService = services.efp(env(context))
     const listUser: Address | undefined = await efp.getAddressByList(token_id)
@@ -52,7 +52,7 @@ export function poap(lists: Hono<{ Bindings: Environment }>, services: Services)
     })
 
     const packagedResponse = { poaps }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
     return context.json(packagedResponse, 200)
   })
 }
