@@ -11,6 +11,7 @@ import { demoRouter } from '#/demo'
 import { apiLogger } from '#/logger.ts'
 import { api } from '#/router/api/v1'
 import { errorHandler, errorLogger } from '#/router/middleware'
+import { CacheService } from '#/service/cache/service'
 import { MockEFPIndexerService } from '#/service/efp-indexer/mock/service'
 import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
@@ -91,6 +92,7 @@ app.get('/routes', async context => {
 
 const services: Services = {
   ens: (env: Environment) => new ENSMetadataService(env),
+  cache: (env: Environment) => new CacheService(env),
   efp: (env: Environment) => (env.IS_DEMO === 'true' ? new MockEFPIndexerService() : new EFPIndexerService(env))
 }
 app.route('/', api(services))

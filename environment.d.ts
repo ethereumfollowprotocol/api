@@ -16,6 +16,7 @@ interface EnvironmentVariables {
   readonly AIRSTACK_API_KEY: string
   readonly CACHE_TTL: number
   readonly POAP_API_TOKEN: string
+  readonly REDIS_URL: string
 }
 
 // Cloudflare Workers
