@@ -12,7 +12,7 @@ export function stats(services: Services): Hono<{ Bindings: Environment }> {
     const { cache } = context.req.query()
     const cacheService = services.cache(env(context))
     const cacheTarget = `stats`
-    
+
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {

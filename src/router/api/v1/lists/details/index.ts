@@ -11,7 +11,7 @@ export function details(lists: Hono<{ Bindings: Environment }>, services: Servic
     const { cache } = context.req.query()
     // const { live } = context.req.query()
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
-      return context.json({ response: 'Invalid list id' }, 400) 
+      return context.json({ response: 'Invalid list id' }, 400)
     }
 
     const cacheService = services.cache(env(context))

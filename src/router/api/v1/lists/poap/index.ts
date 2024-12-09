@@ -20,7 +20,7 @@ export function poap(lists: Hono<{ Bindings: Environment }>, services: Services)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
-    }   
+    }
 
     const efp: IEFPIndexerService = services.efp(env(context))
     const listUser: Address | undefined = await efp.getAddressByList(token_id)

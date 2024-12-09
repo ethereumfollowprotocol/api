@@ -42,8 +42,6 @@ app.use(
   secureHeaders({
     xXssProtection: '1',
     xFrameOptions: 'DENY',
-    // Muted by user
-    // biome-ignore lint/nursery/noSecrets: <explanation>
     strictTransportSecurity: 'max-age=63072000; includeSubDomains; preload'
   })
 )

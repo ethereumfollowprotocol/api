@@ -11,6 +11,8 @@ export function records(users: Hono<{ Bindings: Environment }>, services: Servic
     validator('query', value => {
       const { includeTags } = <Record<'includeTags', string | undefined>>value
       if (includeTags !== undefined && includeTags !== 'true' && includeTags !== 'false') {
+        // Muted by user
+        // biome-ignore lint/nursery/noSecrets: <explanation>
         throw new Error('Accepted format: ?includeTags=true or ?includeTags=false')
       }
       return value

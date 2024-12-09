@@ -12,6 +12,8 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
 }
 
 export function allFollowingAddresses(lists: Hono<{ Bindings: Environment }>, services: Services) {
+  // Muted by user
+  // biome-ignore lint/nursery/noSecrets: <explanation>
   lists.get('/:token_id/allFollowingAddresses', includeValidator, async context => {
     const { token_id } = context.req.param()
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {

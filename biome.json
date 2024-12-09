@@ -38,7 +38,9 @@
       },
       "performance": { "noAccumulatingSpread": "off" },
       "nursery": {
-        "all": true
+        "all": true,
+        "useExplicitType": "off",
+        "noNestedTernary": "off"
       },
       "complexity": {
         "noBannedTypes": "off",
