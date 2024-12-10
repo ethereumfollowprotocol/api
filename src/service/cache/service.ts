@@ -42,8 +42,7 @@ export class CacheService implements ICacheService {
   async put(key: string, value: string): Promise<void> {
     if (this.#cacheType === 'redis') {
       await (this.#client as RedisClientType).set(key, value, {
-        EX: this.#env.CACHE_TTL,
-        NX: false
+        EX: this.#env.CACHE_TTL
       } as any)
     } else {
       await this.#env.EFP_DATA_CACHE.put(key, value, { expirationTtl: this.#env.CACHE_TTL })
