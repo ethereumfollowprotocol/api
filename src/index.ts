@@ -42,6 +42,8 @@ app.use(
   secureHeaders({
     xXssProtection: '1',
     xFrameOptions: 'DENY',
+    // Muted by user
+    // biome-ignore lint/nursery/noSecrets: <explanation>
     strictTransportSecurity: 'max-age=63072000; includeSubDomains; preload'
   })
 )
@@ -58,7 +60,7 @@ app.onError((error, context) => {
   return context.json({ message: error.message }, 500)
 })
 
-app.get('/', context => context.redirect('/v1'))
+// app.get('/', context => context.redirect('/v1'))
 
 app.get('/health', context => context.text('ok'))
 
@@ -66,7 +68,7 @@ app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 3
 
 app.get('/build-version', context => context.text(env(context).COMMIT_SHA))
 
-app.get('/v1', context =>
+app.get('/api/v1', context =>
   context.json({
     sha: env(context).COMMIT_SHA,
     name: 'efp-public-api',
