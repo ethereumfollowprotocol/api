@@ -42,8 +42,6 @@ app.use(
   secureHeaders({
     xXssProtection: '1',
     xFrameOptions: 'DENY',
-    // Muted by user
-    // biome-ignore lint/nursery/noSecrets: <explanation>
     strictTransportSecurity: 'max-age=63072000; includeSubDomains; preload'
   })
 )
@@ -60,7 +58,7 @@ app.onError((error, context) => {
   return context.json({ message: error.message }, 500)
 })
 
-// app.get('/', context => context.redirect('/v1'))
+app.get('/', context => context.redirect('/api/v1'))
 
 app.get('/health', context => context.text('ok'))
 
