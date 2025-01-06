@@ -1595,6 +1595,14 @@ export class EFPIndexerService implements IEFPIndexerService {
   }
 
   async claimPoapLink(address: Address): Promise<string> {
+    const checkExisting = sql<{
+      link: string
+    }>`SELECT link FROM public.efp_poap_links WHERE claimant = ${address}::text LIMIT 1;`
+    const existingRecord = await checkExisting.execute(this.#db)
+    if (existingRecord && existingRecord.rows.length > 0) {
+      return existingRecord.rows[0]?.link as string
+    }
+
     const query = sql<{
       link: string
     }>`SELECT link FROM public.efp_poap_links WHERE claimed = 'false' LIMIT 1;`
