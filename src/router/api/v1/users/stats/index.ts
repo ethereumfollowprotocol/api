@@ -11,10 +11,10 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
     const { addressOrENS } = context.req.param()
     const { live, cache } = context.req.query()
 
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/stats`
     if (cache !== 'fresh' || live !== 'true') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -39,7 +39,7 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       stats.following_count = await efp.getUserFollowingCount(address)
     }
 
-    await cacheKV.put(cacheTarget, JSON.stringify(stats), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(stats))
     return context.json(stats, 200)
   })
 }

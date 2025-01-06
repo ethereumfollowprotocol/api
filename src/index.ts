@@ -11,6 +11,7 @@ import { demoRouter } from '#/demo'
 import { apiLogger } from '#/logger.ts'
 import { api } from '#/router/api/v1'
 import { errorHandler, errorLogger } from '#/router/middleware'
+import { CacheService } from '#/service/cache/service'
 import { MockEFPIndexerService } from '#/service/efp-indexer/mock/service'
 import { EFPIndexerService } from '#/service/efp-indexer/service'
 import { ENSMetadataService } from '#/service/ens-metadata/service'
@@ -41,8 +42,6 @@ app.use(
   secureHeaders({
     xXssProtection: '1',
     xFrameOptions: 'DENY',
-    // Muted by user
-    // biome-ignore lint/nursery/noSecrets: <explanation>
     strictTransportSecurity: 'max-age=63072000; includeSubDomains; preload'
   })
 )
@@ -59,7 +58,7 @@ app.onError((error, context) => {
   return context.json({ message: error.message }, 500)
 })
 
-app.get('/', context => context.redirect('/v1'))
+app.get('/', context => context.redirect('/api/v1'))
 
 app.get('/health', context => context.text('ok'))
 
@@ -67,7 +66,7 @@ app.get('/docs', context => context.redirect('https://docs.ethfollow.xyz/api', 3
 
 app.get('/build-version', context => context.text(env(context).COMMIT_SHA))
 
-app.get('/v1', context =>
+app.get('/api/v1', context =>
   context.json({
     sha: env(context).COMMIT_SHA,
     name: 'efp-public-api',
@@ -91,6 +90,7 @@ app.get('/routes', async context => {
 
 const services: Services = {
   ens: (env: Environment) => new ENSMetadataService(env),
+  cache: (env: Environment) => new CacheService(env),
   efp: (env: Environment) => (env.IS_DEMO === 'true' ? new MockEFPIndexerService() : new EFPIndexerService(env))
 }
 app.route('/', api(services))

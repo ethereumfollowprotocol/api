@@ -9,13 +9,10 @@ interface EnvironmentVariables {
   readonly DATABASE_URL: string
   readonly ENABLE_DATABASE_LOGGING: 'true' | 'false'
   readonly IS_DEMO: 'true' | 'false'
-  readonly S3_ACCESS_KEY: string
-  readonly S3_ACCESS_KEY_SECRET: string
-  readonly S3_BUCKET: string
-  readonly S3_REGION: string
   readonly AIRSTACK_API_KEY: string
   readonly CACHE_TTL: number
   readonly POAP_API_TOKEN: string
+  readonly REDIS_URL: string
 }
 
 // Cloudflare Workers

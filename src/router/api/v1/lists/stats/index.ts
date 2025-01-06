@@ -12,10 +12,10 @@ export function stats(lists: Hono<{ Bindings: Environment }>, services: Services
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `lists/${token_id}/stats`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -27,7 +27,7 @@ export function stats(lists: Hono<{ Bindings: Environment }>, services: Services
       following_count: await efp.getUserFollowingCountByList(token_id)
     }
 
-    await cacheKV.put(cacheTarget, JSON.stringify(stats), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(stats))
     return context.json(stats, 200)
   })
 }

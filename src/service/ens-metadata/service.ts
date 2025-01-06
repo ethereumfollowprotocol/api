@@ -2,11 +2,9 @@ import { ens_normalize } from '@adraffy/ens-normalize'
 import { type Kysely, type QueryResult, sql } from 'kysely'
 import { database } from '#/database'
 import { apiLogger } from '#/logger'
-import { ens } from '#/router/api/v1/users/ens'
 import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
 import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
-import { S3Cache } from './s3-cache'
 import type { ENSProfile } from './types'
 
 export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }

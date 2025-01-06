@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import type { Environment } from '#/types'
 
 const DEMO_NAME = 'dr3a.eth'
+// Muted by user
+// biome-ignore lint/nursery/noSecrets: <explanation>
 const DEMO_ADDRESS = '0xeb6b293E9bB1d71240953c8306aD2c8aC523516a'
 
 export const demoRouter = new Hono<{ Bindings: Environment }>().basePath('/v1')

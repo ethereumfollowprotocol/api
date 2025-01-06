@@ -11,10 +11,10 @@ export function lists(users: Hono<{ Bindings: Environment }>, services: Services
     const { addressOrENS } = context.req.param()
     const { cache } = context.req.query()
 
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/lists`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -34,7 +34,7 @@ export function lists(users: Hono<{ Bindings: Environment }>, services: Services
     const lists: number[] = await efp.getUserLists(address)
 
     const packagedResponse = { primary_list: primaryList?.toString() ?? null, lists }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
 
     return context.json(packagedResponse, 200)
   })

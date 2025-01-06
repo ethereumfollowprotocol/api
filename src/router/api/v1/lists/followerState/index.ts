@@ -12,10 +12,10 @@ export function followerState(lists: Hono<{ Bindings: Environment }>, services: 
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
-    const cacheKV = context.env.EFP_DATA_CACHE
+    const cacheService = services.cache(env(context))
     const cacheTarget = `lists/${token_id}/${addressOrENS}/followerState`
     if (cache !== 'fresh') {
-      const cacheHit = await cacheKV.get(cacheTarget, 'json')
+      const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
@@ -29,7 +29,7 @@ export function followerState(lists: Hono<{ Bindings: Environment }>, services: 
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getListFollowerState(token_id, address)
     const packagedResponse = { token_id, address, state }
-    await cacheKV.put(cacheTarget, JSON.stringify(packagedResponse), { expirationTtl: context.env.CACHE_TTL })
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
     return context.json(packagedResponse, 200)
   })
 }

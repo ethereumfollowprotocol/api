@@ -22,6 +22,8 @@ export const includeValidator = validator('query', value => {
   }
   return new Response(
     JSON.stringify({
+      // Muted by user
+      // biome-ignore lint/nursery/noSecrets: <explanation>
       message: 'Accepted format for include: ?include=ens&include=mutuals&include=blocked&include=muted'
     }),
     { status: 400 }
