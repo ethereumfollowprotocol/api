@@ -27,15 +27,14 @@ type Row = {
 
 export class ENSMetadataService implements IENSMetadataService {
   readonly #db: Kysely<DB>
-  readonly #env: Environment
+  readonly #url: string
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#db = database(env)
-    this.#env = env
+    this.#url = env.ENS_API_URL
   }
 
-  url = 'https://ens.ethfollow.xyz'
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
     // check if it already is a valid type
     if (isAddress(ensNameOrAddress)) {
@@ -103,7 +102,7 @@ export class ENSMetadataService implements IENSMetadataService {
       raise('ENS name or address is required')
     }
     if (!isAddress(ensNameOrAddress)) {
-      const checkPrimary = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+      const checkPrimary = await fetch(`${this.#url}/u/${ensNameOrAddress}`)
       if (checkPrimary.ok) {
         const ensProfileData = (await checkPrimary.json()) as ENSProfile
         if (ensProfileData.address) {
@@ -130,7 +129,7 @@ export class ENSMetadataService implements IENSMetadataService {
     }
     if (!cachedProfile) {
       //silently cache fetched profile without waiting ->
-      const response = await fetch(`${this.url}/u/${ensNameOrAddress}`)
+      const response = await fetch(`${this.#url}/u/${ensNameOrAddress}`)
       if (response.ok) {
         // raise(`invalid ENS name: ${ensNameOrAddress}`)
         try {
@@ -220,7 +219,7 @@ export class ENSMetadataService implements IENSMetadataService {
     // Performs parallel fetch requests for each batch and waits for all to complete.
     const response = await Promise.all(
       formattedBatches.map(batch => {
-        return fetch(`${this.url}/bulk/u?${batch}`)
+        return fetch(`${this.#url}/bulk/u?${batch}`)
       })
     )
 
@@ -263,7 +262,7 @@ export class ENSMetadataService implements IENSMetadataService {
 
   async getENSAvatar(ensNameOrAddress: Address | string): Promise<string> {
     if (ensNameOrAddress === undefined) raise('ENS name or address is required')
-    const response = await fetch(`${this.url}/i/${ensNameOrAddress}`, {
+    const response = await fetch(`${this.#url}/i/${ensNameOrAddress}`, {
       redirect: 'follow'
     })
     if (!response.ok) raise(`invalid ENS name: ${ensNameOrAddress}`)
@@ -278,7 +277,7 @@ export class ENSMetadataService implements IENSMetadataService {
     ensNameOrAddressArray: Array<Address | string>
   ): Promise<{ [ensNameOrAddress: string]: string }> {
     const responses = await Promise.all(
-      ensNameOrAddressArray.map(ensNameOrAddress => fetch(`${this.url}/i/${ensNameOrAddress}`, { redirect: 'follow' }))
+      ensNameOrAddressArray.map(ensNameOrAddress => fetch(`${this.#url}/i/${ensNameOrAddress}`, { redirect: 'follow' }))
     )
     return responses.reduce((accumulator, response, index) => {
       const id = `${ensNameOrAddressArray[index]}`

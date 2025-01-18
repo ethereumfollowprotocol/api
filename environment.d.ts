@@ -13,6 +13,7 @@ interface EnvironmentVariables {
   readonly CACHE_TTL: number
   readonly POAP_API_TOKEN: string
   readonly REDIS_URL: string
+  readonly ENS_API_URL: string
 }
 
 // Cloudflare Workers
