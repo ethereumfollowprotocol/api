@@ -22,8 +22,10 @@ export function commonFollowers(users: Hono<{ Bindings: Environment }>, services
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404) // return error if address is not valid
     }
-
-    const leader = context.req.query('leader')
+    let leader = context.req.query('leader')
+    if(!isAddress(leader as Address)){
+        leader = await ensService.getAddress(addressOrENS)
+    }
     if (!(isAddress(leader as Address) && leader)) {
       return context.json({ response: 'Invalid query address' }, 404)
     }
