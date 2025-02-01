@@ -7,6 +7,7 @@ import { apiLogger } from '#/logger'
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import { debug } from './debug'
+import { serviceHealth } from './serviceHealth'
 import { discover } from './discover'
 import { exportState } from './exportState'
 import { leaderboard } from './leaderboard'
@@ -38,6 +39,7 @@ export function api(services: Services): Hono<{ Bindings: Environment }> {
   api.get('/health', context => context.text('ok'))
 
   api.route('/debug', debug(services))
+  api.route('/serviceHealth', serviceHealth(services))
   api.route('/discover', discover(services))
   api.route('/exportState', exportState(services))
   api.route('/leaderboard', leaderboard(services))
