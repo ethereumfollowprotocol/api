@@ -36,7 +36,7 @@ export function poap(lists: Hono<{ Bindings: Environment }>, services: Services)
       }
     }
 
-    const collections = ['177709', '178064', '178065', '178066']
+    const collections = ['177709', '178064', '178065', '178066', '183182']
     const data = await Promise.all(
       collections.map(async collection => {
         const response = await fetch(`https://api.poap.tech/actions/scan/${listUser}/${collection}`, headers)
