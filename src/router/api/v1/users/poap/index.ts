@@ -48,11 +48,9 @@ export function poap(users: Hono<{ Bindings: Environment }>, services: Services)
     const data = await Promise.all(
       collections.map(async collection => {
         const response = await fetch(`https://api.poap.tech/actions/scan/${address}/${collection}`, headers)
-        console.log("response", response);
         return response.json()
       })
     )
-    console.log("data", data);
     const poaps = data.map((_collection, index) => {
       return {
         eventId: collections[index],
