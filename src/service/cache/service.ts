@@ -11,28 +11,41 @@ export interface ICacheService {
 export class CacheService implements ICacheService {
   readonly #env: Environment
   readonly #cacheType: string
-  readonly #client: RedisClientType | KVNamespace
+  #client: RedisClientType | KVNamespace
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#env = env
     if (this.#env.EFP_DATA_CACHE === undefined) {
       this.#cacheType = 'redis'
-      this.#client = createClient({
-        url: this.#env.REDIS_URL
-      })
-      this.#client.on('error', (err: Error) => {
-        console.log(`Error: ${err}`)
-      })
-      this.#client.connect()
+      this.#client = this.createRedisClient()
     } else {
       this.#cacheType = 'kv'
       this.#client = this.#env.EFP_DATA_CACHE as KVNamespace
     }
   }
 
+  createRedisClient(): RedisClientType {
+    const client: RedisClientType = createClient({
+      url: this.#env.REDIS_URL
+    })
+    client.on('error', (err: Error) => {
+      console.log(`Error: ${err}`)
+      client.quit()
+    })
+    client.connect()
+    return client
+  }
+
+  closeClient(): void {
+    ;(this.#client as RedisClientType).quit()
+  }
+
   async get(key: string): Promise<{} | null> {
     if (this.#cacheType === 'redis') {
+      if (!this.#client) {
+        this.#client = this.createRedisClient()
+      }
       const result = await (this.#client as RedisClientType).get(key)
       return JSON.parse(result as string) as any
     }
@@ -41,6 +54,9 @@ export class CacheService implements ICacheService {
 
   async put(key: string, value: string): Promise<void> {
     if (this.#cacheType === 'redis') {
+      if (!this.#client) {
+        this.#client = this.createRedisClient()
+      }
       await (this.#client as RedisClientType).set(key, value, {
         EX: this.#env.CACHE_TTL
       } as any)
