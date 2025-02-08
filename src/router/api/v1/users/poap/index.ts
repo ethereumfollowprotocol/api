@@ -39,7 +39,7 @@ export function poap(users: Hono<{ Bindings: Environment }>, services: Services)
     const headers = {
       method: 'GET',
       headers: {
-        'X-API-Key': `${context.env.POAP_API_TOKEN}`,
+        'X-API-Key': `${env(context).POAP_API_TOKEN}`,
         'Content-Type': 'application/json'
       }
     }
