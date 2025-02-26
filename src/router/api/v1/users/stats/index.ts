@@ -36,6 +36,7 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
     }
 
     if (live === 'true') {
+      stats.followers_count = await efp.getUserFollowersCount(address)
       stats.following_count = await efp.getUserFollowingCount(address)
     }
 
