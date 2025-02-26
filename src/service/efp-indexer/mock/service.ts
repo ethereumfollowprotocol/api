@@ -241,6 +241,10 @@ export class MockEFPIndexerService implements IEFPIndexerService {
     return this.#socialGraph.getFollowing(address)
   }
 
+  getLeaderboardAll(): Promise<{ address: `0x${string}`; name: string }[]> {
+    throw new Error('Method not implemented.')
+  }
+
   async getLeaderboardBlocked(
     limit: number
   ): Promise<{ rank: number; address: `0x${string}`; blocked_by_count: number }[]> {

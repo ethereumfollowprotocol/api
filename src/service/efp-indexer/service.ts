@@ -173,6 +173,7 @@ export interface IEFPIndexerService {
   claimPoapLink(address: Address): Promise<string>
   getAddressByList(token_id: string): Promise<Address | undefined>
   getCommonFollowers(user: Address, target: Address): Promise<CommonFollowers[]>
+  getLeaderboardAll(): Promise<{ address: `0x${string}`; name: string }[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
   getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: Address; blocks_count: number }[]>
   getLeaderboardFollowers(limit: number): Promise<{ rank: number; address: Address; followers_count: number }[]>
@@ -1067,6 +1068,20 @@ export class EFPIndexerService implements IEFPIndexerService {
       blocks: row.blocks,
       top8: row.top8,
       updated_at: row.updated_at
+    }))
+  }
+
+  async getLeaderboardAll(): Promise<{ address: `0x${string}`; name: string }[]> {
+    const query = sql`SELECT address, name FROM public.efp_leaderboard`
+    const result: QueryResult<unknown> = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return []
+    }
+
+    return result.rows.map((row: any) => ({
+      address: row.address,
+      name: row.name
     }))
   }
 
