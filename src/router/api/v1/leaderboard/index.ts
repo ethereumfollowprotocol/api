@@ -2,6 +2,7 @@ import { Hono } from 'hono'
 
 import type { Services } from '#/service'
 import type { Environment } from '#/types'
+import { all } from './all'
 import { blocked } from './blocked'
 import { blocks } from './blocks'
 import { count } from './count'
@@ -16,6 +17,7 @@ import { includeValidator, limitValidator } from './validators'
 export function leaderboard(services: Services): Hono<{ Bindings: Environment }> {
   const leaderboard = new Hono<{ Bindings: Environment }>()
 
+  all(leaderboard, services)
   blocked(leaderboard, services, limitValidator, includeValidator)
   blocks(leaderboard, services, limitValidator, includeValidator)
   count(leaderboard, services, limitValidator, includeValidator)
