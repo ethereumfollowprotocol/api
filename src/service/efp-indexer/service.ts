@@ -90,6 +90,7 @@ export type LeaderBoardRow = {
   address: Address
   name: string | undefined
   avatar: string | undefined
+  header: string | undefined
   mutuals_rank: number
   followers_rank: number
   following_rank: number
@@ -1054,6 +1055,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       address: row.address,
       name: row.name,
       avatar: row.avatar,
+      header: row.header,
       mutuals_rank: row.mutuals_rank,
       followers_rank: row.followers_rank,
       following_rank: row.following_rank,
@@ -1143,6 +1145,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       address: row.address,
       name: row.name,
       avatar: row.avatar,
+      header: row.header,
       mutuals_rank: row.mutuals_rank,
       followers_rank: row.followers_rank,
       following_rank: row.following_rank,
