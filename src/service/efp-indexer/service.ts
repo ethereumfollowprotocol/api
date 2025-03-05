@@ -246,6 +246,7 @@ export interface IEFPIndexerService {
   getNotificationsByAddress(
     address: Address,
     opcode: string,
+    start_timestamp: bigint,
     interval: string,
     tag: string,
     limit: string,
@@ -457,12 +458,13 @@ export class EFPIndexerService implements IEFPIndexerService {
   async getNotificationsByAddress(
     address: Address,
     opcode: string,
+    start_timestamp: bigint,
     interval: string,
     tag: string,
     limit: string,
     offset: string
   ): Promise<NotificationRow[]> {
-    const query = sql<NotificationRow>`SELECT * FROM query.get_notifications_by_address_tags(${address}, ${opcode}, ${interval}, ${tag}, ${limit}, ${offset})`
+    const query = sql<NotificationRow>`SELECT * FROM query.get_notifications_by_address_tags(${address}, ${opcode}, ${start_timestamp}, ${interval}, ${tag}, ${limit}, ${offset})`
     const result = await query.execute(this.#db)
     if (!result || result.rows.length === 0) {
       return []

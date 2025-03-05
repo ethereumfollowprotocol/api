@@ -133,6 +133,7 @@ export class MockEFPIndexerService implements IEFPIndexerService {
   getNotificationsByAddress(
     _address: Address,
     _opcode: string,
+    _start: bigint,
     _interval: string,
     _tag: string,
     _limit: string,
