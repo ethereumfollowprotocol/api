@@ -11,10 +11,11 @@ export function notifications(users: Hono<{ Bindings: Environment }>, services: 
   users.get('/:addressOrENS/notifications', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
     const { cache } = context.req.query()
-    let { offset, limit, opcode, interval, tag } = context.req.valid('query')
+    let { offset, limit, opcode, start, interval, tag } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
     if (!(opcode && [1, 2, 3, 4].includes(Number(opcode)))) opcode = '0'
+    if (!start || start === '') start = Math.floor(Date.now() / 1000).toString()
     if (!tag || tag === '') tag = 'p_tag_empty'
     if (interval === 'hour') interval = '1:00:00'
     else if (interval === 'day') interval = '24:00:00'
@@ -24,7 +25,7 @@ export function notifications(users: Hono<{ Bindings: Environment }>, services: 
     else interval = '168:00:00'
 
     const cacheService = services.cache(env(context))
-    const cacheTarget = `users/${addressOrENS}/notifications?opcode=${opcode}&interval=${interval}&tag=${tag}&limit=${limit}&offset=${offset}`
+    const cacheTarget = `users/${addressOrENS}/notifications?opcode=${opcode}&start=${start}&interval=${interval}&tag=${tag}&limit=${limit}&offset=${offset}`
 
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
@@ -41,7 +42,15 @@ export function notifications(users: Hono<{ Bindings: Environment }>, services: 
 
     const notifications: NotificationRow[] = await services
       .efp(env(context))
-      .getNotificationsByAddress(address, opcode as string, interval, tag as string, limit as string, offset as string)
+      .getNotificationsByAddress(
+        address,
+        opcode as string,
+        BigInt(start as string),
+        interval,
+        tag as string,
+        limit as string,
+        offset as string
+      )
 
     const response = notifications.map(notification => {
       return {
