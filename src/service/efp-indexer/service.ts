@@ -124,6 +124,7 @@ export type DiscoverRow = {
   address: Address
   name: string
   avatar: string
+  header: string
   followers: number
   following: number
   _index?: number
@@ -133,6 +134,7 @@ export type RecommendedRow = {
   address: Address
   name: string
   avatar: string
+  header?: string
 }
 
 export type RecommendedDetailsRow = RecommendedRow & {
@@ -1202,6 +1204,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       address: row.address,
       name: row.name,
       avatar: row.avatar,
+      header: row.header,
       followers: row.followers,
       following: row.following
     }))
