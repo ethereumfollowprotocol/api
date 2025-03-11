@@ -17,9 +17,19 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
 export function recommended(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/recommended', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
-    let { offset, limit } = context.req.valid('query')
+    let { offset, limit, cache } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `users/${addressOrENS}/recommended?limit=${limit}&offset=${offset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
@@ -35,14 +45,26 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
       offset as string
     )
 
-    return context.json({ recommended: recommendedAddresses }, 200)
+    const packagedResponse = { recommended: recommendedAddresses }
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 
   users.get('/:addressOrENS/recommended/details', includeValidator, async context => {
     const { addressOrENS } = context.req.param()
-    let { offset, limit } = context.req.valid('query')
+    let { offset, limit, cache } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `users/${addressOrENS}/recommended/details?limit=${limit}&offset=${offset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
@@ -77,6 +99,8 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
       }
     })
 
-    return context.json({ recommended: formattedRecommendations }, 200)
+    const packagedResponse = { recommended: formattedRecommendations }
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 }

@@ -20,9 +20,18 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
-    let { offset, limit } = context.req.valid('query')
+    let { offset, limit, cache } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `lists/${token_id}/recommended?limit=${limit}&offset=${offset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
 
     const seed = context.req.query('seed') ? (context.req.query('seed') as Address) : (NETWORKED_WALLET as Address)
     const efp: IEFPIndexerService = services.efp(env(context))
@@ -33,7 +42,9 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
       offset as string
     )
 
-    return context.json({ recommended: recommendedAddresses }, 200)
+    const packagedResponse = { recommended: recommendedAddresses }
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 
   users.get('/:token_id/recommended/details', includeValidator, async context => {
@@ -41,9 +52,18 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
-    let { offset, limit } = context.req.valid('query')
+    let { offset, limit, cache } = context.req.valid('query')
     if (!limit) limit = '10'
     if (!offset) offset = '0'
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `lists/${token_id}/recommended/details?limit=${limit}&offset=${offset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
 
     const efp: IEFPIndexerService = services.efp(env(context))
     const recommendedAddresses: RecommendedDetailsRow[] = await efp.getRecommendedStackByList(
@@ -73,6 +93,8 @@ export function recommended(users: Hono<{ Bindings: Environment }>, services: Se
       }
     })
 
-    return context.json({ recommended: formattedRecommendations }, 200)
+    const packagedResponse = { recommended: formattedRecommendations }
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 }
