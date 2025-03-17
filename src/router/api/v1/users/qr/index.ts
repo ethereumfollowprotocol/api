@@ -72,12 +72,12 @@ export function qr(users: Hono<{ Bindings: Environment }>, services: Services) {
         `<svg xmlns="http://www.w3.org/2000/svg" height="100%" width="100%" viewBox="0 0 39 44">
           <defs>
             <linearGradient id="grad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" style="stop-color:#FAF35F;stop-opacity:1" />
-                <stop offset="80%" style="stop-color:#FFAFDD;stop-opacity:1" />
+                <stop offset="0%" style="stop-color:#FFE067;stop-opacity:1" />
+                <stop offset="80%" style="stop-color:#FFF7D9;stop-opacity:1" />
             </linearGradient>
             <linearGradient id="grad-logo" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" style="stop-color:#FFF500;stop-opacity:1" />
-              <stop offset="80%" style="stop-color:#FF79C9;stop-opacity:1" />
+              <stop offset="0%" style="stop-color:#FFE067;stop-opacity:1" />
+              <stop offset="80%" style="stop-color:#FFF7D9;stop-opacity:1" />
             </linearGradient>
           </defs>
           <style>
