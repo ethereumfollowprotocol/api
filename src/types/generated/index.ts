@@ -55,6 +55,7 @@ export interface EfpLeaderboard {
   followers_rank: Int8 | null
   following: Generated<Int8 | null>
   following_rank: Int8 | null
+  header: string | null
   mutuals: Generated<Int8 | null>
   mutuals_rank: Int8 | null
   name: string | null
@@ -152,6 +153,7 @@ export interface EfpRecentActivity {
   created_at: Generated<Timestamp | null>
   followers: Generated<Int8 | null>
   following: Generated<Int8 | null>
+  header: string | null
   name: string | null
   updated_at: Generated<Timestamp | null>
 }
@@ -161,6 +163,7 @@ export interface EfpRecommended {
   avatar: string | null
   class: string | null
   created_at: Generated<Timestamp | null>
+  header: string | null
   index: Int8
   name: string
 }
