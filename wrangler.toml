@@ -9,7 +9,7 @@ name = "indexer"
 main = "./src/index.ts"
 minify = true
 keep_vars = true
-nodejs_compat = true
+compatibility_flags = ["nodejs_compat"]
 placement = { mode = "smart" }
 compatibility_date = "2023-10-30"
 # end of globally inheritable configuration
