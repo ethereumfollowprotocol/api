@@ -21,11 +21,7 @@ export function account(lists: Hono<{ Bindings: Environment }>, services: Servic
     }
 
     const ensService = services.ens(env(context))
-    const returnedAddress: Address = await ensService.getAddress(addressOrENS)
-    if (!isAddress(returnedAddress)) {
-      return context.json({ response: 'ENS name not valid or does not exist' }, 404) // return error if address is not valid
-    }
-    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(returnedAddress.toLowerCase())
+    const { address, ...ens }: ENSProfile = await ensService.getENSProfile(addressOrENS)
     const response = { address } as Record<string, unknown>
 
     const packagedResponse = { ...response, ens }

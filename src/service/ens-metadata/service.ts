@@ -12,6 +12,7 @@ export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }
 export interface IENSMetadataService {
   getAddress(ensNameOrAddress: Address | string): Promise<Address>
   getENSProfile(ensNameOrAddress: Address | string, refresh?: boolean): Promise<ENSProfile>
+  getENSProfileQuick(ensNameOrAddress: Address | string, refresh?: boolean): Promise<ENSProfile>
   batchGetENSProfiles(ensNameOrAddressArray: Array<Address | string>): Promise<ENSProfileResponse[]>
   getENSAvatar(ensNameOrAddress: Address | string): Promise<string>
   batchGetENSAvatars(ensNameOrAddressArray: Array<Address | string>): Promise<{ [ensNameOrAddress: string]: string }>
@@ -88,6 +89,47 @@ export class ENSMetadataService implements IENSMetadataService {
       return false
     }
     return true
+  }
+
+  async getENSProfileQuick(rawNameOrAddress: Address | string, _refresh = false): Promise<ENSProfile> {
+    const ensNameOrAddress = rawNameOrAddress
+    if (ensNameOrAddress === undefined) {
+      raise('ENS name or address is required')
+    }
+    const response = await fetch(`${this.#url}/u/${ensNameOrAddress}`)
+    if (response.ok) {
+      try {
+        const ensProfileData = (await response.json()) as ENSProfile
+        ensProfileData.name = ens_normalize(ensProfileData.name)
+        ensProfileData.address = ensProfileData.address.toLowerCase() as Address
+
+        if (ensProfileData.contenthash) {
+          ensProfileData.records = JSON.stringify({
+            ...(typeof ensProfileData.records === 'object' && ensProfileData.records !== null
+              ? ensProfileData.records
+              : {}),
+            contenthash: ensProfileData.contenthash
+          })
+          ensProfileData.records = JSON.parse(ensProfileData?.records) as string
+        }
+        try {
+          this.cacheRecord(ensProfileData).catch(error => {
+            console.error('cache failed', error)
+          })
+        } catch (_error) {}
+
+        return ensProfileData as ENSProfile
+      } catch (error) {
+        console.log('error', error)
+      }
+    }
+    return {
+      name: '',
+      address: ensNameOrAddress,
+      avatar: null,
+      records: null,
+      updated_at: ''
+    } as unknown as ENSProfile
   }
 
   /**
