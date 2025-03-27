@@ -9,11 +9,11 @@ import { isAddress } from '#/utilities'
 export function stats(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/stats', async context => {
     const { addressOrENS } = context.req.param()
-    const { live, cache } = context.req.query()
+    const { cache } = context.req.query()
 
     const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/stats`
-    if (cache !== 'fresh' || live !== 'true') {
+    if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
@@ -28,19 +28,17 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
-
-    const ranksAndCounts = await efp.getUserRanksCounts(address)
     const stats = {
-      followers_count: ranksAndCounts.followers,
-      following_count: ranksAndCounts.following
+      followers_count: await efp.getUserFollowersCount(address),
+      following_count: await efp.getUserFollowingCount(address)
     }
 
-    if (live === 'true') {
-      stats.followers_count = await efp.getUserFollowersCount(address)
-      stats.following_count = await efp.getUserFollowingCount(address)
+    try {
+      await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
+    } catch (error) {
+      console.log(error)
     }
 
-    await cacheService.put(cacheTarget, JSON.stringify(stats))
     return context.json(stats, 200)
   })
 }

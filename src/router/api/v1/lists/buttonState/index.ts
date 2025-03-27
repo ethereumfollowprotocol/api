@@ -29,7 +29,7 @@ export function buttonState(lists: Hono<{ Bindings: Environment }>, services: Se
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getListFollowingState(token_id, address)
     const packagedResponse = { token_id, address, state }
-    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
     return context.json(packagedResponse, 200)
   })
 }

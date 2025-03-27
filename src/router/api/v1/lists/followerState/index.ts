@@ -29,7 +29,7 @@ export function followerState(lists: Hono<{ Bindings: Environment }>, services: 
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getListFollowerState(token_id, address)
     const packagedResponse = { token_id, address, state }
-    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
     return context.json(packagedResponse, 200)
   })
 }

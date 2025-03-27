@@ -5,7 +5,7 @@ import type { Environment } from '#/types/index'
 
 export interface ICacheService {
   get(key: string): Promise<{} | null>
-  put(key: string, value: string): Promise<void>
+  put(key: string, value: string, ttl?: number): Promise<void>
 }
 
 export class CacheService implements ICacheService {
@@ -52,16 +52,22 @@ export class CacheService implements ICacheService {
     return this.#env.EFP_DATA_CACHE.get(key, 'json')
   }
 
-  async put(key: string, value: string): Promise<void> {
+  async put(key: string, value: string, ttl = this.#env.CACHE_TTL): Promise<void> {
     if (this.#cacheType === 'redis') {
       if (!this.#client) {
         this.#client = this.createRedisClient()
       }
-      await (this.#client as RedisClientType).set(key, value, {
-        EX: this.#env.CACHE_TTL
-      } as any)
+      if (ttl === 0) {
+        await (this.#client as RedisClientType).set(key, value, {} as any)
+      } else {
+        await (this.#client as RedisClientType).set(key, value, {
+          EX: ttl
+        } as any)
+      }
+    } else if (ttl === 0) {
+      await this.#env.EFP_DATA_CACHE.put(key, value, {})
     } else {
-      await this.#env.EFP_DATA_CACHE.put(key, value, { expirationTtl: this.#env.CACHE_TTL })
+      await this.#env.EFP_DATA_CACHE.put(key, value, { expirationTtl: ttl })
     }
   }
 }

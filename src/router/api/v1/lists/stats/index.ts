@@ -27,7 +27,7 @@ export function stats(lists: Hono<{ Bindings: Environment }>, services: Services
       following_count: await efp.getUserFollowingCountByList(token_id)
     }
 
-    await cacheService.put(cacheTarget, JSON.stringify(stats))
+    await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
     return context.json(stats, 200)
   })
 }
