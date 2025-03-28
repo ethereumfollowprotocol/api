@@ -12,8 +12,8 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
     const { live, cache } = context.req.query()
 
     const cacheService = services.cache(env(context))
-    const cacheTarget = `users/${addressOrENS}/stats`
-    if (cache !== 'fresh') {
+    const cacheTarget = `users/${addressOrENS}/stats`.toLowerCase()
+    if (cache !== 'fresh' || live !== 'true') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)

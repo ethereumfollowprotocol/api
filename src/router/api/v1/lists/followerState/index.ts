@@ -13,7 +13,7 @@ export function followerState(lists: Hono<{ Bindings: Environment }>, services: 
       return context.json({ response: 'Invalid list id' }, 400)
     }
     const cacheService = services.cache(env(context))
-    const cacheTarget = `lists/${token_id}/${addressOrENS}/followerState`
+    const cacheTarget = `lists/${token_id}/${addressOrENS}/followerState`.toLowerCase()
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {

@@ -13,7 +13,7 @@ export function stats(lists: Hono<{ Bindings: Environment }>, services: Services
       return context.json({ response: 'Invalid list id' }, 400)
     }
     const cacheService = services.cache(env(context))
-    const cacheTarget = `lists/${token_id}/stats`
+    const cacheTarget = `lists/${token_id}/stats`.toLowerCase()
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
