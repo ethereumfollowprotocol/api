@@ -1,4 +1,5 @@
 interface EnvironmentVariables {
+  readonly ALLOW_TTL_MOD: 'true' | 'false'
   readonly NODE_ENV: 'development' | 'production' | 'test'
   readonly ENVIRONMENT: 'development' | 'production' | 'stage' | 'test'
   readonly PORT: string

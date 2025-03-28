@@ -13,7 +13,7 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
 
     const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/stats`
-    if (cache !== 'fresh' || live !== 'true') {
+    if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
@@ -28,7 +28,16 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      const stats = {
+        followers_count: await efp.getUserFollowersCount(address),
+        following_count: await efp.getUserFollowingCount(address)
+      }
 
+      await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
+      return context.json(stats, 200)
+    }
+    console.log(env(context).ALLOW_TTL_MOD)
     const ranksAndCounts = await efp.getUserRanksCounts(address)
     const stats = {
       followers_count: ranksAndCounts.followers,
