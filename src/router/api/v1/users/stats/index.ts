@@ -9,7 +9,7 @@ import { isAddress } from '#/utilities'
 export function stats(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/stats', async context => {
     const { addressOrENS } = context.req.param()
-    const { cache } = context.req.query()
+    const { live, cache } = context.req.query()
 
     const cacheService = services.cache(env(context))
     const cacheTarget = `users/${addressOrENS}/stats`
@@ -28,17 +28,28 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
-    const stats = {
-      followers_count: await efp.getUserFollowersCount(address),
-      following_count: await efp.getUserFollowingCount(address)
-    }
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      const stats = {
+        followers_count: await efp.getUserFollowersCount(address),
+        following_count: await efp.getUserFollowingCount(address)
+      }
 
-    try {
       await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
-    } catch (error) {
-      console.log(error)
+      return context.json(stats, 200)
+    }
+    console.log(env(context).ALLOW_TTL_MOD)
+    const ranksAndCounts = await efp.getUserRanksCounts(address)
+    const stats = {
+      followers_count: ranksAndCounts.followers,
+      following_count: ranksAndCounts.following
     }
 
+    if (live === 'true') {
+      stats.followers_count = await efp.getUserFollowersCount(address)
+      stats.following_count = await efp.getUserFollowingCount(address)
+    }
+
+    await cacheService.put(cacheTarget, JSON.stringify(stats))
     return context.json(stats, 200)
   })
 }

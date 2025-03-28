@@ -27,7 +27,11 @@ export function stats(lists: Hono<{ Bindings: Environment }>, services: Services
       following_count: await efp.getUserFollowingCountByList(token_id)
     }
 
-    await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
+    } else {
+      await cacheService.put(cacheTarget, JSON.stringify(stats))
+    }
     return context.json(stats, 200)
   })
 }

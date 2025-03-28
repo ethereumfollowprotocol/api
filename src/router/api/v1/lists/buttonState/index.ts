@@ -29,7 +29,11 @@ export function buttonState(lists: Hono<{ Bindings: Environment }>, services: Se
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getListFollowingState(token_id, address)
     const packagedResponse = { token_id, address, state }
-    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    } else {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    }
     return context.json(packagedResponse, 200)
   })
 }

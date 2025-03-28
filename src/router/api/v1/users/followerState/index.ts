@@ -30,7 +30,11 @@ export function followerState(users: Hono<{ Bindings: Environment }>, services: 
     const efp: IEFPIndexerService = services.efp(env(context))
     const state: FollowStateResponse = await efp.getUserFollowerState(addressUser, addressFollower)
     const packagedResponse = { addressUser, addressFollower, state }
-    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    } else {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    }
     return context.json(packagedResponse, 200)
   })
 }
