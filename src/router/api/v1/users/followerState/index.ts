@@ -11,7 +11,7 @@ export function followerState(users: Hono<{ Bindings: Environment }>, services: 
     const { cache } = context.req.query()
 
     const cacheService = services.cache(env(context))
-    const cacheTarget = `users/${addressOrENS}/${addressOrENS2}/followerState`
+    const cacheTarget = `users/${addressOrENS}/${addressOrENS2}/followerState`.toLowerCase()
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
