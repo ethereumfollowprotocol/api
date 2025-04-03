@@ -8,6 +8,15 @@ import { isAddress } from '#/utilities'
 export function taggedAs(users: Hono<{ Bindings: Environment }>, services: Services) {
   users.get('/:addressOrENS/taggedAs', async context => {
     const { addressOrENS } = context.req.param()
+    const { cache } = context.req.query()
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `lists/${addressOrENS}/taggedAs`.toLowerCase()
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
@@ -30,6 +39,12 @@ export function taggedAs(users: Hono<{ Bindings: Environment }>, services: Servi
     const tagCounts = tags.map(tag => {
       return { tag: tag, count: (counts as any)[tag] }
     })
-    return context.json({ address, tags, tagCounts, taggedAddresses: tagsResponse }, 200)
+    const packagedResponse = { address, tags, tagCounts, taggedAddresses: tagsResponse }
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    } else {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    }
+    return context.json(packagedResponse, 200)
   })
 }
