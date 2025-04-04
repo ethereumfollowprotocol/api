@@ -8,7 +8,7 @@
   "files": {
     "include": ["./**/*.ts", "./**/*.js", "./**/*.cjs", "./**/*.mjs", "./**/*.d.ts", "./**/*.json", "./**/*.jsonc"],
     "ignoreUnknown": true,
-    "ignore": ["node_modules", "dist", "_", "./src/demo/data.json"]
+    "ignore": ["node_modules", "dist", "_", "./src/demo/data.json", "./tests/index.test.ts"]
   },
   "organizeImports": {
     "enabled": true

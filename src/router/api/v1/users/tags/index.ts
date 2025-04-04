@@ -10,18 +10,20 @@ export function tags(users: Hono<{ Bindings: Environment }>, services: Services)
   users.get('/:addressOrENS/tags', async context => {
     const { addressOrENS } = context.req.param()
     const { cache } = context.req.query()
+
+    const ensService = services.ens(env(context))
+    const address: Address = await ensService.getAddress(addressOrENS)
+    if (!isAddress(address)) {
+      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+    }
+
     const cacheService = services.cache(env(context))
-    const cacheTarget = `lists/${addressOrENS}/tags`.toLowerCase()
+    const cacheTarget = `users/${address}/tags`.toLowerCase()
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
-    }
-    const ensService = services.ens(env(context))
-    const address: Address = await ensService.getAddress(addressOrENS)
-    if (!isAddress(address)) {
-      return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
 
     const efp: IEFPIndexerService = services.efp(env(context))
