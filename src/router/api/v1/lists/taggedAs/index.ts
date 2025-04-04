@@ -6,10 +6,20 @@ import type { Address, Environment } from '#/types'
 import { isAddress } from '#/utilities'
 
 export function taggedAs(lists: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/taggedAs', async context => {
     const { token_id } = context.req.param()
+    const { cache } = context.req.query()
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
+    }
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `lists/${token_id}/taggedAs`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
     const address = await efp.getAddressByList(token_id)
@@ -32,6 +42,13 @@ export function taggedAs(lists: Hono<{ Bindings: Environment }>, services: Servi
     const tagCounts = tags.map(tag => {
       return { tag: tag, count: (counts as any)[tag] }
     })
-    return context.json({ token_id, tags, tagCounts, taggedAddresses: tagsResponse }, 200)
+    const packagedResponse = { token_id, tags, tagCounts, taggedAddresses: tagsResponse }
+
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    } else {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    }
+    return context.json(packagedResponse, 200)
   })
 }

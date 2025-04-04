@@ -7,8 +7,10 @@ import type { Address, Environment } from '#/types'
 const onlyLettersPattern = /^[A-Za-z]+$/
 
 export function tags(lists: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   lists.get('/:token_id/tags', async context => {
     const { token_id } = context.req.param()
+    const { cache } = context.req.query()
     if (Number.isNaN(Number(token_id)) || Number(token_id) <= 0) {
       return context.json({ response: 'Invalid list id' }, 400)
     }
@@ -17,6 +19,15 @@ export function tags(lists: Hono<{ Bindings: Environment }>, services: Services)
     if (tagsQuery) {
       const tagsArray = tagsQuery.split(',')
       tagsToSearch = tagsArray.filter(tag => tag.match(onlyLettersPattern))
+    }
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `lists/${token_id}/tags`
+    if (cache !== 'fresh' && !tagsQuery) {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
 
@@ -38,6 +49,12 @@ export function tags(lists: Hono<{ Bindings: Environment }>, services: Services)
     const tagCounts = tags.map(tag => {
       return { tag: tag, count: (counts as any)[tag] }
     })
-    return context.json({ token_id, tags, tagCounts, taggedAddresses: tagsResponse }, 200)
+    const packagedResponse = { token_id, tags, tagCounts, taggedAddresses: tagsResponse }
+    if (env(context).ALLOW_TTL_MOD === 'true') {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse), 0)
+    } else {
+      await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    }
+    return context.json(packagedResponse, 200)
   })
 }
