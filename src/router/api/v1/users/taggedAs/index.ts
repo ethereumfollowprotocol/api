@@ -9,22 +9,23 @@ export function taggedAs(users: Hono<{ Bindings: Environment }>, services: Servi
   users.get('/:addressOrENS/taggedAs', async context => {
     const { addressOrENS } = context.req.param()
     const { cache } = context.req.query()
-    const cacheService = services.cache(env(context))
-    const cacheTarget = `lists/${addressOrENS}/taggedAs`.toLowerCase()
-    if (cache !== 'fresh') {
-      const cacheHit = await cacheService.get(cacheTarget)
-      if (cacheHit) {
-        return context.json({ ...cacheHit }, 200)
-      }
-    }
+
     const ensService = services.ens(env(context))
     const address: Address = await ensService.getAddress(addressOrENS)
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404)
     }
 
-    const efp: IEFPIndexerService = services.efp(env(context))
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `users/${address}/taggedAs`.toLowerCase()
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
 
+    const efp: IEFPIndexerService = services.efp(env(context))
     const tagsResponse: TagResponse[] = await efp.getUserFollowerTags(address)
 
     const tags: string[] = []

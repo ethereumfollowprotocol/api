@@ -11,20 +11,21 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
     const { addressOrENS } = context.req.param()
     const { live, cache } = context.req.query()
 
-    const cacheService = services.cache(env(context))
-    const cacheTarget = `users/${addressOrENS}/stats`.toLowerCase()
-    if (cache !== 'fresh' || live !== 'true') {
-      const cacheHit = await cacheService.get(cacheTarget)
-      if (cacheHit) {
-        return context.json({ ...cacheHit }, 200)
-      }
-    }
     let address: Address = addressOrENS.toLowerCase() as Address
     if (!isAddress(addressOrENS)) {
       const ens: IENSMetadataService = services.ens(env(context))
       address = await ens.getAddress(addressOrENS)
       if (!isAddress(address)) {
         return context.json({ response: 'ENS name not valid or does not exist' }, 404)
+      }
+    }
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `users/${address}/stats`.toLowerCase()
+    if (cache !== 'fresh' || live !== 'true') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      console.log('cacheHit', cacheHit)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
       }
     }
     const efp: IEFPIndexerService = services.efp(env(context))
@@ -37,7 +38,6 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
       await cacheService.put(cacheTarget, JSON.stringify(stats), 0)
       return context.json(stats, 200)
     }
-    console.log(env(context).ALLOW_TTL_MOD)
     const ranksAndCounts = await efp.getUserRanksCounts(address)
     const stats = {
       followers_count: ranksAndCounts.followers,
