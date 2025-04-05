@@ -23,7 +23,6 @@ export function stats(users: Hono<{ Bindings: Environment }>, services: Services
     const cacheTarget = `users/${address}/stats`.toLowerCase()
     if (cache !== 'fresh' || live !== 'true') {
       const cacheHit = await cacheService.get(cacheTarget)
-      console.log('cacheHit', cacheHit)
       if (cacheHit) {
         return context.json({ ...cacheHit }, 200)
       }
