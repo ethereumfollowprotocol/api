@@ -14,6 +14,7 @@ export type ENSFollowingResponse = PrettyTaggedListRecord & {
 }
 
 export function commonFollowers(users: Hono<{ Bindings: Environment }>, services: Services) {
+  // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: <explanation>
   users.get('/:addressOrENS/commonFollowers', async context => {
     const { addressOrENS } = context.req.param()
 
@@ -22,7 +23,7 @@ export function commonFollowers(users: Hono<{ Bindings: Environment }>, services
     if (!isAddress(address)) {
       return context.json({ response: 'ENS name not valid or does not exist' }, 404) // return error if address is not valid
     }
-    let leader = context.req.query('leader')
+    let { leader, limit, offset } = context.req.query()
     if (!isAddress(leader as Address)) {
       leader = await ensService.getAddress(addressOrENS)
     }
@@ -30,10 +31,20 @@ export function commonFollowers(users: Hono<{ Bindings: Environment }>, services
       return context.json({ response: 'Invalid query address' }, 404)
     }
     const efp: IEFPIndexerService = services.efp(env(context))
-    const common: CommonFollowers[] = await efp.getCommonFollowers(
-      address.toLowerCase() as Address,
-      leader.toLowerCase() as Address
-    )
+    let common: CommonFollowers[]
+
+    if (limit || offset) {
+      if (!limit) limit = '10'
+      if (!offset) offset = '0'
+      common = await efp.getCommonFollowersPage(
+        address.toLowerCase() as Address,
+        leader.toLowerCase() as Address,
+        Number(limit),
+        Number(offset)
+      )
+    } else {
+      common = await efp.getCommonFollowers(address.toLowerCase() as Address, leader.toLowerCase() as Address)
+    }
 
     return context.json({ results: common, length: common.length }, 200)
   })

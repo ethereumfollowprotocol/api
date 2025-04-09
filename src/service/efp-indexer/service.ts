@@ -175,6 +175,7 @@ export interface IEFPIndexerService {
   claimPoapLink(address: Address): Promise<string>
   getAddressByList(token_id: string): Promise<Address | undefined>
   getCommonFollowers(user: Address, target: Address): Promise<CommonFollowers[]>
+  getCommonFollowersPage(user: Address, target: Address, limit: number, offset: number): Promise<CommonFollowers[]>
   getLeaderboardAll(): Promise<{ address: `0x${string}`; name: string }[]>
   getLeaderboardBlocked(limit: number): Promise<{ rank: number; address: Address; blocked_by_count: number }[]>
   getLeaderboardBlocks(limit: number): Promise<{ rank: number; address: Address; blocks_count: number }[]>
@@ -722,7 +723,20 @@ export class EFPIndexerService implements IEFPIndexerService {
     if (!result || result.rows.length === 0) {
       return []
     }
-    // return result.rows.map((row: { address: Address }) => row.address)
+    return result.rows
+  }
+
+  async getCommonFollowersPage(
+    user: Address,
+    target: Address,
+    limit: number,
+    offset: number
+  ): Promise<CommonFollowers[]> {
+    const query = sql<CommonFollowers>`SELECT * FROM query.get_common_followers_by_address(${user}, ${target}) LIMIT ${limit} OFFSET ${offset}`
+    const result = await query.execute(this.#db)
+    if (!result || result.rows.length === 0) {
+      return []
+    }
     return result.rows
   }
 
