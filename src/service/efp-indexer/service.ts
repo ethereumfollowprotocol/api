@@ -9,6 +9,7 @@ export type CommonFollowers = {
   address: Address
   name: string
   avatar: string
+  header: string
   mutuals_rank: number
 }
 
