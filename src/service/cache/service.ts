@@ -2,7 +2,6 @@ import type { KVNamespace } from '@cloudflare/workers-types'
 import { createClient } from 'redis'
 import type { RedisClientType } from 'redis'
 import type { Environment } from '#/types/index'
-import { close } from 'fs'
 
 export interface ICacheService {
   get(key: string): Promise<{} | null>
@@ -36,9 +35,9 @@ export class CacheService implements ICacheService {
 
     const client: RedisClientType = createClient({
       url: this.#env.REDIS_URL,
-        socket: {
-            connectTimeout: 10000
-        }
+      socket: {
+        connectTimeout: 10000
+      }
     })
 
     client.on('error', (err: Error) => {
