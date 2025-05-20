@@ -2,6 +2,7 @@ import type { KVNamespace } from '@cloudflare/workers-types'
 import { createClient } from 'redis'
 import type { RedisClientType } from 'redis'
 import type { Environment } from '#/types/index'
+import { close } from 'fs'
 
 export interface ICacheService {
   get(key: string): Promise<{} | null>
@@ -34,11 +35,16 @@ export class CacheService implements ICacheService {
     this.#connecting = true
 
     const client: RedisClientType = createClient({
-      url: this.#env.REDIS_URL
+      url: this.#env.REDIS_URL,
+        socket: {
+            connectTimeout: 10000
+        }
     })
 
     client.on('error', (err: Error) => {
       console.error(`Redis Error: ${err.message}`)
+      client.quit()
+      this.#client = null
     })
 
     try {
@@ -72,6 +78,7 @@ export class CacheService implements ICacheService {
     if (this.#cacheType === 'redis') {
       const client = await this.getRedisClient()
       const result = await client.get(key)
+      client.quit()
       return result ? (JSON.parse(result as string) as {}) : null
     }
     return this.#env.EFP_DATA_CACHE.get(key, 'json')
@@ -85,6 +92,7 @@ export class CacheService implements ICacheService {
       } else {
         await client.set(key, value, { EX: ttl } as any)
       }
+      client.quit()
     } else if (ttl === 0) {
       await this.#env.EFP_DATA_CACHE.put(key, value, {})
     } else {
