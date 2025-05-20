@@ -78,6 +78,7 @@ export class CacheService implements ICacheService {
       const client = await this.getRedisClient()
       const result = await client.get(key)
       client.quit()
+      this.#client = null
       return result ? (JSON.parse(result as string) as {}) : null
     }
     return this.#env.EFP_DATA_CACHE.get(key, 'json')
@@ -92,6 +93,7 @@ export class CacheService implements ICacheService {
         await client.set(key, value, { EX: ttl } as any)
       }
       client.quit()
+      this.#client = null
     } else if (ttl === 0) {
       await this.#env.EFP_DATA_CACHE.put(key, value, {})
     } else {
