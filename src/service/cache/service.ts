@@ -27,9 +27,7 @@ export class CacheService implements ICacheService {
 
   async createRedisClient(): Promise<RedisClientType> {
     if (this.#connecting) {
-      while (this.#connecting) {
-        await new Promise(resolve => setTimeout(resolve, 10))
-      }
+      await new Promise(resolve => setTimeout(resolve, 100))
       return this.#client as RedisClientType
     }
 
