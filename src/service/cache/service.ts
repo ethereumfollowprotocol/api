@@ -11,58 +11,79 @@ export interface ICacheService {
 export class CacheService implements ICacheService {
   readonly #env: Environment
   readonly #cacheType: string
-  #client: RedisClientType | KVNamespace
+  #client: RedisClientType | KVNamespace | null = null
+  #connecting = false
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#env = env
     if (this.#env.EFP_DATA_CACHE === undefined) {
       this.#cacheType = 'redis'
-      this.#client = this.createRedisClient()
     } else {
       this.#cacheType = 'kv'
       this.#client = this.#env.EFP_DATA_CACHE as KVNamespace
     }
   }
 
-  createRedisClient(): RedisClientType {
+  async createRedisClient(): Promise<RedisClientType> {
+    if (this.#connecting) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      return this.#client as RedisClientType
+    }
+
+    this.#connecting = true
+
     const client: RedisClientType = createClient({
       url: this.#env.REDIS_URL
     })
+
     client.on('error', (err: Error) => {
-      console.log(`Error: ${err}`)
-      client.quit()
+      console.error(`Redis Error: ${err.message}`)
     })
-    client.connect()
+
+    try {
+      await client.connect()
+      this.#client = client
+    } catch (err) {
+      console.error(`Failed to connect to Redis: ${err}`)
+      this.#client = null
+    } finally {
+      this.#connecting = false
+    }
+
     return client
   }
 
-  closeClient(): void {
-    ;(this.#client as RedisClientType).quit()
+  async getRedisClient(): Promise<RedisClientType> {
+    if (!this.#client) {
+      return await this.createRedisClient()
+    }
+    return this.#client as RedisClientType
+  }
+
+  async closeClient(): Promise<void> {
+    if (this.#cacheType === 'redis' && this.#client) {
+      await (this.#client as RedisClientType).quit()
+      this.#client = null
+    }
   }
 
   async get(key: string): Promise<{} | null> {
     if (this.#cacheType === 'redis') {
-      if (!this.#client) {
-        this.#client = this.createRedisClient()
-      }
-      const result = await (this.#client as RedisClientType).get(key)
-      return JSON.parse(result as string) as any
+      const client = await this.getRedisClient()
+      const result = await client.get(key)
+      return result ? (JSON.parse(result as string) as {}) : null
     }
     return this.#env.EFP_DATA_CACHE.get(key, 'json')
   }
 
   async put(key: string, value: string, ttl = this.#env.CACHE_TTL): Promise<void> {
     if (this.#cacheType === 'redis') {
-      if (!this.#client) {
-        this.#client = this.createRedisClient()
-      }
+      const client = await this.getRedisClient()
       if (ttl === 0) {
-        await (this.#client as RedisClientType).set(key, value, {} as any)
+        await client.set(key, value, {} as any)
       } else {
-        await (this.#client as RedisClientType).set(key, value, {
-          EX: ttl
-        } as any)
+        await client.set(key, value, { EX: ttl } as any)
       }
     } else if (ttl === 0) {
       await this.#env.EFP_DATA_CACHE.put(key, value, {})
