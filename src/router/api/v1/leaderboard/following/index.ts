@@ -5,32 +5,32 @@ import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import type { IncludeValidator, LimitValidator } from '../validators'
 
-/**
- * TODO: add support for whether :addressOrENS is followed, is following, is muting, is blocking, is blocked by
- */
 export function following(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
   limitValidator: LimitValidator,
   includeValidator: IncludeValidator
 ) {
-  /**
-   * Same as /followers, but for following.
-   */
-  leaderboard.get('/following/:addressOrENS?', limitValidator, includeValidator, async context => {
-    const { include, limit } = context.req.valid('query')
+  leaderboard.get('/following', limitValidator, includeValidator, async context => {
+    const { limit, offset, cache } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
+    const parsedOffset = Number.parseInt(offset?.toString() || '0', 10)
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `leaderboard/following?limit=${parsedLimit}&offset=${parsedOffset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+    
     let mostFollowing: { address: string; following_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardFollowing(parsedLimit)
-    if (include?.includes('ens')) {
-      const ens = services.ens(env(context))
-      const ensProfiles = await Promise.all(mostFollowing.map(user => ens.getENSProfile(user.address)))
-      mostFollowing = mostFollowing.map((user, index) => ({
-        ...user,
-        ens: ensProfiles[index]
-      }))
-    }
-    return context.json(mostFollowing, 200)
+
+    const packagedResponse = mostFollowing
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 }

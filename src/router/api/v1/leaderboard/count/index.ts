@@ -13,9 +13,21 @@ export function count(
   includeValidator: IncludeValidator
 ) {
   leaderboard.get('/count', limitValidator, includeValidator, async context => {
-    const efp = await services.efp(env(context))
+    const { cache } = context.req.valid('query')
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `leaderboard/count`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+    const efp = services.efp(env(context))
     const leaderboardCount: number = await efp.getLeaderboardCount()
 
-    return context.json({ leaderboardCount }, 200)
+    const packagedResponse = { leaderboardCount }
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 }

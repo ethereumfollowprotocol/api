@@ -5,32 +5,32 @@ import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import type { IncludeValidator, LimitValidator } from '../validators'
 
-/**
- * TODO: add support for whether :addressOrENS is followed, is following, is muting, is blocking, is blocked by
- */
 export function blocked(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
   limitValidator: LimitValidator,
   includeValidator: IncludeValidator
 ) {
-  /**
-   * Same as /followers, but for blocked.
-   */
   leaderboard.get('/blocked', limitValidator, includeValidator, async context => {
-    const { include, limit } = context.req.valid('query')
+    const { limit, offset, cache } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
+    const parsedOffset = Number.parseInt(offset?.toString() || '0', 10)
+
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `leaderboard/blocked?limit=${parsedLimit}&offset=${parsedOffset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
+    
     let mostBlocked: { address: string; blocked_by_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardBlocked(parsedLimit)
-    if (include?.includes('ens')) {
-      const ens = services.ens(env(context))
-      const ensProfiles = await Promise.all(mostBlocked.map(user => ens.getENSProfile(user.address)))
-      mostBlocked = mostBlocked.map((user, index) => ({
-        ...user,
-        ens: ensProfiles[index]
-      }))
-    }
-    return context.json(mostBlocked, 200)
+
+    const packagedResponse = mostBlocked
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 }

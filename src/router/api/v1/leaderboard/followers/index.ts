@@ -5,36 +5,31 @@ import type { Services } from '#/service'
 import type { Environment } from '#/types'
 import type { IncludeValidator, LimitValidator } from '../validators'
 
-/**
- * TODO: add support for whether :addressOrENS is followed, is following, is muting, is blocking, is blocked by
- */
 export function followers(
   leaderboard: Hono<{ Bindings: Environment }>,
   services: Services,
   limitValidator: LimitValidator,
   includeValidator: IncludeValidator
 ) {
-  /**
-   * By default, only returns leaderboard with address and followers_count/following_count of each user.
-   * If include=ens, also returns ens profile of each user.
-   * If include=muted, also returns how many users each user has muted.
-   * If include=blocked, also returns how many users each user has blocked.
-   * If addressOrENS path param is provided AND include=mutuals query param is provided, returns mutuals between addressOrENS and each user.
-   */
-  leaderboard.get('/followers/:addressOrENS?', limitValidator, includeValidator, async context => {
-    const { include, limit } = context.req.valid('query')
+  leaderboard.get('/followers', limitValidator, includeValidator, async context => {
+    const { limit, offset, cache } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
+    const parsedOffset = Number.parseInt(offset?.toString() || '0', 10)
+    
+    const cacheService = services.cache(env(context))
+    const cacheTarget = `leaderboard/followers?limit=${parsedLimit}&offset=${parsedOffset}`
+    if (cache !== 'fresh') {
+      const cacheHit = await cacheService.get(cacheTarget)
+      if (cacheHit) {
+        return context.json({ ...cacheHit }, 200)
+      }
+    }
     let mostFollowers: { address: string; followers_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardFollowers(parsedLimit)
-    if (include?.includes('ens')) {
-      const ens = services.ens(env(context))
-      const ensProfiles = await Promise.all(mostFollowers.map(user => ens.getENSProfile(user.address)))
-      mostFollowers = mostFollowers.map((user, index) => ({
-        ...user,
-        ens: ensProfiles[index]
-      }))
-    }
-    return context.json(mostFollowers, 200)
+
+    const packagedResponse = mostFollowers
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
+    return context.json(packagedResponse, 200)
   })
 }
