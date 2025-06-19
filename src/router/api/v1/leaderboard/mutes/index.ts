@@ -17,7 +17,7 @@ export function mutes(
     const parsedOffset = Number.parseInt(offset?.toString() || '0', 10)
 
     const cacheService = services.cache(env(context))
-    const cacheTarget = `leaderboard/blocked?limit=${parsedLimit}&offset=${parsedOffset}`
+    const cacheTarget = `leaderboard/mutes?limit=${parsedLimit}&offset=${parsedOffset}`
     if (cache !== 'fresh') {
       const cacheHit = await cacheService.get(cacheTarget)
       if (cacheHit) {
