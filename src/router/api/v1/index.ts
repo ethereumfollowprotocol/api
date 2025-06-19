@@ -13,6 +13,7 @@ import { leaderboard } from './leaderboard'
 import { lists } from './lists'
 import { minters } from './minters'
 import { serviceHealth } from './serviceHealth'
+import { slots } from './slots'
 import { stats } from './stats'
 import { token } from './token'
 import { users } from './users'
@@ -45,6 +46,7 @@ export function api(services: Services): Hono<{ Bindings: Environment }> {
   api.route('/leaderboard', leaderboard(services))
   api.route('/lists', lists(services))
   api.route('/minters', minters(services))
+  api.route('/slots', slots(services))
   api.route('/stats', stats(services))
   api.route('/token', token(services))
   api.route('/users', users(services))
