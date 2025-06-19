@@ -25,12 +25,12 @@ export function blocks(
       }
     }
 
-    let mostBlocks: { address: string; blocks_count: number }[] = await services
+    const mostBlocks: { address: string; blocks_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardBlocks(parsedLimit)
 
     const packagedResponse = mostBlocks
-    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))   
+    await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
     return context.json(packagedResponse, 200)
   })
 }

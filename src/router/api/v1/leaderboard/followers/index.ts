@@ -15,7 +15,7 @@ export function followers(
     const { limit, offset, cache } = context.req.valid('query')
     const parsedLimit = Number.parseInt(limit?.toString() || '10', 10)
     const parsedOffset = Number.parseInt(offset?.toString() || '0', 10)
-    
+
     const cacheService = services.cache(env(context))
     const cacheTarget = `leaderboard/followers?limit=${parsedLimit}&offset=${parsedOffset}`
     if (cache !== 'fresh') {
@@ -24,7 +24,7 @@ export function followers(
         return context.json({ ...cacheHit }, 200)
       }
     }
-    let mostFollowers: { address: string; followers_count: number }[] = await services
+    const mostFollowers: { address: string; followers_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardFollowers(parsedLimit)
 

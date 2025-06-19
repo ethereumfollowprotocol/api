@@ -973,7 +973,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
+    return result.rows.map((row: any) => ({
       rank: Number(row.blocks_rank),
       address: row.address,
       blocks_count: row.blocks_count
@@ -990,7 +990,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
+    return result.rows.map((row: any) => ({
       rank: Number(row.blocked_rank),
       address: row.address,
       blocked_by_count: row.blocked_count
@@ -1005,7 +1005,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
+    return result.rows.map((row: any) => ({
       rank: Number(row.followers_rank),
       address: row.address,
       followers_count: row.followers_count
@@ -1020,7 +1020,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
+    return result.rows.map((row: any) => ({
       rank: Number(row.following_rank),
       address: row.address,
       following_count: row.following_count
@@ -1037,7 +1037,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
+    return result.rows.map((row: any) => ({
       rank: Number(row.muted_rank),
       address: row.address,
       muted_by_count: row.muted_count
@@ -1052,7 +1052,7 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
+    return result.rows.map((row: any) => ({
       rank: Number(row.mutes_rank),
       address: row.address,
       mutes_count: row.mutes_count

@@ -24,8 +24,8 @@ export function following(
         return context.json({ ...cacheHit }, 200)
       }
     }
-    
-    let mostFollowing: { address: string; following_count: number }[] = await services
+
+    const mostFollowing: { address: string; following_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardFollowing(parsedLimit)
 

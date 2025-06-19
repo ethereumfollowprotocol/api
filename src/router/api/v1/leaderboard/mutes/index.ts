@@ -24,11 +24,11 @@ export function mutes(
         return context.json({ ...cacheHit }, 200)
       }
     }
-    let mostMutes: { address: string; mutes_count: number }[] = await services
+    const mostMutes: { address: string; mutes_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardMutes(parsedLimit)
-    
-      const packagedResponse = mostMutes
+
+    const packagedResponse = mostMutes
     await cacheService.put(cacheTarget, JSON.stringify(packagedResponse))
     return context.json(packagedResponse, 200)
   })

@@ -24,8 +24,8 @@ export function blocked(
         return context.json({ ...cacheHit }, 200)
       }
     }
-    
-    let mostBlocked: { address: string; blocked_by_count: number }[] = await services
+
+    const mostBlocked: { address: string; blocked_by_count: number }[] = await services
       .efp(env(context))
       .getLeaderboardBlocked(parsedLimit)
 
