@@ -172,6 +172,19 @@ export type ENSTaggedListRecord = TaggedListRecord & {
   }
 }
 
+export type ListDetailsRow = {
+  chainId: number
+  contractAddress: Address
+  tokenId: number
+  owner: string
+  manager: string
+  user: string
+  userName: string
+  userAvatar: string
+  userHeader: string
+  isPrimaryList: boolean
+}
+
 export interface IEFPIndexerService {
   claimPoapLink(address: Address): Promise<string>
   getAddressByList(token_id: string): Promise<Address | undefined>
@@ -199,6 +212,7 @@ export interface IEFPIndexerService {
   getDebugTotalSupply(): Promise<number>
   getDiscoverAccounts(limit: string, offset: string): Promise<DiscoverRow[]>
   // getListStorageLocation(tokenId: bigint): Promise<`0x${string}` | undefined>
+  getListDetailsBySlot(chain_id: number, contract: string, slot: string): Promise<ListDetailsRow | undefined>
   getListRecordCount(tokenId: bigint): Promise<number>
   getListRecords(tokenId: bigint): Promise<ListRecord[]>
   getListRecordsWithTags(tokenId: bigint): Promise<TaggedListRecord[]>
@@ -973,8 +987,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
-      rank: index + 1,
+    return result.rows.map((row: any) => ({
+      rank: Number(row.blocks_rank),
       address: row.address,
       blocks_count: row.blocks_count
     }))
@@ -990,8 +1004,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
-      rank: index + 1,
+    return result.rows.map((row: any) => ({
+      rank: Number(row.blocked_rank),
       address: row.address,
       blocked_by_count: row.blocked_count
     }))
@@ -1005,8 +1019,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
-      rank: index + 1,
+    return result.rows.map((row: any) => ({
+      rank: Number(row.followers_rank),
       address: row.address,
       followers_count: row.followers_count
     }))
@@ -1020,8 +1034,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
-      rank: index + 1,
+    return result.rows.map((row: any) => ({
+      rank: Number(row.following_rank),
       address: row.address,
       following_count: row.following_count
     }))
@@ -1037,8 +1051,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
-      rank: index + 1,
+    return result.rows.map((row: any) => ({
+      rank: Number(row.muted_rank),
       address: row.address,
       muted_by_count: row.muted_count
     }))
@@ -1052,8 +1066,8 @@ export class EFPIndexerService implements IEFPIndexerService {
       return []
     }
 
-    return result.rows.map((row: any, index) => ({
-      rank: index + 1,
+    return result.rows.map((row: any) => ({
+      rank: Number(row.mutes_rank),
       address: row.address,
       mutes_count: row.mutes_count
     }))
@@ -1223,6 +1237,43 @@ export class EFPIndexerService implements IEFPIndexerService {
       followers: row.followers,
       following: row.following
     }))
+  }
+
+  async getListDetailsBySlot(chain_id: number, contract: string, slot: string): Promise<ListDetailsRow | undefined> {
+    console.log(`Fetching list details for slot: ${slot}`)
+    const query = sql<Row>`SELECT * FROM query.get_list_details_by_slot(${chain_id}, ${contract}, ${slot})`
+    const result = await query.execute(this.#db)
+
+    if (!result || result.rows.length === 0) {
+      return undefined
+    }
+
+    type Row = {
+      list_chain_id: bigint
+      list_contract_address: Address
+      list_token_id: bigint
+      list_owner: string
+      list_manager: string
+      list_user: string
+      list_user_name: string
+      list_user_avatar: string
+      list_user_header: string
+      is_primary_list: boolean
+    }
+
+    return {
+      chainId: Number(result.rows[0]?.list_chain_id),
+      // biome-ignore lint/nursery/noSecrets: <explanation>
+      contractAddress: result.rows[0]?.list_contract_address ?? '0x0000000000000000000000000000000000000000',
+      tokenId: Number(result.rows[0]?.list_token_id),
+      owner: result.rows[0]?.list_owner ?? '',
+      manager: result.rows[0]?.list_manager ?? '',
+      user: result.rows[0]?.list_user ?? '',
+      userName: result.rows[0]?.list_user_name ?? '',
+      userAvatar: result.rows[0]?.list_user_avatar ?? '',
+      userHeader: result.rows[0]?.list_user_header ?? '',
+      isPrimaryList: (result.rows[0]?.is_primary_list ?? false) as boolean
+    }
   }
   /////////////////////////////////////////////////////////////////////////////
   // Debug
