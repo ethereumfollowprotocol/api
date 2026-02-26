@@ -14,7 +14,7 @@ placement = { mode = "smart" }
 compatibility_date = "2023-10-30"
 # end of globally inheritable configuration
 #
-vars = { ENVIRONMENT = "development" }
+vars = { ENVIRONMENT = "development", IPFS_GATEWAY_URL = "https://ipfs.io/ipfs/", ARWEAVE_GATEWAY_URL = "https://arweave.net/" }
 services = [{ binding = "ens", service = "ens" }]
 kv_namespaces = [
     { binding = "EFP_DATA_CACHE", id = "5092581c2d524711a04560d335966a60", preview_id = "608971607bd2469e8972a0811f8de589" },

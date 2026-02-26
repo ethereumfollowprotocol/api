@@ -4,7 +4,7 @@ import { database } from '#/database'
 import { apiLogger } from '#/logger'
 import type { Address, DB } from '#/types'
 import type { Environment } from '#/types/index'
-import { arrayToChunks, isAddress, raise } from '#/utilities.ts'
+import { arrayToChunks, isAddress, raise, resolveDecentralizedURI } from '#/utilities.ts'
 import type { ENSProfile } from './types'
 
 export type ENSProfileResponse = ENSProfile & { type: 'error' | 'success' }
@@ -29,11 +29,13 @@ type Row = {
 export class ENSMetadataService implements IENSMetadataService {
   readonly #db: Kysely<DB>
   readonly #url: string
+  readonly #gateways: { ipfs: string; arweave: string }
 
   // biome-ignore lint/correctness/noUndeclaredVariables: <explanation>
   constructor(env: Env) {
     this.#db = database(env)
     this.#url = env.ENS_API_URL
+    this.#gateways = { ipfs: env.IPFS_GATEWAY_URL, arweave: env.ARWEAVE_GATEWAY_URL }
   }
 
   async getAddress(ensNameOrAddress: Address | string): Promise<Address> {
@@ -118,7 +120,7 @@ export class ENSMetadataService implements IENSMetadataService {
           })
         } catch (_error) {}
 
-        return ensProfileData as ENSProfile
+        return this.#resolveRecordURIs(ensProfileData) as ENSProfile
       } catch (error) {
         console.log('error', error)
       }
@@ -194,7 +196,7 @@ export class ENSMetadataService implements IENSMetadataService {
           } catch (error) {
             console.log('cache failed', error)
           }
-          return ensProfileData as ENSProfile
+          return this.#resolveRecordURIs(ensProfileData) as ENSProfile
         } catch (error) {
           console.log('error', error)
         }
@@ -206,7 +208,7 @@ export class ENSMetadataService implements IENSMetadataService {
         formattedSecondTry.records = formattedSecondTry?.records
           ? (JSON.parse(formattedSecondTry?.records) as string)
           : ''
-        return secondTry as ENSProfile
+        return this.#resolveRecordURIs(secondTry as ENSProfile)
       }
 
       return {
@@ -221,7 +223,7 @@ export class ENSMetadataService implements IENSMetadataService {
     if (cachedProfile) {
       returnedRecord.records = returnedRecord?.records ? (JSON.parse(returnedRecord?.records) as string) : ''
     }
-    return returnedRecord as ENSProfile
+    return this.#resolveRecordURIs(returnedRecord)
   }
 
   /**
@@ -289,6 +291,7 @@ export class ENSMetadataService implements IENSMetadataService {
       if (record.name) {
         await this.cacheRecord(record)
         record.records = JSON.parse(record?.records || '') as string
+        this.#resolveRecordURIs(record)
       }
       //   record.records = JSON.parse(record?.records || '') as string;
     }
@@ -296,6 +299,7 @@ export class ENSMetadataService implements IENSMetadataService {
     for (const record of filteredCache) {
       if (record.name) {
         record.records = JSON.parse(record?.records || '') as string
+        this.#resolveRecordURIs(record)
       }
     }
 
@@ -332,6 +336,19 @@ export class ENSMetadataService implements IENSMetadataService {
       }
       return { ...accumulator, [id]: response.url }
     }, {})
+  }
+
+  #resolveRecordURIs(profile: ENSProfile): ENSProfile {
+    if (profile.records && typeof profile.records === 'object') {
+      const records = profile.records as unknown as Record<string, unknown>
+      for (const key of Object.keys(records)) {
+        const value = records[key]
+        if (typeof value === 'string') {
+          records[key] = resolveDecentralizedURI(value, this.#gateways)
+        }
+      }
+    }
+    return profile
   }
 
   static #toTableRow(namedata: ENSProfile): {

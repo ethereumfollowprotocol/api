@@ -23,6 +23,22 @@ export function arrayToChunks<T>(array: T[], chunkSize: number): T[][] {
   return chunks
 }
 
+export function resolveDecentralizedURI(
+  uri: string | undefined | null,
+  gateways: { ipfs: string; arweave: string }
+): string | undefined | null {
+  if (!uri) return uri
+  if (uri.startsWith('ipfs://')) {
+    const gateway = gateways.ipfs.endsWith('/') ? gateways.ipfs : `${gateways.ipfs}/`
+    return uri.replace('ipfs://', gateway)
+  }
+  if (uri.startsWith('ar://')) {
+    const gateway = gateways.arweave.endsWith('/') ? gateways.arweave : `${gateways.arweave}/`
+    return uri.replace('ar://', gateway)
+  }
+  return uri
+}
+
 // removed properties with undefined values from object
 export function removeUndefined<T>(object: T): T {
   return JSON.parse(JSON.stringify(object)) as T

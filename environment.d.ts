@@ -15,6 +15,8 @@ interface EnvironmentVariables {
   readonly POAP_API_TOKEN: string
   readonly REDIS_URL: string
   readonly ENS_API_URL: string
+  readonly IPFS_GATEWAY_URL: string
+  readonly ARWEAVE_GATEWAY_URL: string
 }
 
 // Cloudflare Workers
